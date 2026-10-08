@@ -1,50 +1,79 @@
 <?php
+/**
+ * client/notifications.php - All notifications, with category tabs.
+ * Filter with ?cat=all|proposals|responses|messages|work|hours|deadline|payments|refunds
+ */
+$user_role     = "client";
+$base_url      = "/Webdev/";
+$active_client = "";
+
+require_once __DIR__ . '/../includes/data.php';
+
+$all = toptunity_client_notifications_all();
+
+$tabs = [
+    'all'       => 'All',
+    'proposals' => 'New Proposals',
+    'responses' => "Freelancer's Response",
+    'messages'  => 'New Messages',
+    'work'      => 'Work Submissions',
+    'hours'     => 'Hours Logged',
+    'deadline'  => 'Deadline and Overdue Alerts',
+    'payments'  => 'Payment Confirmations',
+    'refunds'   => 'Refunds',
+];
+$cat = isset($_GET['cat']) && isset($tabs[$_GET['cat']]) ? $_GET['cat'] : 'all';
+
+$rows = array_values(array_filter($all, function ($n) use ($cat) {
+    return $cat === 'all' || $n['cat'] === $cat;
+}));
+$unread_total = count(array_filter($all, function ($n) { return $n['new']; }));
+
 $page_title = "Notifications";
-$user_role = "client";
 include '../includes/header.php';
-include '../includes/nav.php';
+include '../includes/client-nav.php';
 ?>
 
-<div class="container" style="padding-top: 3rem; padding-bottom: 3rem; max-width: 800px;">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-    <h2>Notifications</h2>
-    <a href="#" style="font-size: 0.85rem; color: var(--color-vibrant-teal);">Mark all as read</a>
+<div class="welcome-row">
+  <div>
+    <h1>Notifications</h1>
+    <p class="subtle">You have <?= (int) $unread_total ?> unread notification<?= $unread_total === 1 ? '' : 's' ?>.</p>
   </div>
-
-  <!-- Notification Category Tabs -->
-  <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
-    <button class="tab-btn active" style="padding: 0.3rem 0.7rem; font-size: 0.8rem;">All</button>
-    <button class="tab-btn" style="padding: 0.3rem 0.7rem; font-size: 0.8rem;">New Proposals</button>
-    <button class="tab-btn" style="padding: 0.3rem 0.7rem; font-size: 0.8rem;">Work Submissions</button>
-    <button class="tab-btn" style="padding: 0.3rem 0.7rem; font-size: 0.8rem;">Payments</button>
-  </div>
-
-  <!-- Notifications List -->
-  <div style="display: flex; flex-direction: column; gap: 0.8rem;">
-    <div class="card" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem;">
-      <div>
-        <p style="font-size: 0.9rem;"><strong>New Proposal:</strong> Miguel Reyes submitted a proposal for "Online Ordering Website"[cite: 52, 91].</p>
-        <small style="color: var(--color-muted-gray);">2 hours ago</small>
-      </div>
-      <a href="<?php echo $base_url; ?>client/project-tracking.php?id=101" class="btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">View Proposal</a>
-    </div>
-
-    <div class="card" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem;">
-      <div>
-        <p style="font-size: 0.9rem;"><strong>Contract Accepted:</strong> Jerome Castillo accepted the contract for "Clinic Website Redesign"[cite: 52, 91].</p>
-        <small style="color: var(--color-muted-gray);">1 day ago</small>
-      </div>
-      <a href="<?php echo $base_url; ?>client/project-tracking.php?id=102" class="btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Deposit Escrow</a>
-    </div>
-
-    <div class="card" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--color-off-white);">
-      <div>
-        <p style="font-size: 0.9rem;"><strong>Work Submitted:</strong> Work files uploaded for "Clinic Website Redesign"[cite: 52].</p>
-        <small style="color: var(--color-muted-gray);">3 days ago</small>
-      </div>
-      <a href="<?php echo $base_url; ?>client/project-tracking.php?id=102" class="btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Review Work</a>
-    </div>
-  </div>
+  <a href="#" class="btn-link-teal"><?= icon('check', 14) ?> Mark all as read</a>
 </div>
+
+<nav class="notif-tabs" aria-label="Filter notifications">
+  <?php foreach ($tabs as $key => $label): ?>
+    <a href="notifications.php<?= $key === 'all' ? '' : '?cat=' . e($key) ?>" class="filter-tab <?= $cat === $key ? 'is-active' : '' ?>">
+      <?= e($label) ?>
+      <?php if ($key !== 'all' && $cat === $key): ?><?php endif; ?>
+    </a>
+  <?php endforeach; ?>
+</nav>
+
+<div class="notif-list-card">
+  <?php if (!$rows): ?>
+    <div class="empty-state empty-state--design" style="border:0; border-radius:0;">
+      <div class="empty-art"><?= icon('bell', 40) ?></div>
+      <h3>No notifications here</h3>
+      <p>New activity in this category will show up here.</p>
+    </div>
+  <?php endif; ?>
+
+  <?php foreach ($rows as $n): ?>
+    <div class="notif-row <?= $n['new'] ? 'notif-row--unread' : '' ?>">
+      <span class="icon-box icon-box--<?= e($n['tint']) ?>"><?= icon($n['icon'], 16) ?></span>
+      <div class="notif-row__body">
+        <strong><?= e($n['title']) ?></strong>
+        <?php if ($n['new']): ?><span class="status status--ongoing" style="margin-left:0.4rem; padding:0.1rem 0.5rem;">New</span><?php endif; ?>
+        <p><?= e($n['text']) ?></p>
+      </div>
+      <time><?= e($n['time']) ?></time>
+      <?php if ($n['new']): ?><span class="unread-dot" aria-label="Unread"></span><?php endif; ?>
+    </div>
+  <?php endforeach; ?>
+</div>
+
+</main>
 
 <?php include '../includes/footer.php'; ?>

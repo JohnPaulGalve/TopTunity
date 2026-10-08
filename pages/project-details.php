@@ -27,10 +27,10 @@ function fmt_date($ymd)
 <?php if (!$project): ?>
     <!-- ===================== NOT FOUND ===================== -->
     <div class="not-found">
-      <?= icon('alert', 36) ?>
-      <h1>We couldn't find that project</h1>
-      <p>It may have been removed, or the link is incorrect.</p>
-      <a href="browse-projects.php" class="btn btn--teal-outline">Back to Browse Projects</a>
+      <div class="empty-art"><?= icon('alert', 40) ?></div>
+      <h1>Project not found</h1>
+      <p>This project is not available.</p>
+      <a href="browse-projects.php" class="btn btn--dark">Browse Projects</a>
     </div>
 
 <?php else: ?>

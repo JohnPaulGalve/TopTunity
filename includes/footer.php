@@ -5,6 +5,11 @@
  */
 $base_url = isset($base_url) ? $base_url : '/Webdev/';
 ?>
+<?php if (!empty($app_shell)): ?>
+</div><!-- /app-main -->
+</div><!-- /app-shell -->
+<?php endif; ?>
+
 <footer class="footer">
   <div class="container">
     <div class="footer__grid">

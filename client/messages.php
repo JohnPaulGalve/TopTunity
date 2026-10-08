@@ -1,81 +1,114 @@
 <?php
+/**
+ * client/messages.php - Conversations with freelancers.
+ * Open a thread with ?c=N (0-based index). Sending is not connected to a database yet.
+ */
+$user_role     = "client";
+$base_url      = "/Webdev/";
+$active_client = "";
+
+require_once __DIR__ . '/../includes/data.php';
+
+$me      = toptunity_current_client();
+$threads = toptunity_client_threads();
+
+$q      = isset($_GET['q']) ? trim($_GET['q']) : '';
+$open   = isset($_GET['c']) ? (int) $_GET['c'] : 0;
+if (!isset($threads[$open])) { $open = 0; }
+$thread = $threads[$open];
+
+$shown = [];
+foreach ($threads as $i => $t) {
+    if ($q === '' || stripos($t['name'] . ' ' . $t['project'], $q) !== false) { $shown[$i] = $t; }
+}
+
+function msg_url($i, $q)
+{
+    $p = ['c' => $i];
+    if ($q !== '') { $p['q'] = $q; }
+    return 'messages.php?' . http_build_query($p);
+}
+
 $page_title = "Messages";
-$user_role = "client";
 include '../includes/header.php';
-include '../includes/nav.php';
+include '../includes/client-nav.php';
 ?>
 
-<div class="container" style="padding-top: 2rem; padding-bottom: 3rem;">
-  <h2>Messages</h2>
-  <p style="color: var(--color-muted-gray); font-size: 0.9rem; margin-bottom: 1.5rem;">Communicate with freelancers about projects, proposals, and contracts[cite: 7, 51].</p>
-
-  <!-- Dual-Pane Chat Layout -->
-  <div class="card" style="display: grid; grid-template-columns: 300px 1fr; gap: 0; padding: 0; overflow: hidden; min-height: 550px;">
-    
-    <!-- Left Pane: Conversation List -->
-    <div style="border-right: 1px solid var(--color-border-gray); background: var(--color-off-white);">
-      <div style="padding: 1rem; border-bottom: 1px solid var(--color-border-gray);">
-        <input type="text" placeholder="Search conversations..." style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border-gray); border-radius: 4px; font-size: 0.85rem;">
-      </div>
-      <div style="display: flex; flex-direction: column;">
-        <!-- Active Chat Item -->
-        <div style="padding: 1rem; border-bottom: 1px solid var(--color-border-gray); background: #FFF; border-left: 4px solid var(--color-vibrant-teal); cursor: pointer;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <strong>Miguel Reyes</strong>
-            <small style="color: var(--color-muted-gray); font-size: 0.75rem;">10:42 AM</small>
-          </div>
-          <p style="font-size: 0.8rem; color: var(--color-muted-gray); margin-top: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Attached the updated menu layout preview.</p>
-        </div>
-
-        <!-- Inactive Chat Item -->
-        <div style="padding: 1rem; border-bottom: 1px solid var(--color-border-gray); cursor: pointer;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <strong>Bea Lim</strong>
-            <small style="color: var(--color-muted-gray); font-size: 0.75rem;">Yesterday</small>
-          </div>
-          <p style="font-size: 0.8rem; color: var(--color-muted-gray); margin-top: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Thanks! I'll review the Figma prototype shortly.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Right Pane: Active Message Thread -->
-    <div style="display: flex; flex-direction: column; justify-content: space-between; background: #FFF;">
-      <!-- Thread Header -->
-      <div style="padding: 1rem; border-bottom: 1px solid var(--color-border-gray); display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <h3 style="font-size: 1.1rem; margin: 0;">Miguel Reyes</h3>
-          <p style="font-size: 0.8rem; color: var(--color-muted-gray);">Project: Online Ordering Website for a Coffee Shop[cite: 51, 91]</p>
-        </div>
-        <a href="<?php echo $base_url; ?>client/report-dispute.php?user=MiguelReyes" style="font-size: 0.8rem; color: var(--color-error-base);">Report User</a>
-      </div>
-
-      <!-- Message History Feed -->
-      <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; overflow-y: auto; max-height: 380px;">
-        <!-- Incoming Message -->
-        <div style="align-self: flex-start; max-width: 70%; background: var(--color-off-white); border: 1px solid var(--color-border-gray); padding: 0.8rem; border-radius: 8px;">
-          <p style="font-size: 0.9rem;">Hello Andrea! I have finished setting up the menu categories for Kapé Lokal[cite: 51, 91]. Please check the file below.</p>
-          <small style="color: var(--color-muted-gray); font-size: 0.75rem; display: block; margin-top: 0.4rem;">10:30 AM</small>
-        </div>
-
-        <!-- Outgoing Message -->
-        <div style="align-self: flex-end; max-width: 70%; background: var(--color-deep-slate); color: #FFF; padding: 0.8rem; border-radius: 8px;">
-          <p style="font-size: 0.9rem;">Looks great! Thanks for sending this over. I will review it with our staff today[cite: 51].</p>
-          <small style="color: var(--color-disabled-gray); font-size: 0.75rem; display: block; margin-top: 0.4rem; text-align: right;">10:42 AM</small>
-        </div>
-      </div>
-
-      <!-- Message Input Form -->
-      <form action="#" method="POST" style="padding: 1rem; border-top: 1px solid var(--color-border-gray); display: flex; gap: 0.5rem; align-items: center;">
-        <label class="btn-outline" style="padding: 0.6rem 0.8rem; font-size: 0.85rem; cursor: pointer;">
-          📎 Attach
-          <input type="file" name="attachment" id="attachment" style="display: none;">
-        </label>
-        <input type="text" name="message" placeholder="Type a message..." required style="flex: 1; padding: 0.6rem; border: 1px solid var(--color-border-gray); border-radius: 4px; font-size: 0.9rem;">
-        <button type="submit" class="btn-primary">Send</button>
-      </form>
-    </div>
-
+<div class="welcome-row">
+  <div>
+    <h1>Messages</h1>
+    <p class="subtle">Talk with your freelancers about projects, proposals and contracts.</p>
   </div>
 </div>
+
+<div class="msg-layout">
+
+  <!-- Conversation list -->
+  <aside class="convo-pane">
+    <form class="convo-search" method="get" action="messages.php" role="search">
+      <div class="search-compact" style="width:100%;">
+        <?= icon('search', 15) ?>
+        <input type="search" name="q" value="<?= e($q) ?>" placeholder="Search conversations…" aria-label="Search conversations">
+      </div>
+    </form>
+
+    <div class="convo-list">
+      <?php if (!$shown): ?>
+        <p class="muted" style="padding:1rem;">No conversations match your search.</p>
+      <?php endif; ?>
+      <?php foreach ($shown as $i => $t): ?>
+        <a href="<?= e(msg_url($i, $q)) ?>" class="convo-item <?= $i === $open ? 'is-active' : '' ?>" style="display:flex; text-decoration:none;">
+          <?= avatar($t['bg'], $t['hair'], $t['style'], 36) ?>
+          <div class="convo-item__body">
+            <div class="convo-item__top">
+              <strong><?= e($t['name']) ?><?php if ($t['unread']): ?><span class="unread-dot"></span><?php endif; ?></strong>
+              <time><?= e($t['time']) ?></time>
+            </div>
+            <small><?= e($t['project']) ?></small>
+            <p><?= e($t['preview']) ?></p>
+          </div>
+        </a>
+      <?php endforeach; ?>
+    </div>
+  </aside>
+
+  <!-- Chat -->
+  <section class="chat-pane">
+    <header class="chat-head">
+      <div>
+        <strong><?= e($thread['name']) ?></strong>
+        <small>Conversation · <a href="project-tracking.php?id=<?= (int) $thread['project_id'] ?>"><?= e($thread['project']) ?> · View Project</a></small>
+      </div>
+      <a href="#" class="btn btn--row-outline"><?= icon('flag', 13) ?> Report User</a>
+    </header>
+
+    <div class="chat-body">
+      <div class="day-tag">Today</div>
+      <?php foreach ($thread['messages'] as $m): ?>
+        <?php if (!empty($m['file'])): ?>
+          <div class="bubble-row bubble-row--<?= $m['from'] === 'me' ? 'me' : 'them' ?>">
+            <div class="bubble-file"><?= icon('file', 18) ?><span><?= e($m['file']['name']) ?></span><small><?= e($m['file']['size']) ?></small></div>
+            <div class="bubble" style="margin-top:0.4rem;"><?= e($m['text']) ?></div>
+            <span class="bubble-time"><?= e($m['time']) ?></span>
+          </div>
+        <?php else: ?>
+          <div class="bubble-row bubble-row--<?= $m['from'] === 'me' ? 'me' : 'them' ?>">
+            <div class="bubble"><?= e($m['text']) ?></div>
+            <span class="bubble-time"><?= e($m['time']) ?></span>
+          </div>
+        <?php endif; ?>
+      <?php endforeach; ?>
+    </div>
+
+    <form class="composer" method="post" action="">
+      <textarea name="message" placeholder="Write a message…" rows="1" aria-label="Write a message"></textarea>
+      <button type="submit" class="btn btn--primary"><?= icon('send', 14) ?> Send</button>
+    </form>
+    <p class="msg-foot"><?= icon('lock', 11) ?> Messages are saved securely. The administrator can only view them when they are part of a report or dispute.</p>
+  </section>
+
+</div>
+
+</main>
 
 <?php include '../includes/footer.php'; ?>

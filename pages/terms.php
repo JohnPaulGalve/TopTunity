@@ -1,30 +1,59 @@
 <?php
-$page_title = "Terms & Privacy Policy";
+/**
+ * pages/terms.php - Terms of Service and Privacy Policy
+ * The table of contents jumps to each section by anchor.
+ */
 $user_role = "public";
-require_once __DIR__ . '/../includes/header.php';
-require_once __DIR__ . '/../includes/nav.php';
+$base_url  = "/Webdev/";
+
+$page_title = "Terms and Privacy Policy";
+include '../includes/header.php';
+include '../includes/nav.php';
+
+$sections = [
+    ['Terms of Use', 'By creating an account on TopTunity, you agree to these terms. TopTunity is a student project that simulates a freelance marketplace; you must provide accurate information and use the platform only for lawful work.'],
+    ['User Accounts', 'Each email address can only be used for one account, either as a Client or a Freelancer. You are responsible for keeping your password secure. Suspended users cannot log in or send messages.'],
+    ['Projects and Proposals', 'Clients may post Fixed Price or Hourly projects. A freelancer can submit only one proposal per project, and proposals cannot be submitted after the deadline. Clients may select only one freelancer per project.'],
+    ['Payments and Fees', 'All payments are simulated and no real money is used. A 10% platform service fee is deducted from the amount released to the freelancer. Unused Hourly deposits are refunded to the client on the End Date.'],
+    ['Reviews and Reports', 'Clients and freelancers may review each other once per completed project. Abusive messages, fake reviews or prohibited projects may be reported and are reviewed by the administrator.'],
+    ['Privacy Policy', 'We collect only the information needed to run the platform: your name, email, profile details, projects, messages and transaction records. Messages are only viewed by the administrator when they are part of a report or dispute.'],
+    ['Data We Collect', 'We collect account details, profile information, project and proposal records, messages, and transaction records needed to operate the platform.'],
+    ['How We Use Data', 'We use your data to run your account, match freelancers to projects, process simulated payments and resolve reports. We do not use it for any other purpose.'],
+];
 ?>
 
-<div class="container" style="padding-top: 3rem; padding-bottom: 3rem; max-width: 800px;">
-  <div class="card">
-    <h2>Terms of Service & Privacy Policy</h2>
-    <p style="color: var(--color-muted-gray); font-size: 0.85rem; margin-bottom: 1.5rem;">Last updated: October 2026[cite: 36]</p>
+<main class="page-browse">
+  <div class="container">
 
-    <h3 style="font-size: 1.1rem; margin-top: 1rem;">1. Platform Terms</h3>
-    <p style="font-size: 0.9rem; color: var(--color-deep-slate); margin-top: 0.5rem; line-height: 1.6;">
-      By accessing TopTunity, users agree to operate within our simulated workflow rules[cite: 4]. All messaging, contract creations, and financial updates are intended solely for academic demonstration and testing[cite: 2, 4].
-    </p>
+    <header class="terms-title">
+      <h1>Terms and Privacy Policy</h1>
+      <p>Last updated September 15, 2026</p>
+    </header>
 
-    <h3 style="font-size: 1.1rem; margin-top: 1.5rem;">2. Contracts & Disputes</h3>
-    <p style="font-size: 0.9rem; color: var(--color-deep-slate); margin-top: 0.5rem; line-height: 1.6;">
-      Clients and freelancers must explicitly accept digital contract terms before work begins[cite: 2, 5, 8]. Any disagreement during project execution may be submitted to the dispute resolution workflow for administrative review[cite: 6, 9, 11].
-    </p>
+    <div class="terms-layout">
 
-    <h3 style="font-size: 1.1rem; margin-top: 1.5rem;">3. Privacy Policy</h3>
-    <p style="font-size: 0.9rem; color: var(--color-deep-slate); margin-top: 0.5rem; line-height: 1.6;">
-      User data collected on this platform is stored securely for account authentication, proposal submission, and portfolio showcase within the system[cite: 4].
-    </p>
+      <aside class="toc-card">
+        <h2>Contents</h2>
+        <ol>
+          <?php foreach ($sections as $i => $s): ?>
+            <li>
+              <a href="#section-<?= $i + 1 ?>" class="<?= $i === 0 ? 'is-active' : '' ?>"><?= $i + 1 ?>. <?= e($s[0]) ?></a>
+            </li>
+          <?php endforeach; ?>
+        </ol>
+      </aside>
+
+      <article class="terms-body">
+        <?php foreach ($sections as $i => $s): ?>
+          <section id="section-<?= $i + 1 ?>">
+            <h2><?= $i + 1 ?>. <?= e($s[0]) ?></h2>
+            <p><?= e($s[1]) ?></p>
+          </section>
+        <?php endforeach; ?>
+      </article>
+
+    </div>
   </div>
-</div>
+</main>
 
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+<?php include '../includes/footer.php'; ?>

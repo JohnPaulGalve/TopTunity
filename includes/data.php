@@ -443,3 +443,384 @@ function toptunity_freelancer_by_name($name)
     }
     return null;
 }
+
+/* ==========================================================================
+   TESTIMONIALS
+   role: 'client' | 'freelancer'
+   ========================================================================== */
+function toptunity_testimonials()
+{
+    return [
+        ['quote' => 'I posted our ordering website project on a Monday and had twelve solid proposals by Wednesday. The match percentage helped me shortlist fast, and holding the payment until I approved the work gave me peace of mind.',
+         'name' => 'Andrea Santos', 'role' => 'client', 'context' => 'Kapé Lokal Coffee Co.', 'stars' => 5, 'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'long'],
+        ['quote' => 'The proposal process is clear and the 10% fee is shown upfront, so I always know my net earnings before I send an offer. Withdrawing to GCash is simple.',
+         'name' => 'Rhea Mendoza', 'role' => 'freelancer', 'context' => 'Content Writer', 'stars' => 5, 'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'long'],
+        ['quote' => 'Tracking the project from contract to completion was easy. I could see the status history and every submitted file in one place.',
+         'name' => 'Grace Aquino', 'role' => 'client', 'context' => 'Aquino Dental Clinic', 'stars' => 5, 'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'bun'],
+        ['quote' => 'Recommended Projects shows me jobs that actually match my PHP and MySQL skills. Most of my repeat clients found me through TopTunity.',
+         'name' => 'Miguel Reyes', 'role' => 'freelancer', 'context' => 'Full-Stack PHP Developer', 'stars' => 5, 'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'short'],
+        ['quote' => 'Found a talented designer for our logo within a week. Some filters for budget, but overall a great experience.',
+         'name' => 'Joy Bautista', 'role' => 'client', 'context' => 'Bautista Bakeshop', 'stars' => 4, 'bg' => '#FEF9C3', 'hair' => '#1E293B', 'style' => 'bun'],
+        ['quote' => 'Contracts are agreed before any work starts, so there are no surprises about scope or deadlines. That alone makes it worth it.',
+         'name' => 'Carlo Dizon', 'role' => 'freelancer', 'context' => 'Mobile App Developer', 'stars' => 5, 'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'short'],
+        ['quote' => 'The hourly log made it easy to approve hours every week. Billing on the deadline was automatic and the unused deposit came back right away.',
+         'name' => 'Ramon Villanueva', 'role' => 'client', 'context' => 'BrightPath Tutorial Center', 'stars' => 5, 'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'short'],
+        ['quote' => 'My portfolio and reviews do the selling for me. Clients can see my Figma work before they even message me.',
+         'name' => 'Bea Lim', 'role' => 'freelancer', 'context' => 'UI/UX Designer', 'stars' => 5, 'bg' => '#DBEAFE', 'hair' => '#1E293B', 'style' => 'long'],
+        ['quote' => 'Great for small, steady projects. Hours are logged per day, and I can see which ones the client already approved.',
+         'name' => 'Kevin Tan', 'role' => 'freelancer', 'context' => 'Data Entry Specialist', 'stars' => 4, 'bg' => '#DCFCE7', 'hair' => '#1E293B', 'style' => 'short'],
+    ];
+}
+
+/* ==========================================================================
+   FAQS
+   category: 'clients' | 'freelancers' | 'payments'
+   ========================================================================== */
+function toptunity_faqs()
+{
+    return [
+        ['cat' => 'clients', 'q' => 'How do I post a project?',
+         'a' => 'Log in as a client and click Post a Project. Enter the project title, description, category and required skills, then choose Fixed Price (one budget) or Hourly (hourly rate and maximum hours) and set the deadline. Your project appears in My Projects and is published after administrator moderation.'],
+        ['cat' => 'freelancers', 'q' => 'How do I submit a proposal?',
+         'a' => 'Open a project from Find Projects, click Submit a Proposal, then enter your rate, estimated completion time and a cover letter. You can send only one proposal per project.'],
+        ['cat' => 'freelancers', 'q' => 'How is the match percentage computed?',
+         'a' => 'The match percentage compares the skills on your profile with the skills a project requires. The more required skills you have, the higher your match. Clients see it when they review proposals.'],
+        ['cat' => 'payments', 'q' => 'When is the service fee deducted?',
+         'a' => 'A 10% service fee is deducted from the amount released to the freelancer. For Fixed Price projects this happens on approval; for Hourly projects it happens on the End Date.'],
+        ['cat' => 'payments', 'q' => 'How does escrow payment work?',
+         'a' => 'When you deposit the project amount, TopTunity holds it until you approve the work. Approval releases the payment to the freelancer minus the service fee. All payments are simulated, so no real money is used.'],
+        ['cat' => 'clients', 'q' => 'How does an Hourly project work?',
+         'a' => 'You set an hourly rate and a maximum number of hours. The freelancer logs hours, you approve them, and you pay only for approved hours. Any unused deposit is refunded on the End Date.'],
+        ['cat' => 'clients', 'q' => 'What happens when a project passes its deadline?',
+         'a' => 'The project is flagged as Overdue. You can extend the deadline, cancel the project, or message your freelancer to agree on next steps.'],
+        ['cat' => 'clients', 'q' => 'Can I select more than one freelancer?',
+         'a' => 'No. You can select only one freelancer per project. The other proposals are marked Not Selected.'],
+        ['cat' => 'payments', 'q' => 'How do I withdraw my earnings?',
+         'a' => 'Go to Earnings, enter the amount, and choose GCash or a bank account. The administrator reviews each withdrawal request and marks it as processed.'],
+        ['cat' => 'payments', 'q' => 'How do I report a user or file a dispute?',
+         'a' => 'Open the project or conversation and choose Report. For a payment problem, choose Report a Dispute. The administrator reviews the case and can release the payment, refund the client or split the amount.'],
+        ['cat' => 'freelancers', 'q' => 'Can I review the platform?',
+         'a' => 'Yes. Clients and freelancers can both send platform feedback from the Platform Review page in their account.'],
+    ];
+}
+
+/* ==========================================================================
+   CLIENT AREA (logged-in client: Andrea Santos)
+   ========================================================================== */
+function toptunity_current_client()
+{
+    return [
+        'name' => 'Andrea Santos', 'company' => 'Kapé Lokal Coffee Co.',
+        'role' => 'Client', 'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'long',
+    ];
+}
+
+/**
+ * Projects posted by the current client.
+ * status: open | ongoing | overdue | completed | past | cancelled
+ * note:   optional extra line (e.g. closed by administrator)
+ */
+function toptunity_client_projects()
+{
+    return [
+        1 => ['title' => 'Online Ordering Website for a Coffee Shop', 'category' => 'Web Development', 'status' => 'open',
+              'type' => 'fixed', 'budget' => 45000, 'deadline' => '2026-11-20', 'proposals' => 12, 'freelancer' => null, 'posted' => '2026-10-06'],
+        2 => ['title' => 'Point-of-Sale and Inventory Dashboard', 'category' => 'Web Development', 'status' => 'ongoing',
+              'type' => 'hourly', 'rate' => 600, 'max_hours' => 60, 'budget' => 36000, 'deadline' => '2026-10-31', 'proposals' => 9, 'freelancer' => 'Janelle Cruz', 'posted' => '2026-09-08'],
+        3 => ['title' => 'Monthly Social Media Content Calendar', 'category' => 'Digital Marketing', 'status' => 'ongoing',
+              'type' => 'hourly', 'rate' => 350, 'max_hours' => 40, 'budget' => 14000, 'deadline' => '2026-11-30', 'proposals' => 9, 'freelancer' => 'Liza Navarro', 'posted' => '2026-09-20'],
+        4 => ['title' => 'Menu Board and Cup Sleeve Design', 'category' => 'Graphic Design', 'status' => 'overdue',
+              'type' => 'fixed', 'budget' => 8500, 'deadline' => '2026-10-01', 'proposals' => 15, 'freelancer' => 'Paolo Garcia', 'posted' => '2026-08-25'],
+        5 => ['title' => '30-Second Promo Video for Opening Week', 'category' => 'Video and Animation', 'status' => 'past',
+              'type' => 'fixed', 'budget' => 9000, 'deadline' => '2026-09-25', 'proposals' => 4, 'freelancer' => null, 'posted' => '2026-08-10',
+              'note' => 'Closed by administrator'],
+        6 => ['title' => 'Product Photo Retouching', 'category' => 'Graphic Design', 'status' => 'completed',
+              'type' => 'fixed', 'budget' => 5000, 'deadline' => '2026-09-05', 'proposals' => 11, 'freelancer' => 'Liza Navarro', 'posted' => '2026-08-01'],
+        7 => ['title' => 'Weekly Menu Social Posts (July)', 'category' => 'Digital Marketing', 'status' => 'completed',
+              'type' => 'hourly', 'rate' => 350, 'max_hours' => 24, 'budget' => 8400, 'deadline' => '2026-07-31', 'proposals' => 8, 'freelancer' => 'Liza Navarro', 'posted' => '2026-06-28'],
+        8 => ['title' => 'Barista Training Manual Layout', 'category' => 'Graphic Design', 'status' => 'cancelled',
+              'type' => 'fixed', 'budget' => 4000, 'deadline' => '2026-08-30', 'proposals' => 6, 'freelancer' => null, 'posted' => '2026-07-20'],
+        9 => ['title' => 'Loyalty Points Web App', 'category' => 'Web Development', 'status' => 'open',
+              'type' => 'hourly', 'rate' => 550, 'max_hours' => 50, 'budget' => 27500, 'deadline' => '2026-12-12', 'proposals' => 2, 'freelancer' => null, 'posted' => '2026-10-02'],
+    ];
+}
+
+/** Human labels for each project status (used by pills and filter tabs). */
+function toptunity_status_label($status)
+{
+    $labels = [
+        'open' => 'Open', 'ongoing' => 'Ongoing', 'overdue' => 'Overdue',
+        'completed' => 'Completed', 'past' => 'Past Deadline', 'cancelled' => 'Cancelled',
+    ];
+    return isset($labels[$status]) ? $labels[$status] : ucfirst($status);
+}
+
+/** Payments and deposits for the current client. status: pending | held | released | refunded | paid */
+function toptunity_client_payments()
+{
+    return [
+        ['date' => '2026-10-02', 'project' => 'Monthly Social Media Content Calendar', 'type' => 'Deposit', 'amount' => 14000, 'status' => 'pending'],
+        ['date' => '2026-09-14', 'project' => 'Point-of-Sale and Inventory Dashboard', 'type' => 'Deposit', 'amount' => 36000, 'status' => 'held'],
+        ['date' => '2026-09-10', 'project' => 'Menu Board and Cup Sleeve Design', 'type' => 'Deposit', 'amount' => 6500, 'status' => 'held'],
+        ['date' => '2026-09-04', 'project' => 'Product Photo Retouching', 'type' => 'Deposit', 'amount' => 5000, 'status' => 'released'],
+        ['date' => '2026-08-31', 'project' => 'Barista Training Manual Layout', 'type' => 'Refund', 'amount' => 4000, 'status' => 'refunded'],
+        ['date' => '2026-07-31', 'project' => 'Weekly Menu Social Posts (July)', 'type' => 'Hourly Billing', 'amount' => 8400, 'status' => 'paid'],
+    ];
+}
+
+/** Recent notifications for the dashboard and notifications page. */
+function toptunity_client_notifications()
+{
+    return [
+        ['icon' => 'file', 'tint' => 'blue', 'title' => 'New proposals', 'text' => '3 new proposals on Online Ordering Website.', 'time' => '2h', 'new' => true],
+        ['icon' => 'message', 'tint' => 'blue', 'title' => 'New messages', 'text' => 'Janelle Cruz sent you a message.', 'time' => '3h', 'new' => true],
+        ['icon' => 'wallet', 'tint' => 'orange', 'title' => 'Hours logged', 'text' => 'Janelle logged 3.0 hrs on POS Dashboard.', 'time' => '5h', 'new' => false],
+        ['icon' => 'check-circle', 'tint' => 'teal', 'title' => 'Payment confirmations', 'text' => 'Deposit of ₱30,000 is now held.', 'time' => '1d', 'new' => false],
+    ];
+}
+
+/** Recent conversations for the dashboard and messages page. */
+function toptunity_client_messages()
+{
+    return [
+        ['name' => 'Janelle Cruz', 'project' => 'POS and Inventory Dashboard', 'text' => 'I pushed the low-stock alerts — can you test it today?', 'time' => '5m', 'unread' => true,
+         'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'bun'],
+        ['name' => 'Liza Navarro', 'project' => 'Social Media Calendar', 'text' => 'Here are the captions for week 1, po!', 'time' => '1h', 'unread' => true,
+         'bg' => '#DBEAFE', 'hair' => '#1E293B', 'style' => 'long'],
+        ['name' => 'Paolo Garcia', 'project' => 'Menu Board Design', 'text' => 'Sorry for the delay, sending the files tonight.', 'time' => '1d', 'unread' => false,
+         'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'short'],
+    ];
+}
+
+/* ==========================================================================
+   CLIENT PROJECT DETAILS: proposals, contract and tracking
+   ========================================================================== */
+
+/** Proposals received on a client project. Each: freelancer_id, offer, days, letter. */
+function toptunity_project_proposals($id)
+{
+    $projects = toptunity_client_projects();
+    if (!isset($projects[$id])) { return []; }
+    $p = $projects[$id];
+
+    if ($id === 1) {
+        return [
+            ['freelancer_id' => 1, 'offer' => 42000, 'days' => 21,
+             'letter' => 'I have built several ordering systems for cafés in Cebu. I can deliver the menu, cart, pick-up scheduling and a staff dashboard in three weeks, including a short training video for your team.'],
+            ['freelancer_id' => 7, 'offer' => 45000, 'days' => 25,
+             'letter' => 'Front-end focused developer. I will make the ordering flow fast and mobile-friendly, with a simple PHP backend your staff can manage. Sample: kape-no-lola.ph ordering page.'],
+            ['freelancer_id' => 6, 'offer' => 32000, 'days' => 30,
+             'letter' => 'I can build your ordering website in native PHP with MySQL, with an admin page for updating menu items and order status. Affordable rate and weekly progress updates.'],
+        ];
+    }
+
+    // Other projects: generated from the freelancer list so every project has proposals
+    $ids    = array_keys(toptunity_freelancers());
+    $base   = $p['type'] === 'hourly' ? $p['rate'] * max(1, (int) round($p['max_hours'] * 0.8)) : $p['budget'];
+    $count  = min(3, (int) $p['proposals']);
+    $out    = [];
+    for ($i = 0; $i < $count; $i++) {
+        $out[] = [
+            'freelancer_id' => $ids[($id + $i) % count($ids)],
+            'offer'         => (int) round($base * (0.92 + 0.04 * $i) / 100) * 100,
+            'days'          => 14 + $i * 5 + $id,
+            'letter'        => 'I can deliver this project on time, with clear weekly progress updates and a short video walkthrough when the work is submitted.',
+        ];
+    }
+    return $out;
+}
+
+/** Contract terms for a project once a freelancer has been selected (sample for project 2). */
+function toptunity_project_tracking($id)
+{
+    if ($id !== 2) { return null; }
+    return [
+        'current_step' => 5,
+        'start'        => '2026-09-14',
+        'deposit'      => 36000,
+        'deposit_status' => 'held',
+        'worklog' => [
+            ['date' => '2026-10-03', 'hours' => 3.0, 'task' => 'Low-stock alert emails for 25 ingredients', 'status' => 'pending'],
+            ['date' => '2026-10-02', 'hours' => 5.5, 'task' => 'Daily sales report page with totals per cashier', 'status' => 'approved'],
+            ['date' => '2026-10-01', 'hours' => 4.0, 'task' => 'Product and stock tables, CRUD screens', 'status' => 'approved'],
+            ['date' => '2026-09-30', 'hours' => 2.0, 'task' => 'Duplicate test data cleanup (not in scope)', 'status' => 'rejected'],
+        ],
+        'max_hours' => 60,
+        'files' => [
+            ['name' => 'pos-dashboard-v2.zip', 'size' => '4.8 MB', 'type' => 'doc'],
+            ['name' => 'sales-report-preview.png', 'size' => '560 KB', 'type' => 'pdf'],
+        ],
+        'message' => 'Hi Andrea! Version 2 of the dashboard is ready for testing: stock levels, low-stock alerts and the daily sales report. Login details are in the README.',
+        'history' => [
+            ['date' => '2026-10-03 18:42', 'status' => 'Hours Logged (3.0 h)', 'by' => 'Freelancer'],
+            ['date' => '2026-10-02 09:15', 'status' => 'Hours Approved (5.5 h)', 'by' => 'Client'],
+            ['date' => '2026-09-14 10:03', 'status' => 'Project Started (payment held)', 'by' => 'Client'],
+            ['date' => '2026-09-14 08:30', 'status' => 'Contract Accepted · Start Date set', 'by' => 'Freelancer'],
+            ['date' => '2026-09-13 16:12', 'status' => 'Contract Sent', 'by' => 'Client'],
+            ['date' => '2026-09-13 16:05', 'status' => 'Freelancer Selected', 'by' => 'Client'],
+            ['date' => '2026-09-08 11:20', 'status' => 'Project Posted', 'by' => 'Client'],
+        ],
+    ];
+}
+
+/**
+ * Details for a CLIENT project. Client IDs don't always match public IDs,
+ * so match by title first; otherwise build the details from the client project itself.
+ */
+function toptunity_client_detail($id)
+{
+    $cp = toptunity_client_projects()[$id] ?? null;
+    if (!$cp) { return null; }
+
+    foreach (toptunity_projects() as $pub) {
+        if ($pub['title'] === $cp['title']) { return $pub; }
+    }
+
+    $intros = [
+        2 => 'Build a point-of-sale and inventory dashboard with stock levels, low-stock alerts and a daily sales report for each cashier.',
+        3 => 'Plan and create a monthly social media content calendar with captions, visuals and posting dates for each week.',
+        4 => 'Design a menu board and cup sleeve set in print-ready files for the café, with clear pricing and brand colors.',
+        5 => 'Edit a 30-second promo video for our opening week, with captions, background music and a clear call to action.',
+        6 => 'Retouch product photos for the online shop: clean backgrounds, accurate color and consistent sizing.',
+        7 => 'Write weekly social media posts for the menu, with captions, hashtags and photo suggestions.',
+        8 => 'Lay out a barista training manual with clear sections, diagrams and printable pages.',
+        9 => 'Build a loyalty points web app where customers earn and redeem points, with an admin page for managing rewards.',
+    ];
+    $skills = [
+        2 => ['PHP', 'MySQL', 'JavaScript'], 3 => ['Copywriting', 'Social Media Marketing', 'Canva'],
+        4 => ['Adobe Illustrator', 'Photoshop'], 5 => ['Premiere Pro', 'Video Editing'],
+        6 => ['Photoshop', 'Retouching'], 7 => ['Copywriting', 'SEO'],
+        8 => ['Adobe Illustrator', 'Layout Design'], 9 => ['PHP', 'MySQL', 'HTML/CSS'],
+    ];
+
+    return [
+        'title'    => $cp['title'],
+        'category' => $cp['category'],
+        'desc'     => isset($intros[$id]) ? $intros[$id] : $cp['title'],
+        'intro'    => isset($intros[$id]) ? $intros[$id] : $cp['title'],
+        'features' => [],
+        'closing'  => '',
+        'skills'   => isset($skills[$id]) ? $skills[$id] : [],
+        'files'    => [],
+    ];
+}
+
+/* ==========================================================================
+   CLIENT: SAVED FREELANCERS, NOTIFICATIONS (full list), MESSAGES, BILLING
+   ========================================================================== */
+
+/** Freelancer ids the client has saved. */
+function toptunity_saved_freelancer_ids()
+{
+    return [1, 2, 3, 5];
+}
+
+/** Full notification list. cat is used by the filter tabs. */
+function toptunity_client_notifications_all()
+{
+    return [
+        ['cat' => 'proposals', 'icon' => 'file', 'tint' => 'blue', 'new' => true,
+         'title' => 'New Proposals', 'text' => 'Jerome Castillo submitted a proposal on Online Ordering Website for a Coffee Shop.', 'time' => '2h ago'],
+        ['cat' => 'responses', 'icon' => 'users', 'tint' => 'teal', 'new' => true,
+         'title' => "Freelancer's Response", 'text' => 'Liza Navarro accepted your contract for Monthly Social Media Content Calendar. Please deposit the amount.', 'time' => '5h ago'],
+        ['cat' => 'messages', 'icon' => 'message', 'tint' => 'blue', 'new' => true,
+         'title' => 'New Messages', 'text' => 'Janelle Cruz: "I pushed the low-stock alerts — can you test it today?"', 'time' => '5h ago'],
+        ['cat' => 'work', 'icon' => 'upload', 'tint' => 'teal', 'new' => false,
+         'title' => 'Work Submissions', 'text' => 'Janelle Cruz submitted work on Point-of-Sale and Inventory Dashboard.', 'time' => 'Yesterday'],
+        ['cat' => 'hours', 'icon' => 'clock', 'tint' => 'orange', 'new' => false,
+         'title' => 'Hours Logged', 'text' => 'Janelle Cruz logged 3.0 hours on Oct 03. Review them before Oct 31.', 'time' => 'Yesterday'],
+        ['cat' => 'deadline', 'icon' => 'alert', 'tint' => 'orange', 'new' => false,
+         'title' => 'Deadline and Overdue Alerts', 'text' => 'Menu Board and Cup Sleeve Design is now Overdue. Extend the deadline or accept late work.', 'time' => 'Oct 02'],
+        ['cat' => 'payments', 'icon' => 'check-circle', 'tint' => 'teal', 'new' => false,
+         'title' => 'Payment Confirmations', 'text' => 'Your deposit of ₱36,000 for Point-of-Sale and Inventory Dashboard is now held.', 'time' => 'Sep 14'],
+        ['cat' => 'refunds', 'icon' => 'refresh', 'tint' => 'orange', 'new' => false,
+         'title' => 'Refunds', 'text' => '₱4,000 was refunded for the cancelled project Barista Training Manual Layout.', 'time' => 'Aug 31'],
+    ];
+}
+
+/** Message threads. Each has a list of messages: from = 'me' | 'them'. */
+function toptunity_client_threads()
+{
+    return [
+        [
+            'name' => 'Miguel Reyes', 'project' => 'Online Ordering Website', 'project_id' => 1,
+            'preview' => 'Sure — here are the details you asked for...', 'time' => '5m', 'unread' => true,
+            'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'short',
+            'messages' => [
+                ['from' => 'them', 'text' => 'Hello po! I have a question about the project requirements — do you also need a delivery option, or pick-up only for now?', 'time' => 'Oct 04, 9:12 AM'],
+                ['from' => 'me',   'text' => 'Sure — here are the details you asked for. Pick-up only for now, but please make it easy to add delivery next year.', 'time' => 'Oct 04, 9:30 AM · Seen'],
+                ['from' => 'them', 'file' => ['name' => 'ordering-flow-draft.pdf', 'size' => '620 KB'], 'text' => 'Attached the ordering flow for your review.', 'time' => 'Oct 04, 9:41 AM'],
+                ['from' => 'me',   'text' => 'Thanks, I will check it today.', 'time' => 'Oct 04, 9:45 AM · Seen'],
+            ],
+        ],
+        [
+            'name' => 'Janelle Cruz', 'project' => 'POS and Inventory Dashboard', 'project_id' => 2,
+            'preview' => 'I pushed the low-stock alerts — can you test it...', 'time' => '1h', 'unread' => true,
+            'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'bun',
+            'messages' => [
+                ['from' => 'them', 'text' => 'Hi Andrea! I pushed the low-stock alerts. Can you test it today?', 'time' => 'Oct 07, 3:10 PM'],
+                ['from' => 'me',   'text' => 'Will do. I will test the daily report first.', 'time' => 'Oct 07, 3:20 PM · Seen'],
+            ],
+        ],
+        [
+            'name' => 'Liza Navarro', 'project' => 'Social Media Calendar', 'project_id' => 3,
+            'preview' => 'Here are the captions for week 1, po!', 'time' => '1h', 'unread' => true,
+            'bg' => '#DBEAFE', 'hair' => '#1E293B', 'style' => 'long',
+            'messages' => [
+                ['from' => 'them', 'text' => 'Here are the captions for week 1, po!', 'time' => 'Oct 07, 2:05 PM'],
+            ],
+        ],
+        [
+            'name' => 'Paolo Garcia', 'project' => 'Menu Board Design', 'project_id' => 4,
+            'preview' => 'Sorry for the delay, sending the files tonight.', 'time' => '3d', 'unread' => false,
+            'bg' => '#FEF9C3', 'hair' => '#1E293B', 'style' => 'short',
+            'messages' => [
+                ['from' => 'them', 'text' => 'Sorry for the delay, sending the files tonight.', 'time' => 'Oct 05, 6:40 PM'],
+            ],
+        ],
+        [
+            'name' => 'Jerome Castillo', 'project' => 'Online Ordering Website', 'project_id' => 1,
+            'preview' => 'Thank you for considering my proposal!', 'time' => '1d', 'unread' => false,
+            'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'glasses',
+            'messages' => [
+                ['from' => 'them', 'text' => 'Thank you for considering my proposal!', 'time' => 'Oct 06, 4:02 PM'],
+            ],
+        ],
+    ];
+}
+
+/** Hourly billing rows for the billing page. */
+function toptunity_client_hourly_billing()
+{
+    return [
+        ['end' => '2026-07-31', 'project' => 'Weekly Menu Social Posts (July)', 'approved' => 24.0, 'rate' => 350, 'billed' => 8400, 'unused' => 1400, 'status' => 'paid'],
+        ['end' => '2026-10-31', 'project' => 'Point-of-Sale and Inventory Dashboard', 'approved' => 32.5, 'rate' => 600, 'billed' => null, 'unused' => null, 'status' => 'upcoming'],
+    ];
+}
+
+/* ==========================================================================
+   CLIENT: REVIEWS RECEIVED (My Profile > My Reviews)
+   ========================================================================== */
+function toptunity_client_reviews()
+{
+    return [
+        ['by' => 'Miguel Reyes', 'project' => 'Cafe Menu Landing Page', 'date' => '2026-09-02', 'stars' => 5,
+         'text' => 'Clear requirements and very quick to reply. Andrea approved the work on the same day I submitted it. Would gladly work with Kapé Lokal again!', 'bg' => '#CCFBF1', 'style' => 'short'],
+        ['by' => 'Liza Navarro', 'project' => 'Product Photo Retouching', 'date' => '2026-09-05', 'stars' => 5,
+         'text' => 'Friendly client and the photos were well organized. Payment was released right after approval.', 'bg' => '#DBEAFE', 'style' => 'long'],
+        ['by' => 'Paolo Garcia', 'project' => 'Loyalty Card Design', 'date' => '2026-07-18', 'stars' => 4,
+         'text' => 'Good communication. The brief changed once mid-project but we sorted it out quickly.', 'bg' => '#FEF9C3', 'style' => 'short'],
+        ['by' => 'Janelle Cruz', 'project' => 'POS Dashboard (Phase 1)', 'date' => '2026-06-12', 'stars' => 5,
+         'text' => 'Andrea gave clear feedback every week and paid on time.', 'bg' => '#FFEDD5', 'style' => 'bun'],
+        ['by' => 'Carla Mendoza', 'project' => 'Salon Flyer Set', 'date' => '2026-05-30', 'stars' => 5,
+         'text' => 'Very organized and easy to work with.', 'bg' => '#FFEDD5', 'style' => 'long'],
+        ['by' => 'Nina Reyes', 'project' => 'Retail Banner Design', 'date' => '2026-05-14', 'stars' => 5,
+         'text' => 'Quick decisions and fair scope. Would hire again.', 'bg' => '#FEF9C3', 'style' => 'bun'],
+        ['by' => 'Rhea Mendoza', 'project' => 'Brand Voice Guide', 'date' => '2026-04-22', 'stars' => 5,
+         'text' => 'Gave me the context I needed and approved the drafts promptly.', 'bg' => '#CCFBF1', 'style' => 'long'],
+        ['by' => 'Kevin Tan', 'project' => 'Inventory Clean-up', 'date' => '2026-03-09', 'stars' => 4,
+         'text' => 'Payment flow was smooth. The scope grew a little, but we agreed on the changes.', 'bg' => '#DCFCE7', 'style' => 'short'],
+        ['by' => 'Bea Lim', 'project' => 'Menu App Mockups', 'date' => '2026-02-18', 'stars' => 5,
+         'text' => 'Great client. Clear about what she wanted and responsive on chat.', 'bg' => '#DBEAFE', 'style' => 'long'],
+    ];
+}

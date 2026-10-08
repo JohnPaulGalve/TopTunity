@@ -1,40 +1,68 @@
 <?php
+/**
+ * client/account-settings.php - Update account information and password (matches the Account Settings design).
+ * Saving is not connected to a database yet.
+ */
+$user_role     = "client";
+$base_url      = "/Webdev/";
+$active_client = "";
+
+require_once __DIR__ . '/../includes/data.php';
+$me = toptunity_current_client();
+
 $page_title = "Account Settings";
-$user_role = "client";
 include '../includes/header.php';
-include '../includes/nav.php';
+include '../includes/client-nav.php';
 ?>
 
-<div class="container" style="padding-top: 3rem; padding-bottom: 3rem; max-width: 800px;">
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-    <!-- Account Information Form -->
-    <div class="card">
-      <h3>Update Email</h3>
-      <form action="#" method="POST" style="margin-top: 1rem;">
-        <div style="margin-bottom: 1.5rem;">
-          <label for="account_email" style="display: block; font-weight: 600; font-size: 0.9rem;">Email Address</label>
-          <input type="email" name="account_email" id="account_email" value="andrea.santos@kapelokal.ph" required style="width: 100%; padding: 0.6rem; border: 1px solid var(--color-border-gray); border-radius: 4px;">
-        </div>
-        <button type="submit" class="btn-primary">Save Changes</button>
-      </form>
-    </div>
-
-    <!-- Password Change Form -->
-    <div class="card">
-      <h3>Change Password</h3>
-      <form action="#" method="POST" style="margin-top: 1rem;">
-        <div style="margin-bottom: 1rem;">
-          <label for="current_password" style="display: block; font-weight: 600; font-size: 0.9rem;">Current Password</label>
-          <input type="password" name="current_password" id="current_password" required style="width: 100%; padding: 0.6rem; border: 1px solid var(--color-border-gray); border-radius: 4px;">
-        </div>
-        <div style="margin-bottom: 1.5rem;">
-          <label for="new_password" style="display: block; font-weight: 600; font-size: 0.9rem;">New Password</label>
-          <input type="password" name="new_password" id="new_password" required style="width: 100%; padding: 0.6rem; border: 1px solid var(--color-border-gray); border-radius: 4px;">
-        </div>
-        <button type="submit" class="btn-outline">Update Password</button>
-      </form>
-    </div>
+<div class="welcome-row">
+  <div>
+    <h1>Account Settings</h1>
+    <p class="subtle">Update your account information and password.</p>
   </div>
 </div>
+
+<div class="two-col" style="margin-top:1.25rem; grid-template-columns:1fr 1fr;">
+  <section class="box" style="margin-top:0;">
+    <div class="box-head" style="margin-bottom:1.1rem;">
+      <h2 style="display:flex; align-items:center; gap:0.5rem; margin:0;"><span class="icon-box icon-box--teal"><?= icon('user', 16) ?></span> Update Account Information</h2>
+    </div>
+    <form method="post" action="">
+      <div class="field" style="margin-top:0;">
+        <label for="acc-name">Full Name</label>
+        <div class="input-wrap"><?= icon('user', 16) ?><input id="acc-name" name="name" value="<?= e($me['name']) ?>"></div>
+      </div>
+      <div class="field">
+        <label for="acc-email">Email Address</label>
+        <div class="input-wrap"><?= icon('mail', 16) ?><input id="acc-email" name="email" type="email" value="andrea.santos@kapelokal.ph"></div>
+      </div>
+      <div class="form-actions--plain">
+        <button type="submit" class="btn btn--deep" style="background:var(--color-deep-slate); color:#FFFFFF;">Save Changes</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="box" style="margin-top:0;">
+    <div class="box-head" style="margin-bottom:1.1rem;">
+      <h2 style="display:flex; align-items:center; gap:0.5rem; margin:0;"><span class="icon-box icon-box--orange"><?= icon('lock', 16) ?></span> Change Password</h2>
+    </div>
+    <form method="post" action="">
+      <div class="field" style="margin-top:0;">
+        <label for="cur-pass">Current Password</label>
+        <div class="input-wrap"><?= icon('lock', 16) ?><input id="cur-pass" name="current" type="password" value="password123" autocomplete="current-password"><span class="input-eye"><?= icon('eye', 16) ?></span></div>
+      </div>
+      <div class="field">
+        <label for="new-pass">New Password</label>
+        <div class="input-wrap" style="box-shadow:0 0 0 3px rgba(0,148,136,0.12); border-radius:var(--radius-sm);"><?= icon('lock', 16) ?><input id="new-pass" name="new" type="password" value="password123" minlength="8" autocomplete="new-password" style="border-color:var(--color-vibrant-teal);"><span class="input-eye"><?= icon('eye', 16) ?></span></div>
+        <p class="hint">At least 8 characters with a number.</p>
+      </div>
+      <div class="form-actions--plain">
+        <button type="submit" class="btn btn--primary">Update Password</button>
+      </div>
+    </form>
+  </section>
+</div>
+
+</main>
 
 <?php include '../includes/footer.php'; ?>

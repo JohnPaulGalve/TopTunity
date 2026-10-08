@@ -1,105 +1,184 @@
 <?php
-$page_title = "Client Dashboard";
-$user_role = "client";
-include '../includes/header.php';
-include '../includes/nav.php';
+/**
+ * client/dashboard.php - Client home: stats, posted projects, notifications, messages.
+ */
+$user_role     = "client";
+$base_url      = "/Webdev/";
+$active_client = "dashboard";
 
-// Mock Client Data
-$client_name = "Andrea Santos";
-$posted_count = 4;
-$proposals_count = 12;
-$ongoing_count = 2;
-$pending_payments = "₱18,000";
+require_once __DIR__ . '/../includes/data.php';
+
+$me       = toptunity_current_client();
+$projects = toptunity_client_projects();
+$payments = toptunity_client_payments();
+$notes    = toptunity_client_notifications();
+$messages = toptunity_client_messages();
+
+$page_title = "Client Dashboard";
+include '../includes/header.php';
+include '../includes/client-nav.php';
+
+/* ---- Stats, calculated from the data ---- */
+$posted_count   = count($projects);
+$proposal_total = array_sum(array_column($projects, 'proposals'));
+$ongoing_count  = count(array_filter($projects, function ($p) { return $p['status'] === 'ongoing'; }));
+$pending_total  = array_sum(array_map(function ($x) {
+    return $x['status'] === 'pending' ? $x['amount'] : 0;
+}, $payments));
+
+/* Projects shown in the table */
+$table_ids = [1, 2, 4, 6];
+
+/* The project with the pending deposit */
+$pending_project = null;
+foreach ($projects as $p) {
+    if ($p['title'] === 'Monthly Social Media Content Calendar') { $pending_project = $p; break; }
+}
 ?>
 
-<div class="container" style="padding-top: 2rem; padding-bottom: 3rem;">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-    <div>
-      <h2>Welcome back, <?php echo htmlspecialchars($client_name); ?>!</h2>
-      <p style="color: var(--color-muted-gray);">Overview of your posted projects, received proposals, and account activity[cite: 5, 39].</p>
+<div class="welcome-row">
+  <div>
+    <h1>Welcome back, <?= e(explode(' ', $me['name'])[0]) ?>!</h1>
+    <p class="subtle">Here's what's happening with your projects today, <?= e(date('l, F j')) ?>.</p>
+  </div>
+  <a href="<?= e($base_url) ?>client/post-project.php" class="btn btn--primary btn--sm-block"><?= icon('plus', 16) ?> Post a Project</a>
+</div>
+
+<!-- Stat cards -->
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-card__top">
+      <span class="stat-card__label">Posted Projects</span>
+      <span class="icon-box icon-box--orange"><?= icon('folder', 16) ?></span>
     </div>
-    <a href="<?php echo $base_url; ?>client/post-project.php" class="btn-primary">+ Post a Project</a>
+    <span class="stat-card__value"><?= (int) $posted_count ?></span>
+    <a href="<?= e($base_url) ?>client/my-projects.php" class="stat-card__link">View →</a>
   </div>
 
-  <!-- Metric Cards Grid -->
-  <div class="grid-4" style="margin-bottom: 2rem;">
-    <div class="card">
-      <p style="font-size: 0.85rem; color: var(--color-muted-gray);">Posted Projects</p>
-      <h3 style="font-size: 2rem; color: var(--color-deep-slate);"><?php echo $posted_count; ?></h3>
-      <a href="<?php echo $base_url; ?>client/my-projects.php" style="font-size: 0.85rem; color: var(--color-vibrant-teal);">View all &rarr;</a>
+  <div class="stat-card">
+    <div class="stat-card__top">
+      <span class="stat-card__label">Proposals Received</span>
+      <span class="icon-box icon-box--teal"><?= icon('clipboard', 16) ?></span>
     </div>
-    <div class="card">
-      <p style="font-size: 0.85rem; color: var(--color-muted-gray);">Proposals Received</p>
-      <h3 style="font-size: 2rem; color: var(--color-deep-slate);"><?php echo $proposals_count; ?></h3>
-      <a href="<?php echo $base_url; ?>client/my-projects.php" style="font-size: 0.85rem; color: var(--color-vibrant-teal);">Review proposals &rarr;</a>
-    </div>
-    <div class="card">
-      <p style="font-size: 0.85rem; color: var(--color-muted-gray);">Ongoing Projects</p>
-      <h3 style="font-size: 2rem; color: var(--color-deep-slate);"><?php echo $ongoing_count; ?></h3>
-      <a href="<?php echo $base_url; ?>client/my-projects.php?status=ongoing" style="font-size: 0.85rem; color: var(--color-vibrant-teal);">Track progress &rarr;</a>
-    </div>
-    <div class="card">
-      <p style="font-size: 0.85rem; color: var(--color-muted-gray);">Pending Payments</p>
-      <h3 style="font-size: 2rem; color: var(--color-coral-orange);"><?php echo $pending_payments; ?></h3>
-      <a href="<?php echo $base_url; ?>client/billing.php" style="font-size: 0.85rem; color: var(--color-vibrant-teal);">Go to Billing &rarr;</a>
-    </div>
+    <span class="stat-card__value"><?= (int) $proposal_total ?></span>
+    <a href="<?= e($base_url) ?>client/my-projects.php" class="stat-card__link">View →</a>
   </div>
 
-  <!-- Dashboard Tables & Feed Layout -->
-  <div style="display: grid; grid-template-columns: 1fr 340px; gap: 2rem;">
-    <main>
-      <div class="card" style="margin-bottom: 2rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-          <h3>Posted Projects Overview</h3>
-          <a href="<?php echo $base_url; ?>client/my-projects.php" style="font-size: 0.85rem; color: var(--color-vibrant-teal);">View All</a>
-        </div>
-        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+  <div class="stat-card">
+    <div class="stat-card__top">
+      <span class="stat-card__label">Ongoing Projects</span>
+      <span class="icon-box icon-box--blue"><?= icon('clock', 16) ?></span>
+    </div>
+    <span class="stat-card__value"><?= (int) $ongoing_count ?></span>
+    <a href="<?= e($base_url) ?>client/my-projects.php?status=ongoing" class="stat-card__link">View →</a>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card__top">
+      <span class="stat-card__label">Pending Payments</span>
+      <span class="icon-box icon-box--orange"><?= icon('wallet', 16) ?></span>
+    </div>
+    <span class="stat-card__value">₱<?= number_format($pending_total) ?></span>
+    <a href="<?= e($base_url) ?>client/billing.php" class="stat-card__link">View →</a>
+  </div>
+</div>
+
+<div class="dash-grid">
+
+  <div class="dash-col">
+    <!-- Posted projects -->
+    <section class="panel">
+      <div class="panel__head">
+        <h2>Posted Projects</h2>
+        <a href="<?= e($base_url) ?>client/my-projects.php" class="panel__link">View all in My Projects →</a>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="data-table">
           <thead>
-            <tr style="border-bottom: 2px solid var(--color-border-gray); background: var(--color-off-white);">
-              <th style="padding: 0.75rem;">Project Title</th>
-              <th style="padding: 0.75rem;">Billing</th>
-              <th style="padding: 0.75rem;">Status</th>
-              <th style="padding: 0.75rem;">Deadline</th>
-              <th style="padding: 0.75rem;">Action</th>
+            <tr>
+              <th>Project</th>
+              <th>Status</th>
+              <th class="num">Proposals</th>
+              <th class="num">Deadline</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
-            <tr style="border-bottom: 1px solid var(--color-border-gray);">
-              <td style="padding: 0.75rem;"><strong>Coffee Shop Ordering Site</strong></td>
-              <td style="padding: 0.75rem;">Fixed</td>
-              <td style="padding: 0.75rem;"><span class="badge badge-info">Open</span></td>
-              <td style="padding: 0.75rem;">Nov 20, 2026[cite: 91]</td>
-              <td style="padding: 0.75rem;"><a href="<?php echo $base_url; ?>client/project-tracking.php?id=1" class="btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;">Manage</a></td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--color-border-gray);">
-              <td style="padding: 0.75rem;"><strong>Clinic Website Redesign</strong></td>
-              <td style="padding: 0.75rem;">Fixed</td>
-              <td style="padding: 0.75rem;"><span class="badge badge-success">Ongoing</span></td>
-              <td style="padding: 0.75rem;">Nov 15, 2026[cite: 91]</td>
-              <td style="padding: 0.75rem;"><a href="<?php echo $base_url; ?>client/project-tracking.php?id=2" class="btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;">Track</a></td>
-            </tr>
+            <?php foreach ($table_ids as $id): $p = $projects[$id]; ?>
+              <tr>
+                <td>
+                  <strong><?= e($p['title']) ?></strong>
+                  <small><?= $p['type'] === 'hourly' ? 'Hourly · ₱' . number_format($p['rate']) . '/hr' : 'Fixed Price · ₱' . number_format($p['budget']) ?></small>
+                </td>
+                <td><span class="status status--<?= e($p['status']) ?>"><?= e(toptunity_status_label($p['status'])) ?></span></td>
+                <td class="num"><?= (int) $p['proposals'] ?></td>
+                <td class="num"><?= e(date('M d, Y', strtotime($p['deadline']))) ?></td>
+                <td class="num"><a href="<?= e($base_url) ?>client/project-tracking.php?id=<?= (int) $id ?>" class="view">View</a></td>
+              </tr>
+            <?php endforeach; ?>
           </tbody>
         </table>
       </div>
-    </main>
+    </section>
 
-    <!-- Side Panel -->
-    <aside style="display: flex; flex-direction: column; gap: 1.5rem;">
-      <div class="card">
-        <h3 style="font-size: 1rem; margin-bottom: 1rem;">Recent Notifications</h3>
-        <div style="display: flex; flex-direction: column; gap: 0.8rem; font-size: 0.85rem;">
-          <div style="border-bottom: 1px solid var(--color-border-gray); padding-bottom: 0.5rem;">
-            <p><strong>New Proposal:</strong> Miguel Reyes submitted an offer on Coffee Shop Ordering Site[cite: 39].</p>
-            <small style="color: var(--color-muted-gray);">2h ago</small>
+    <!-- Recent messages -->
+    <section class="panel">
+      <div class="panel__head">
+        <h2>Recent Messages</h2>
+        <a href="<?= e($base_url) ?>client/messages.php" class="panel__link">Open Messages →</a>
+      </div>
+      <?php foreach ($messages as $m): ?>
+        <div class="msg-item">
+          <?= avatar($m['bg'], $m['hair'], $m['style'], 34) ?>
+          <div class="msg-item__body">
+            <strong><?= e($m['name']) ?></strong>
+            <small> · <?= e($m['project']) ?></small>
+            <p><?= e($m['text']) ?></p>
           </div>
-          <div>
-            <p><strong>Hours Logged:</strong> Work log updated for Student Enrollment System[cite: 39].</p>
-            <small style="color: var(--color-muted-gray);">5h ago</small>
+          <div class="msg-item__meta">
+            <time><?= e($m['time']) ?></time>
+            <?php if ($m['unread']): ?><span class="unread-dot" aria-label="Unread"></span><?php endif; ?>
           </div>
         </div>
-      </div>
-    </aside>
+      <?php endforeach; ?>
+    </section>
   </div>
+
+  <div class="dash-col">
+    <!-- Notifications -->
+    <section class="panel">
+      <div class="panel__head">
+        <h2>Recent Notifications</h2>
+        <a href="<?= e($base_url) ?>client/notifications.php" class="panel__link">All</a>
+      </div>
+      <?php foreach ($notes as $n): ?>
+        <div class="notif-item">
+          <span class="icon-box icon-box--<?= e($n['tint']) ?>"><?= icon($n['icon'], 15) ?></span>
+          <div class="notif-item__body">
+            <strong><?= e($n['title']) ?><?php if ($n['new']): ?><span class="dot-new" aria-label="New"></span><?php endif; ?></strong>
+            <p><?= e($n['text']) ?></p>
+          </div>
+          <time><?= e($n['time']) ?></time>
+        </div>
+      <?php endforeach; ?>
+    </section>
+
+    <!-- Pending payment -->
+    <?php if ($pending_project): ?>
+    <section class="pending-box">
+      <h2>Pending Payments</h2>
+      <p>
+        <?= e($pending_project['title']) ?><br>
+        Deposit ₱<?= number_format($pending_project['rate']) ?> × <?= (int) $pending_project['max_hours'] ?> hrs
+        <strong>₱<?= number_format($pending_project['budget']) ?></strong>
+      </p>
+      <a href="<?= e($base_url) ?>client/billing.php" class="btn btn--primary btn--small">Go to Billing and Payments</a>
+    </section>
+    <?php endif; ?>
+  </div>
+
 </div>
+
+</main>
 
 <?php include '../includes/footer.php'; ?>

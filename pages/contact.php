@@ -1,50 +1,89 @@
 <?php
-$page_title = "Contact Us";
+/**
+ * pages/contact.php - Public contact form. Submission is not wired to a backend yet.
+ */
 $user_role = "public";
-require_once __DIR__ . '/../includes/header.php';
-require_once __DIR__ . '/../includes/nav.php';
+$base_url  = "/Webdev/";
+
+$page_title = "Contact Us";
+include '../includes/header.php';
+include '../includes/nav.php';
+
+$subjects = ['Account help', 'Projects and proposals', 'Payments and fees', 'Report a user', 'Technical issue', 'Other'];
 ?>
 
-<div class="container" style="padding-top: 3rem; padding-bottom: 3rem;">
-  <div style="display: grid; grid-template-columns: 1fr 320px; gap: 2rem;">
-    <!-- Contact Form -->
-    <main class="card">
-      <h2>Send Us an Inquiry</h2>
-      <p style="color: var(--color-muted-gray); font-size: 0.9rem; margin-bottom: 1.5rem;">Have questions or concerns? Reach out to the platform administrator[cite: 4, 34].</p>
+<main class="page-browse">
+  <div class="container">
 
-      <form action="#" method="POST">
-        <div style="margin-bottom: 1rem;">
-          <label for="contact_name" style="display: block; font-weight: 600; font-size: 0.9rem;">Full Name</label>
-          <input type="text" name="contact_name" id="contact_name" placeholder="Juan Dela Cruz" required style="width: 100%; padding: 0.6rem; border: 1px solid var(--color-border-gray); border-radius: 4px;">
+    <header class="center-block">
+      <h1 style="font-size:2rem; font-weight:700;">Contact Us</h1>
+      <p style="margin-top:0.35rem; font-size:0.85rem; color:var(--color-muted-gray);">Send your inquiry or concern to the platform administrator.</p>
+    </header>
+
+    <div class="contact-layout">
+
+      <form class="contact-form" method="post" action="">
+        <div class="form-grid2">
+          <div class="field">
+            <label for="c-name">Full Name</label>
+            <div class="input-wrap">
+              <?= icon('user', 16) ?>
+              <input type="text" id="c-name" name="name" placeholder="Your full name" autocomplete="name" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="c-email">Email Address</label>
+            <div class="input-wrap">
+              <?= icon('mail', 16) ?>
+              <input type="email" id="c-email" name="email" placeholder="you@example.com" autocomplete="email" required>
+            </div>
+          </div>
         </div>
 
-        <div style="margin-bottom: 1rem;">
-          <label for="contact_email" style="display: block; font-weight: 600; font-size: 0.9rem;">Email Address</label>
-          <input type="email" name="contact_email" id="contact_email" required style="width: 100%; padding: 0.6rem; border: 1px solid var(--color-border-gray); border-radius: 4px;">
+        <div class="field">
+          <label for="c-subject">Subject</label>
+          <select id="c-subject" name="subject" required>
+            <option value="" selected disabled>Choose a subject…</option>
+            <?php foreach ($subjects as $s): ?>
+              <option value="<?= e($s) ?>"><?= e($s) ?></option>
+            <?php endforeach; ?>
+          </select>
         </div>
 
-        <div style="margin-bottom: 1rem;">
-          <label for="contact_subject" style="display: block; font-weight: 600; font-size: 0.9rem;">Subject</label>
-          <input type="text" name="contact_subject" id="contact_subject" required style="width: 100%; padding: 0.6rem; border: 1px solid var(--color-border-gray); border-radius: 4px;">
+        <div class="field">
+          <label for="c-message">Message</label>
+          <textarea id="c-message" name="message" placeholder="How can we help?" required></textarea>
         </div>
 
-        <div style="margin-bottom: 1.5rem;">
-          <label for="contact_message" style="display: block; font-weight: 600; font-size: 0.9rem;">Message</label>
-          <textarea name="contact_message" id="contact_message" rows="5" required style="width: 100%; padding: 0.6rem; border: 1px solid var(--color-border-gray); border-radius: 4px;"></textarea>
+        <div class="contact-form__foot">
+          <small>We usually reply within 1–2 business days.</small>
+          <button type="submit" class="btn btn--primary"><?= icon('send', 16) ?> Send Message</button>
         </div>
-
-        <button type="submit" class="btn-primary">Send Message</button>
       </form>
-    </main>
 
-    <!-- Support Information Sidebar -->
-    <aside class="card">
-      <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Help & Support</h3>
-      <p style="font-size: 0.9rem; color: var(--color-deep-slate); margin-bottom: 0.5rem;"><strong>Email:</strong> support@toptunity.ph</p>
-      <p style="font-size: 0.9rem; color: var(--color-deep-slate); margin-bottom: 0.5rem;"><strong>Office Hours:</strong> Mon - Fri, 9 AM - 5 PM</p>
-      <p style="font-size: 0.85rem; color: var(--color-muted-gray); margin-top: 1.5rem;">Inquiries submitted through this form are logged in the administrator's dashboard[cite: 11, 34].</p>
-    </aside>
+      <aside class="contact-side">
+        <div class="contact-info">
+          <span class="icon-box icon-box--teal"><?= icon('mail', 18) ?></span>
+          <div><small>Email</small><strong>support@toptunity.ph</strong></div>
+        </div>
+        <div class="contact-info">
+          <span class="icon-box icon-box--teal"><?= icon('user', 18) ?></span>
+          <div><small>Phone</small><strong>(02) 8123 4567</strong></div>
+        </div>
+        <div class="contact-info">
+          <span class="icon-box icon-box--teal"><?= icon('clock', 18) ?></span>
+          <div><small>Office hours</small><strong>Mon–Fri, 9:00 AM – 6:00 PM</strong></div>
+        </div>
+
+        <div class="help-card">
+          <h3>Have a quick question?</h3>
+          <p>Most answers are already in our FAQs.</p>
+          <a href="faqs.php" class="btn btn--primary">Go to FAQs</a>
+        </div>
+      </aside>
+
+    </div>
   </div>
-</div>
+</main>
 
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+<?php include '../includes/footer.php'; ?>

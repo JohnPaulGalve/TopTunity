@@ -155,7 +155,7 @@ $state = ['q' => $q, 'category' => $cat, 'sort' => $sort, 'page' => $page];
               <?php if ($total): ?>
                 Showing <?= $from ?>–<?= $to ?> of <?= $total ?> open projects
               <?php else: ?>
-                No open projects found
+                Showing 0–0 of 0 open projects
               <?php endif; ?>
               · Sort by
             </span>
@@ -173,10 +173,11 @@ $state = ['q' => $q, 'category' => $cat, 'sort' => $sort, 'page' => $page];
         </div>
 
         <?php if (!$visible): ?>
-          <div class="empty-state">
-            <h3>No projects match your search</h3>
-            <p>Try a different keyword or clear the category filter.</p>
-            <a href="browse-projects.php" class="btn btn--teal-outline">Clear search and filter</a>
+          <div class="empty-state empty-state--design">
+            <div class="empty-art"><?= icon('search', 40) ?></div>
+            <h3>No projects found</h3>
+            <p>Try another keyword or category.</p>
+            <a href="browse-projects.php" class="btn btn--dark">Clear Filter</a>
           </div>
         <?php else: ?>
           <div class="listing">
