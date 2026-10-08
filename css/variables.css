@@ -1,0 +1,60 @@
+/* ==========================================================================
+   TopTunity - Design Tokens
+   Color palette, functional badges, typography, radius and shadows
+   ========================================================================== */
+:root {
+  /* Brand Palette */
+  --color-midnight-black: #0F172A; /* Dark Neutral */
+  --color-deep-slate:     #1E293B; /* Primary */
+  --color-vibrant-teal:   #009488; /* Secondary */
+  --color-coral-orange:   #F97316; /* CTA Accent */
+  --color-off-white:      #F8FAFC; /* Light Neutral */
+
+  /* Brand tints (backgrounds for icons, badges, illustration cards) */
+  --color-teal-dark:      #0F766E;
+  --color-teal-soft:      #CCFBF1;
+  --color-teal-tint:      #E6F6F3;
+  --color-mint:           #DCF2EE;
+  --color-orange-soft:    #FFEDD5;
+  --color-peach:          #FDE3D2;
+
+  /* Functional Status Colors */
+  --color-success-base:   #15803D;
+  --color-success-bg:     #DCFCE7;
+  --color-success-text:   #166534; /* Completed / Approved */
+
+  --color-error-base:     #DC2626;
+  --color-error-bg:       #FEE2E2;
+  --color-error-text:     #991B1B; /* Rejected / Disputes / Overdue */
+
+  --color-warning-base:   #EAB308;
+  --color-warning-bg:     #FEF9C3;
+  --color-warning-text:   #854D0E; /* Pending / Overdue alerts */
+
+  --color-info-base:      #2563EB;
+  --color-info-bg:        #DBEAFE;
+  --color-info-text:      #1E40AF; /* Notifications / Info */
+
+  /* Form & UI Neutral Colors */
+  --color-border-gray:    #E2E8F0;
+  --color-disabled-gray:  #CBD5E1;
+  --color-muted-gray:     #64748B;
+  --color-slate-text:     #475569;
+  --color-chip-bg:        #F1F5F9;
+
+  /* Typography */
+  --font-logo:    'Plus Jakarta Sans', sans-serif;
+  --font-heading: 'Poppins', sans-serif;
+  --font-body:    'Inter', sans-serif;
+
+  /* Shape & elevation */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --shadow-cta: 0 4px 12px rgba(249, 115, 22, 0.28);
+
+  /* Layout */
+  --container-width: 1140px;
+  --nav-height: 64px;
+}
