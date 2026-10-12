@@ -10,6 +10,7 @@ $active_client = "";
 require_once __DIR__ . '/../includes/data.php';
 
 $me      = toptunity_current_client();
+$demo    = tt_is_demo_account();
 $reviews = toptunity_client_reviews();
 $tab     = isset($_GET['tab']) && $_GET['tab'] === 'business' ? 'business' : 'personal';
 
@@ -56,22 +57,22 @@ include '../includes/client-nav.php';
           <div class="field"><label for="full-name">Full Name</label><input class="input" id="full-name" name="full_name" value="<?= e($me['name']) ?>"></div>
           <div class="field"><label for="company">Company (optional)</label><input class="input" id="company" name="company" value="<?= e($me['company']) ?>"></div>
           <div class="field"><label for="location">Location</label>
-            <div class="input-wrap"><?= icon('map-pin', 16) ?><input id="location" name="location" value="Quezon City, Philippines"></div>
+            <div class="input-wrap"><?= icon('map-pin', 16) ?><input id="location" name="location" value="<?= e($demo ? 'Quezon City, Philippines' : '') ?>"></div>
           </div>
           <div class="field"><label for="contact">Contact Number</label>
-            <div class="input-wrap"><?= icon('phone', 16) ?><input id="contact" name="contact" value="+63 917 555 0142"></div>
+            <div class="input-wrap"><?= icon('phone', 16) ?><input id="contact" name="contact" value="<?= e($demo ? '+63 917 555 0142' : '') ?>"></div>
           </div>
           <div class="field full"><label for="about">About</label>
-            <textarea id="about" name="about" class="input" rows="4" style="height:auto; padding:0.7rem; font-size:0.82rem;">Kapé Lokal is a small specialty coffee shop in Maginhawa, Quezon City serving locally sourced Batangas and Benguet beans. I usually hire freelancers for web, design and social media work.</textarea>
+            <textarea id="about" name="about" class="input" rows="4" style="height:auto; padding:0.7rem; font-size:0.82rem;"><?= e($demo ? 'Kapé Lokal is a small specialty coffee shop in Maginhawa, Quezon City serving locally sourced Batangas and Benguet beans. I usually hire freelancers for web, design and social media work.' : '') ?></textarea>
           </div>
         </div>
       <?php else: ?>
         <div class="form-grid-2">
-          <div class="field"><label for="biz-name">Business Name</label><input class="input" id="biz-name" name="business_name" value="Kapé Lokal Coffee Co."></div>
+          <div class="field"><label for="biz-name">Business Name</label><input class="input" id="biz-name" name="business_name" value="<?= e($me['company']) ?>"></div>
           <div class="field"><label for="biz-type">Business Type</label>
             <select class="input" id="biz-type" name="business_type"><option selected>Food and beverage</option><option>Retail</option><option>Clinic or health</option><option>Education</option><option>Other</option></select>
           </div>
-          <div class="field full"><label for="biz-address">Business Address</label><input class="input" id="biz-address" name="address" value="Maginhawa Street, Quezon City"></div>
+          <div class="field full"><label for="biz-address">Business Address</label><input class="input" id="biz-address" name="address" value="<?= e($demo ? 'Maginhawa Street, Quezon City' : '') ?>"></div>
           <div class="field"><label for="biz-tin">Business ID or TIN (optional)</label><input class="input" id="biz-tin" name="tin" placeholder="e.g. 123-456-789-000"></div>
         </div>
       <?php endif; ?>

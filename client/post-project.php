@@ -1,7 +1,7 @@
 <?php
 /**
- * client/post-project.php - Post a new project, or edit an open one (?id=N).
- * Form is not wired to a database yet. Submitted projects are reviewed by the administrator.
+ * client/post-project.php - Post a new project, or edit one of your own projects (?id=N).
+ * Saves to storage/projects.json, so the project appears on the dashboard and My Projects.
  */
 $user_role     = "client";
 $base_url      = "/Webdev/";
@@ -14,23 +14,96 @@ $categories = [
     'Writing and Content', 'Digital Marketing', 'Video and Animation', 'Data Entry and Admin',
 ];
 
-/* Edit mode: prefill from an existing project */
-$edit_id  = isset($_GET['id']) ? (int) $_GET['id'] : 0;
-$editing  = $edit_id ? (toptunity_client_projects()[$edit_id] ?? null) : null;
-$public   = $editing ? toptunity_client_detail($edit_id) : null;
+/* Edit mode: only projects this client posted (saved ones) can be edited */
+$edit_id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+$saved   = tt_saved_projects_for_current_user();
+$editing = ($edit_id && isset($saved[$edit_id])) ? $saved[$edit_id] : null;
+if ($edit_id && !$editing) {
+    tt_flash('That project can\'t be edited here.');
+    header('Location: ' . $base_url . 'client/my-projects.php');
+    exit;
+}
 
-$form = [
-    'title'       => $editing ? $editing['title'] : '',
-    'description' => $public  ? $public['intro'] : '',
-    'category'    => $public  ? $public['category'] : '',
-    'skills'      => $public  ? $public['skills'] : [],
-    'type'        => $editing ? $editing['type'] : 'fixed',
-    'budget'      => $editing && $editing['type'] === 'fixed' ? $editing['budget'] : '',
-    'rate'        => $editing && $editing['type'] === 'hourly' ? $editing['rate'] : '',
-    'max_hours'   => $editing && $editing['type'] === 'hourly' ? $editing['max_hours'] : '',
-    'deadline'    => $editing ? $editing['deadline'] : '',
-    'files'       => $public  ? $public['files'] : [],
+$form = $editing ? [
+    'title'       => $editing['title'],
+    'description' => $editing['intro'],
+    'category'    => $editing['category'],
+    'skills'      => $editing['skills'],
+    'type'        => $editing['type'],
+    'budget'      => $editing['type'] === 'fixed' ? $editing['budget'] : '',
+    'rate'        => $editing['type'] === 'hourly' ? $editing['rate'] : '',
+    'max_hours'   => $editing['type'] === 'hourly' ? $editing['max_hours'] : '',
+    'deadline'    => $editing['deadline'],
+    'files'       => $editing['files'],
+] : [
+    'title' => '', 'description' => '', 'category' => '', 'skills' => [], 'type' => 'fixed',
+    'budget' => '', 'rate' => '', 'max_hours' => '', 'deadline' => '', 'files' => [],
 ];
+
+/* Submitted form */
+$errors = [];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $in = [
+        'title'       => trim(isset($_POST['title']) ? $_POST['title'] : ''),
+        'description' => trim(isset($_POST['description']) ? $_POST['description'] : ''),
+        'category'    => isset($_POST['category']) ? $_POST['category'] : '',
+        'skills'      => array_values(array_unique(array_filter(array_map('trim', (array) (isset($_POST['skills']) ? $_POST['skills'] : [])), 'strlen'))),
+        'type'        => (isset($_POST['billing_type']) && $_POST['billing_type'] === 'hourly') ? 'hourly' : 'fixed',
+        'budget'      => (int) (isset($_POST['budget']) ? $_POST['budget'] : 0),
+        'rate'        => (int) (isset($_POST['rate']) ? $_POST['rate'] : 0),
+        'max_hours'   => (int) (isset($_POST['max_hours']) ? $_POST['max_hours'] : 0),
+        'deadline'    => isset($_POST['deadline']) ? $_POST['deadline'] : '',
+    ];
+
+    if (mb_strlen($in['title']) < 5)                       { $errors[] = 'Please enter a project title (at least 5 characters).'; }
+    if (mb_strlen($in['title']) > 120)                     { $errors[] = 'The project title can be at most 120 characters.'; }
+    if ($in['description'] === '')                         { $errors[] = 'Please describe the project.'; }
+    if (mb_strlen($in['description']) > 3000)              { $errors[] = 'The description can be at most 3,000 characters.'; }
+    if (!in_array($in['category'], $categories, true))     { $errors[] = 'Please choose a category.'; }
+    if (!$in['skills'])                                    { $errors[] = 'Add at least one required skill.'; }
+    if ($in['type'] === 'fixed') {
+        if ($in['budget'] < 1)                             { $errors[] = 'Enter a budget for the Fixed Price project.'; }
+    } else {
+        if ($in['rate'] < 1)                               { $errors[] = 'Enter an hourly rate.'; }
+        if ($in['max_hours'] < 1)                          { $errors[] = 'Enter the maximum hours.'; }
+    }
+    $d = DateTime::createFromFormat('Y-m-d', $in['deadline']);
+    if (!$d || $d->format('Y-m-d') !== $in['deadline']) {
+        $errors[] = 'Please choose a deadline.';
+    } elseif (!$editing && $in['deadline'] < date('Y-m-d')) {
+        $errors[] = 'The deadline must be today or later.';
+    }
+
+    $uploads = tt_handle_uploads('attachments');
+    $errors  = array_merge($errors, $uploads['errors']);
+
+    $form = $in + ['files' => $editing ? $editing['files'] : []];
+
+    if (!$errors) {
+        $record = [
+            'title'     => $in['title'],
+            'category'  => $in['category'],
+            'type'      => $in['type'],
+            'budget'    => $in['type'] === 'hourly' ? $in['rate'] * $in['max_hours'] : $in['budget'],
+            'rate'      => $in['type'] === 'hourly' ? $in['rate'] : 0,
+            'max_hours' => $in['type'] === 'hourly' ? $in['max_hours'] : 0,
+            'deadline'  => $in['deadline'],
+            'intro'     => $in['description'],
+            'skills'    => $in['skills'],
+            'files'     => array_merge($editing ? $editing['files'] : [], $uploads['files']),
+        ];
+        if ($editing) {
+            tt_update_saved_project($edit_id, $record);
+            tt_flash('Your changes were saved.');
+        } else {
+            tt_add_saved_project($record);
+            tt_flash('Your project was posted. It now appears on your dashboard and in My Projects.');
+        }
+        header('Location: ' . $base_url . 'client/my-projects.php');
+        exit;
+    }
+}
+
 $is_hourly = $form['type'] === 'hourly';
 $max_desc  = 3000;
 
@@ -46,11 +119,17 @@ include '../includes/client-nav.php';
   </div>
 </div>
 
+<?php if ($errors): ?>
+  <div class="form-alert" role="alert" style="margin-top:1.25rem;">
+    <?= icon('alert', 15) ?>
+    <div><?php foreach ($errors as $err): ?><div><?= e($err) ?></div><?php endforeach; ?></div>
+  </div>
+<?php endif; ?>
+
 <div class="post-layout">
 
   <!-- ===================== FORM ===================== -->
-  <form class="form-card" method="post" action="" enctype="multipart/form-data">
-    <?php if ($editing): ?><input type="hidden" name="project_id" value="<?= (int) $edit_id ?>"><?php endif; ?>
+  <form class="form-card" method="post" action="post-project.php<?= $editing ? '?id=' . (int) $edit_id : '' ?>" enctype="multipart/form-data">
 
     <div class="field">
       <label for="title">Project Title <span class="req">*</span></label>
@@ -141,7 +220,7 @@ include '../includes/client-nav.php';
 
     <div class="field">
       <label for="deadline">Deadline <span class="req">*</span></label>
-      <input class="input" type="date" id="deadline" name="deadline" value="<?= e($form['deadline']) ?>" required>
+      <input class="input" type="date" id="deadline" name="deadline" value="<?= e($form['deadline']) ?>" min="<?= e(date('Y-m-d')) ?>" required>
     </div>
 
     <!-- Attachments -->
@@ -169,7 +248,7 @@ include '../includes/client-nav.php';
         <button type="submit" class="btn btn--primary"><?= icon('send', 15) ?> <?= $editing ? 'Save Changes' : 'Post' ?></button>
         <a href="<?= e($base_url) ?>client/my-projects.php" class="btn btn--outline">Cancel</a>
       </div>
-      <small>Published after administrator moderation.</small>
+      <small>Your project appears in My Projects straight away.</small>
     </div>
   </form>
 

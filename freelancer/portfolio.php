@@ -1,62 +1,93 @@
 <?php
-$page_title = "Portfolio Management";
-$user_role = "freelancer";
+/**
+ * freelancer/portfolio.php - Samples of your previous work (matches the Portfolio design).
+ * Uploading, editing and removing are not connected to a database yet.
+ */
+$user_role     = "freelancer";
+$base_url      = "/Webdev/";
+$active_client = "";
+
+require_once __DIR__ . '/../includes/data.php';
+
+$items  = tt_is_demo_freelancer() ? toptunity_freelancer(1)['portfolio'] : [];
+$errors = [];
+$form   = ['title' => '', 'category' => ''];
+$cats   = ['Web Development', 'Mobile App Development', 'Graphic Design', 'UI/UX Design', 'Writing and Content', 'Digital Marketing', 'Video and Animation', 'Data Entry and Admin'];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $form['title']    = trim(isset($_POST['title']) ? $_POST['title'] : '');
+    $form['category'] = isset($_POST['category']) ? $_POST['category'] : '';
+    if (mb_strlen($form['title']) < 3)                 { $errors[] = 'Enter a title for this sample.'; }
+    if (!in_array($form['category'], $cats, true))     { $errors[] = 'Choose a category.'; }
+    if (empty($_FILES['sample']['name'][0]))           { $errors[] = 'Choose an image or PDF to upload.'; }
+    if (!$errors) {
+        tt_flash('Your portfolio sample was uploaded.');
+        header('Location: ' . $base_url . 'freelancer/portfolio.php');
+        exit;
+    }
+}
+
+$page_title = "Portfolio";
 include '../includes/header.php';
-include '../includes/nav.php';
+include '../includes/client-nav.php';
 ?>
 
-<div class="container" style="padding-top: 3rem; padding-bottom: 3rem;">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-    <div>
-      <h2>Portfolio Management</h2>
-      <p style="color: var(--color-muted-gray);">Upload and showcase previous work samples on your public profile[cite: 9, 68].</p>
-    </div>
-    <button class="btn-primary" onclick="document.getElementById('portfolioForm').style.display='block';">+ Add Portfolio Sample</button>
+<div class="welcome-row">
+  <div>
+    <h1>Portfolio</h1>
+    <p class="subtle">Samples of your previous work.</p>
   </div>
-
-  <!-- Upload New Portfolio Item Form -->
-  <div id="portfolioForm" class="card" style="display: none; margin-bottom: 2rem; background: var(--color-off-white);">
-    <h3>Upload Work Sample</h3>
-    <form action="#" method="POST" style="margin-top: 1rem;">
-      <div style="margin-bottom: 1rem;">
-        <label style="display: block; font-weight: 600; font-size: 0.9rem;">Project Title</label>
-        <input type="text" name="item_title" placeholder="e.g. Restaurant Point of Sale System" required style="width: 100%; padding: 0.6rem; border: 1px solid var(--color-border-gray); border-radius: 4px;">
-      </div>
-      <div style="margin-bottom: 1rem;">
-        <label style="display: block; font-weight: 600; font-size: 0.9rem;">Category / Skill Tag</label>
-        <input type="text" name="item_category" placeholder="Web Development, PHP" style="width: 100%; padding: 0.6rem; border: 1px solid var(--color-border-gray); border-radius: 4px;">
-      </div>
-      <div style="margin-bottom: 1.5rem;">
-        <label style="display: block; font-weight: 600; font-size: 0.9rem;">Sample Preview Image</label>
-        <input type="file" name="item_image" required style="font-size: 0.85rem;">
-      </div>
-      <div style="display: flex; gap: 0.5rem;">
-        <button type="submit" class="btn-primary">Upload Sample</button>
-        <button type="button" class="btn-outline" onclick="document.getElementById('portfolioForm').style.display='none';">Cancel</button>
-      </div>
-    </form>
-  </div>
-
-  <!-- Portfolio Grid View -->
-  <div class="grid-3">
-    <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
-      <div>
-        <div style="height: 140px; background: var(--color-border-gray); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--color-muted-gray); margin-bottom: 1rem;">[ Sample Image Preview ]</div>
-        <h3>Sari-Sari Store POS System</h3>
-        <p style="font-size: 0.85rem; color: var(--color-muted-gray); margin-top: 0.2rem;">Web Development • PHP / MySQL</p>
-      </div>
-      <button class="btn-outline" style="margin-top: 1rem; color: var(--color-error-base); padding: 0.3rem 0.6rem; font-size: 0.8rem;">Delete Item</button>
-    </div>
-
-    <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
-      <div>
-        <div style="height: 140px; background: var(--color-border-gray); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--color-muted-gray); margin-bottom: 1rem;">[ Sample Image Preview ]</div>
-        <h3>Resort Booking Web Portal</h3>
-        <p style="font-size: 0.85rem; color: var(--color-muted-gray); margin-top: 0.2rem;">Web Development • JavaScript</p>
-      </div>
-      <button class="btn-outline" style="margin-top: 1rem; color: var(--color-error-base); padding: 0.3rem 0.6rem; font-size: 0.8rem;">Delete Item</button>
-    </div>
-  </div>
+  <a href="#upload" class="btn btn--primary btn--sm-block"><?= icon('upload', 14) ?> Upload Portfolio</a>
 </div>
+
+<?php if (!$items): ?>
+  <div class="empty-state empty-state--design" style="margin-top:1.5rem;">
+    <div class="empty-art"><?= icon('folder', 40) ?></div>
+    <h3>Your portfolio is empty</h3>
+    <p>Upload samples of your work so clients can see what you can do.</p>
+    <a href="#upload" class="btn btn--dark">Upload Portfolio</a>
+  </div>
+<?php else: ?>
+  <div class="portfolio-grid" style="grid-template-columns: repeat(4, 1fr); margin-top:1.25rem;">
+    <?php foreach ($items as $item): ?>
+      <div class="portfolio-item">
+        <div class="portfolio-thumb" style="--thumb: <?= e($item['tint']) ?>"><span></span><span></span><span></span></div>
+        <h4><?= e($item['title']) ?></h4>
+        <p><?= e($item['category']) ?></p>
+        <div style="display:flex; gap:0.9rem; margin-top:0.6rem; font-size:0.72rem; font-weight:600;">
+          <a href="#" style="color:var(--color-vibrant-teal);"><?= icon('edit', 12) ?> Edit</a>
+          <a href="#" style="color:var(--color-error-base);"><?= icon('x-circle', 12) ?> Remove</a>
+        </div>
+      </div>
+    <?php endforeach; ?>
+  </div>
+<?php endif; ?>
+
+<section class="box" id="upload" style="margin-top:1.5rem;">
+  <h2>Upload a sample</h2>
+  <?php if ($errors): ?>
+    <div class="form-alert" role="alert"><?= icon('alert', 15) ?><div><?php foreach ($errors as $err): ?><div><?= e($err) ?></div><?php endforeach; ?></div></div>
+  <?php endif; ?>
+  <form method="post" action="portfolio.php" enctype="multipart/form-data" style="margin-top:0.8rem;">
+    <div class="field-row">
+      <div class="field" style="margin-top:0;"><label for="pf-title">Title <span class="req">*</span></label><input class="input" id="pf-title" name="title" value="<?= e($form['title']) ?>" required></div>
+      <div class="field" style="margin-top:0;"><label for="pf-cat">Category <span class="req">*</span></label>
+        <select class="input" id="pf-cat" name="category" required>
+          <option value="" disabled <?= $form['category'] === '' ? 'selected' : '' ?>>Choose a category</option>
+          <?php foreach ($cats as $c): ?><option <?= $form['category'] === $c ? 'selected' : '' ?>><?= e($c) ?></option><?php endforeach; ?>
+        </select>
+      </div>
+    </div>
+    <label class="dropzone" style="margin-top:0.9rem;">
+      <?= icon('upload', 22) ?>
+      <strong>Drag files here or <a>browse</a></strong>
+      <small>PNG, JPG or PDF up to 10 MB</small>
+      <input type="file" name="sample[]" accept=".pdf,.jpg,.jpeg,.png">
+    </label>
+    <div class="form-actions--plain"><button type="submit" class="btn btn--primary">Upload</button></div>
+  </form>
+</section>
+
+</main>
 
 <?php include '../includes/footer.php'; ?>

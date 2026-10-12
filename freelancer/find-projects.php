@@ -1,100 +1,181 @@
 <?php
+/**
+ * freelancer/find-projects.php - Matches the Find Projects design: recommended projects, filters, listing.
+ */
+$user_role     = "freelancer";
+$base_url      = "/Webdev/";
+$active_client = "find";
+
+require_once __DIR__ . '/../includes/data.php';
+
+$categories = ['Web Development', 'Mobile App Development', 'Graphic Design', 'UI/UX Design',
+               'Writing and Content', 'Digital Marketing', 'Video and Animation', 'Data Entry and Admin'];
+$skills     = tt_is_demo_freelancer() ? toptunity_freelancer(1)['skills'] : [];
+
+$q    = isset($_GET['q']) ? trim($_GET['q']) : '';
+$cat  = isset($_GET['category']) && in_array($_GET['category'], $categories, true) ? $_GET['category'] : '';
+$type = isset($_GET['type']) && in_array($_GET['type'], ['fixed', 'hourly'], true) ? $_GET['type'] : '';
+$page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
+$per_page = 5;
+
+$rows = [];
+foreach (toptunity_listing() as $row) {
+    $full = toptunity_project($row['id']);
+    $req  = $full ? $full['skills'] : [];
+    $rows[] = $row + ['match' => tt_skill_match($req, $skills), 'skills' => $req ?: $row['skills'],
+                      'desc' => $full ? $full['desc'] : $row['desc']];
+}
+
+$counts = array_fill_keys($categories, 0);
+foreach ($rows as $r) { $counts[$r['category']] = ($counts[$r['category']] ?? 0) + 1; }
+
+$results = array_values(array_filter($rows, function ($r) use ($q, $cat, $type) {
+    if ($cat !== '' && $r['category'] !== $cat) { return false; }
+    if ($type !== '' && $r['type'] !== $type) { return false; }
+    if ($q !== '' && stripos($r['title'] . ' ' . $r['desc'] . ' ' . implode(' ', $r['skills']), $q) === false) { return false; }
+    return true;
+}));
+usort($results, function ($a, $b) { return $b['match'] <=> $a['match']; });
+
+$recommended = array_slice($rows, 0, 0);
+$sorted = $rows; usort($sorted, function ($a, $b) { return $b['match'] <=> $a['match']; });
+$recommended = array_slice($sorted, 0, 2);
+
+$total       = count($results);
+$total_pages = max(1, (int) ceil($total / $per_page));
+$page        = min($page, $total_pages);
+$visible     = array_slice($results, ($page - 1) * $per_page, $per_page);
+
+function fp_url($q, $cat, $type, $page = 1)
+{
+    $p = [];
+    if ($q !== '')    { $p['q'] = $q; }
+    if ($cat !== '')  { $p['category'] = $cat; }
+    if ($type !== '') { $p['type'] = $type; }
+    if ($page > 1)    { $p['page'] = $page; }
+    $qs = http_build_query($p);
+    return 'find-projects.php' . ($qs ? '?' . $qs : '');
+}
+
 $page_title = "Find Projects";
-$user_role = "freelancer";
 include '../includes/header.php';
-include '../includes/nav.php';
+include '../includes/client-nav.php';
 ?>
 
-<div class="container" style="padding-top: 3rem; padding-bottom: 3rem;">
-  <h2>Find Projects</h2>
-  <p style="color: var(--color-muted-gray); margin-bottom: 2rem;">Search open projects and view your automated skill match scores[cite: 8, 58].</p>
-
-  <div style="display: grid; grid-template-columns: 260px 1fr; gap: 2rem;">
-    <!-- Sidebar Filter -->
-    <aside class="card" style="height: fit-content;">
-      <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Filter Projects</h3>
-      <div style="display: flex; flex-direction: column; gap: 1rem; font-size: 0.9rem;">
-        <div>
-          <strong>Billing Type</strong>
-          <div style="margin-top: 0.4rem;">
-            <label style="display: block;"><input type="checkbox" checked> Fixed Price</label>
-            <label style="display: block;"><input type="checkbox" checked> Hourly Rate</label>
-          </div>
-        </div>
-        <div>
-          <strong>Category</strong>
-          <div style="margin-top: 0.4rem;">
-            <label style="display: block;"><input type="checkbox"> Web Development</label>
-            <label style="display: block;"><input type="checkbox"> Mobile Apps</label>
-            <label style="display: block;"><input type="checkbox"> UI/UX Design</label>
-          </div>
-        </div>
-      </div>
-    </aside>
-
-    <!-- Project Listings -->
-    <main>
-      <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
-        <input type="text" placeholder="Search by keyword or skill tag..." style="flex: 1; padding: 0.6rem; border: 1px solid var(--color-border-gray); border-radius: 4px;">
-        <button class="btn-primary">Search</button>
-      </div>
-
-      <!-- Recommended Section -->
-      <h3 style="margin-bottom: 1rem; color: var(--color-vibrant-teal);">Recommended Based on Your Skills</h3>
-      <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
-        <!-- Job Card 1 -->
-        <div class="card" style="border-left: 4px solid var(--color-vibrant-teal);">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-            <div>
-              <div style="display: flex; gap: 0.5rem; align-items: center;">
-                <span class="badge badge-info">Web Development</span>
-                <span class="badge badge-success">95% Match</span>[cite: 8, 58]
-              </div>
-              <h3 style="margin: 0.5rem 0;"><a href="<?php echo $base_url; ?>freelancer/project-details.php?id=101">Online Ordering Website for a Coffee Shop</a></h3>
-            </div>
-            <div style="text-align: right;">
-              <strong style="color: var(--color-vibrant-teal); font-size: 1.2rem;">₱45,000</strong>
-              <p style="font-size: 0.8rem; color: var(--color-muted-gray);">Fixed Price</p>
-            </div>
-          </div>
-          <p style="color: var(--color-muted-gray); font-size: 0.9rem; margin: 0.5rem 0;">We need a simple online ordering website where customers can browse our coffee menu[cite: 91, 93].</p>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
-            <div>
-              <span class="badge" style="background: var(--color-off-white); border: 1px solid var(--color-border-gray);">PHP</span>
-              <span class="badge" style="background: var(--color-off-white); border: 1px solid var(--color-border-gray);">MySQL</span>
-              <span class="badge" style="background: var(--color-off-white); border: 1px solid var(--color-border-gray);">JavaScript</span>
-            </div>
-            <a href="<?php echo $base_url; ?>freelancer/project-details.php?id=101" class="btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Submit Proposal</a>
-          </div>
-        </div>
-
-        <!-- Job Card 2 -->
-        <div class="card" style="border-left: 4px solid var(--color-vibrant-teal);">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-            <div>
-              <div style="display: flex; gap: 0.5rem; align-items: center;">
-                <span class="badge badge-info">Web Development</span>
-                <span class="badge badge-success">82% Match</span>[cite: 58]
-              </div>
-              <h3 style="margin: 0.5rem 0;"><a href="<?php echo $base_url; ?>freelancer/project-details.php?id=102">Student Enrollment System for Tutorial Center</a></h3>
-            </div>
-            <div style="text-align: right;">
-              <strong style="color: var(--color-vibrant-teal); font-size: 1.2rem;">₱500 / hr</strong>
-              <p style="font-size: 0.8rem; color: var(--color-muted-gray);">Hourly (Max 80 hrs)[cite: 94]</p>
-            </div>
-          </div>
-          <p style="color: var(--color-muted-gray); font-size: 0.9rem; margin: 0.5rem 0;">Build a web-based enrollment and payment tracking system for 300 students[cite: 93, 94].</p>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
-            <div>
-              <span class="badge" style="background: var(--color-off-white); border: 1px solid var(--color-border-gray);">PHP</span>
-              <span class="badge" style="background: var(--color-off-white); border: 1px solid var(--color-border-gray);">MySQL</span>
-            </div>
-            <a href="<?php echo $base_url; ?>freelancer/project-details.php?id=102" class="btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Submit Proposal</a>
-          </div>
-        </div>
-      </div>
-    </main>
+<div class="welcome-row">
+  <div>
+    <h1>Find Projects</h1>
+    <p class="subtle">Open projects that have not passed their deadline.</p>
   </div>
 </div>
+
+<form class="search-bar" method="get" action="find-projects.php" role="search" style="margin-top:1.25rem;">
+  <div class="search-field">
+    <?= icon('search', 16) ?>
+    <input type="search" name="q" value="<?= e($q) ?>" placeholder="Search projects by title or skill…" aria-label="Search projects">
+  </div>
+  <button type="submit" class="btn btn--dark">Search</button>
+</form>
+
+<div class="browse-layout" style="margin-top:1.25rem;">
+  <aside class="filter-card">
+    <h2>Filter Projects</h2>
+    <p class="section-tag" style="margin:0.4rem 0 0.3rem;">Category</p>
+    <nav class="filter-list">
+      <a href="<?= e(fp_url($q, '', $type)) ?>" class="filter-option <?= $cat === '' ? 'is-active' : '' ?>"><span class="check"><?= icon('check') ?></span> All Categories</a>
+      <?php foreach ($categories as $c): if (!$counts[$c]) { continue; } ?>
+        <a href="<?= e(fp_url($q, $c, $type)) ?>" class="filter-option <?= $cat === $c ? 'is-active' : '' ?>"><span class="check"><?= icon('check') ?></span> <?= e($c) ?> <span class="filter-option__count"><?= (int) $counts[$c] ?></span></a>
+      <?php endforeach; ?>
+    </nav>
+    <p class="section-tag" style="margin:0.9rem 0 0.3rem;">Billing type</p>
+    <nav class="filter-list">
+      <a href="<?= e(fp_url($q, $cat, '')) ?>" class="filter-option <?= $type === '' ? 'is-active' : '' ?>"><span class="check"><?= icon('check') ?></span> Any</a>
+      <a href="<?= e(fp_url($q, $cat, 'fixed')) ?>" class="filter-option <?= $type === 'fixed' ? 'is-active' : '' ?>"><span class="check"><?= icon('check') ?></span> Fixed Price</a>
+      <a href="<?= e(fp_url($q, $cat, 'hourly')) ?>" class="filter-option <?= $type === 'hourly' ? 'is-active' : '' ?>"><span class="check"><?= icon('check') ?></span> Hourly</a>
+    </nav>
+    <a href="find-projects.php" class="btn btn--outline btn--sm btn--block" style="margin-top:0.6rem;">Clear Filter</a>
+  </aside>
+
+  <section>
+    <?php if ($recommended && $q === '' && $cat === '' && $type === ''): ?>
+      <div class="recommend-band">
+        <div class="recommend-band__head">
+          <h2><?= icon('zap', 16) ?> Recommended Projects</h2>
+          <small>Based on your skills: <?= e(implode(' · ', array_slice($skills, 0, 4))) ?></small>
+        </div>
+        <div class="rec-grid">
+          <?php foreach ($recommended as $r): ?>
+            <div class="rec-card">
+              <div style="display:flex; justify-content:space-between; gap:0.6rem; align-items:flex-start;">
+                <h3><?= e($r['title']) ?></h3>
+                <span class="rec-card__price"><?= $r['type'] === 'hourly' ? '₱' . number_format($r['amount']) . '/hr' : '₱' . number_format($r['amount']) ?></span>
+              </div>
+              <div style="margin:0.5rem 0;"><span class="match-chip"><?= icon('zap', 11) ?> <?= (int) $r['match'] ?>% match</span></div>
+              <p class="muted"><?= e($r['client']) ?> · <?= e($r['category']) ?></p>
+              <div class="chips" style="margin-top:0.5rem;"><?php foreach ($r['skills'] as $s): ?><span class="chip"><?= e($s) ?></span><?php endforeach; ?></div>
+              <div class="rec-card__actions">
+                <a href="#" class="btn btn--row-outline"><?= icon('bookmark', 13) ?> Save Project</a>
+                <a href="<?= e($base_url) ?>pages/project-details.php?id=<?= (int) $r['id'] ?>" class="btn--row-dark">View Details</a>
+              </div>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      </div>
+    <?php endif; ?>
+
+    <div class="listing-meta" style="margin-top:1.25rem;">
+      <p class="section-tag">Project listing</p>
+      <span class="muted"><?= $total ? 'Showing ' . (($page - 1) * $per_page + 1) . '–' . (($page - 1) * $per_page + count($visible)) . ' of ' . $total . ' open projects' : 'No open projects found' ?></span>
+    </div>
+
+    <?php if (!$visible): ?>
+      <div class="empty-state empty-state--design">
+        <div class="empty-art"><?= icon('search', 40) ?></div>
+        <h3>No projects found</h3>
+        <p>Try another keyword or category.</p>
+        <a href="find-projects.php" class="btn btn--dark">Clear Filter</a>
+      </div>
+    <?php else: ?>
+      <div class="project-list" style="margin-top:0;">
+        <?php foreach ($visible as $r): ?>
+          <article class="project-row" style="grid-template-columns: 1fr auto;">
+            <div>
+              <div class="project-row__title">
+                <h3><?= e($r['title']) ?></h3>
+                <span class="pill pill--cat"><?= e($r['category']) ?></span>
+                <span class="pill pill--blue"><?= $r['type'] === 'hourly' ? 'Hourly' : 'Fixed Price' ?></span>
+              </div>
+              <div class="project-row__meta">
+                <span>Client <strong><?= e($r['client']) ?></strong></span>
+                <span>Deadline <strong><?= e(date('M d, Y', strtotime($r['deadline']))) ?></strong></span>
+                <span>Proposals <strong><?= (int) $r['proposals'] ?></strong></span>
+                <span>Match <strong><?= (int) $r['match'] ?>%</strong></span>
+              </div>
+              <p class="listing-card__desc" style="margin:0.5rem 0;"><?= e($r['desc']) ?></p>
+              <div class="chips"><?php foreach ($r['skills'] as $s): ?><span class="chip"><?= e($s) ?></span><?php endforeach; ?></div>
+            </div>
+            <div class="project-row__actions" style="flex-direction:column; align-items:flex-end;">
+              <div style="font-family:var(--font-heading); font-weight:700; font-size:1.05rem;"><?= $r['type'] === 'hourly' ? '₱' . number_format($r['amount']) . '/hr' : '₱' . number_format($r['amount']) ?></div>
+              <div style="display:flex; gap:0.45rem;">
+                <a href="#" class="btn btn--row-outline" aria-label="Save"><?= icon('bookmark', 13) ?></a>
+                <a href="<?= e($base_url) ?>pages/project-details.php?id=<?= (int) $r['id'] ?>" class="btn--row-dark">View Details</a>
+              </div>
+            </div>
+          </article>
+        <?php endforeach; ?>
+      </div>
+
+      <?php if ($total_pages > 1): ?>
+        <nav class="pagination" aria-label="Pagination">
+          <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+            <a class="page-btn <?= $i === $page ? 'is-active' : '' ?>" href="<?= e(fp_url($q, $cat, $type, $i)) ?>"><?= $i ?></a>
+          <?php endfor; ?>
+        </nav>
+      <?php endif; ?>
+    <?php endif; ?>
+  </section>
+</div>
+
+</main>
 
 <?php include '../includes/footer.php'; ?>

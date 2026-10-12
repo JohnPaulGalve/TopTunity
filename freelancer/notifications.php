@@ -1,31 +1,70 @@
 <?php
+/**
+ * freelancer/notifications.php - Matches the Notifications design, with category tabs.
+ */
+$user_role     = "freelancer";
+$base_url      = "/Webdev/";
+$active_client = "";
+
+require_once __DIR__ . '/../includes/data.php';
+
+$all  = toptunity_freelancer_notifications();
+$tabs = [
+    'all'         => 'All',
+    'proposals'   => 'Proposal Results',
+    'offers'      => 'Project Offers',
+    'messages'    => 'New Messages',
+    'revisions'   => 'Revision Requests',
+    'worklog'     => 'Work Log Updates',
+    'deadlines'   => 'Deadline Extensions and Overdue Alerts',
+    'payments'    => 'Payments',
+    'withdrawals' => 'Withdrawal Updates',
+];
+$cat  = isset($_GET['cat']) && isset($tabs[$_GET['cat']]) ? $_GET['cat'] : 'all';
+$rows = array_values(array_filter($all, function ($n) use ($cat) { return $cat === 'all' || $n['cat'] === $cat; }));
+$unread = count(array_filter($all, function ($n) { return $n['new']; }));
+
 $page_title = "Notifications";
-$user_role = "freelancer";
 include '../includes/header.php';
-include '../includes/nav.php';
+include '../includes/client-nav.php';
 ?>
 
-<div class="container" style="padding-top: 3rem; padding-bottom: 3rem; max-width: 800px;">
-  <h2>Notifications</h2>
-  <p style="color: var(--color-muted-gray); margin-bottom: 1.5rem;">Updates regarding proposal acceptances, contract offers, and payout releases[cite: 9, 73].</p>
-
-  <div style="display: flex; flex-direction: column; gap: 0.8rem;">
-    <div class="card" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem;">
-      <div>
-        <p style="font-size: 0.9rem;"><strong>Contract Offer:</strong> Ramon Villanueva sent you a contract offer for "Student Enrollment System"[cite: 73, 94].</p>
-        <small style="color: var(--color-muted-gray);">1 hour ago</small>
-      </div>
-      <a href="<?php echo $base_url; ?>freelancer/my-projects.php" class="btn-primary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Review Contract</a>
-    </div>
-
-    <div class="card" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--color-off-white);">
-      <div>
-        <p style="font-size: 0.9rem;"><strong>Payout Released:</strong> ₱22,500 net payment added to your available balance[cite: 73].</p>
-        <small style="color: var(--color-muted-gray);">Yesterday</small>
-      </div>
-      <a href="<?php echo $base_url; ?>freelancer/earnings.php" class="btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">View Earnings</a>
-    </div>
+<div class="welcome-row">
+  <div>
+    <h1>Notifications</h1>
+    <p class="subtle">You have <?= (int) $unread ?> unread notification<?= $unread === 1 ? '' : 's' ?>.</p>
   </div>
+  <a href="#" class="btn-link-teal"><?= icon('zap', 14) ?> Mark all as read</a>
 </div>
+
+<nav class="notif-tabs" aria-label="Filter notifications">
+  <?php foreach ($tabs as $key => $label): ?>
+    <a href="notifications.php<?= $key === 'all' ? '' : '?cat=' . e($key) ?>" class="filter-tab <?= $cat === $key ? 'is-active' : '' ?>"><?= e($label) ?></a>
+  <?php endforeach; ?>
+</nav>
+
+<div class="notif-list-card">
+  <?php if (!$rows): ?>
+    <div class="empty-state empty-state--design" style="border:0; border-radius:0;">
+      <div class="empty-art"><?= icon('bell', 40) ?></div>
+      <h3>No notifications here</h3>
+      <p>New activity in this category will show up here.</p>
+    </div>
+  <?php endif; ?>
+  <?php foreach ($rows as $n): ?>
+    <div class="notif-row <?= $n['new'] ? 'notif-row--unread' : '' ?>">
+      <span class="icon-box icon-box--<?= e($n['tint']) ?>"><?= icon($n['icon'], 16) ?></span>
+      <div class="notif-row__body">
+        <strong><?= e($n['title']) ?></strong>
+        <?php if ($n['new']): ?><span class="status status--ongoing" style="margin-left:0.4rem; padding:0.1rem 0.5rem;">New</span><?php endif; ?>
+        <p><?= e($n['text']) ?></p>
+      </div>
+      <time><?= e($n['time']) ?></time>
+      <?php if ($n['new']): ?><span class="unread-dot" aria-label="Unread"></span><?php endif; ?>
+    </div>
+  <?php endforeach; ?>
+</div>
+
+</main>
 
 <?php include '../includes/footer.php'; ?>

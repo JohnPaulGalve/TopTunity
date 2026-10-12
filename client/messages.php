@@ -15,7 +15,7 @@ $threads = toptunity_client_threads();
 $q      = isset($_GET['q']) ? trim($_GET['q']) : '';
 $open   = isset($_GET['c']) ? (int) $_GET['c'] : 0;
 if (!isset($threads[$open])) { $open = 0; }
-$thread = $threads[$open];
+$thread = $threads ? $threads[$open] : null;
 
 $shown = [];
 foreach ($threads as $i => $t) {
@@ -54,7 +54,7 @@ include '../includes/client-nav.php';
 
     <div class="convo-list">
       <?php if (!$shown): ?>
-        <p class="muted" style="padding:1rem;">No conversations match your search.</p>
+        <p class="muted" style="padding:1rem;">No conversations yet.</p>
       <?php endif; ?>
       <?php foreach ($shown as $i => $t): ?>
         <a href="<?= e(msg_url($i, $q)) ?>" class="convo-item <?= $i === $open ? 'is-active' : '' ?>" style="display:flex; text-decoration:none;">
@@ -73,6 +73,15 @@ include '../includes/client-nav.php';
   </aside>
 
   <!-- Chat -->
+  <?php if (!$thread): ?>
+  <section class="chat-pane" style="align-items:center; justify-content:center;">
+    <div class="empty-state empty-state--design" style="border:0;">
+      <div class="empty-art"><?= icon('message', 40) ?></div>
+      <h3>No conversations yet</h3>
+      <p>Messages with freelancers will appear here once you work with them.</p>
+    </div>
+  </section>
+  <?php else: ?>
   <section class="chat-pane">
     <header class="chat-head">
       <div>
@@ -106,6 +115,7 @@ include '../includes/client-nav.php';
     </form>
     <p class="msg-foot"><?= icon('lock', 11) ?> Messages are saved securely. The administrator can only view them when they are part of a report or dispute.</p>
   </section>
+  <?php endif; ?>
 
 </div>
 

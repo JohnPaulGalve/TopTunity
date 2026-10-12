@@ -120,7 +120,7 @@ include '../includes/client-nav.php';
 
       <div class="field">
         <label for="details">Details</label>
-        <textarea id="details" name="details" class="input" rows="4" style="height:auto; padding:0.8rem; line-height:1.6; font-size:0.82rem;" required><?= $tab === 'report' ? 'After I chose another freelancer, this user sent me several rude messages and demanded I cancel my project. Screenshots attached.' : '' ?></textarea>
+        <textarea id="details" name="details" class="input" rows="4" style="height:auto; padding:0.8rem; line-height:1.6; font-size:0.82rem;" required><?= $tab === 'report' && tt_is_demo_account() ? 'After I chose another freelancer, this user sent me several rude messages and demanded I cancel my project. Screenshots attached.' : '' ?></textarea>
       </div>
 
       <div class="field">

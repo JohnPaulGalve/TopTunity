@@ -81,13 +81,13 @@ if (isset($nav_active)) {
       </ul>
 
       <div class="nav-auth">
-        <?php if ($user_role === 'public'): ?>
+        <?php $who = function_exists('tt_current_user') ? tt_current_user() : null; ?>
+        <?php if ($who): ?>
+          <a href="<?= e($base_url . tt_home_for($who['role'])) ?>" class="nav-login">My Dashboard</a>
+          <a href="<?= e($base_url) ?>pages/login.php?action=logout" class="btn btn--outline btn--sm">Log out</a>
+        <?php else: ?>
           <a href="<?= e($base_url) ?>pages/login.php" class="nav-login">Login</a>
           <a href="<?= e($base_url) ?>pages/register.php" class="btn btn--primary btn--sm">Register</a>
-        <?php else: ?>
-          <a href="<?= e($base_url . $user_role) ?>/notifications.php" class="nav-login">Notifications</a>
-          <?php /* TODO: point this at your real logout handler */ ?>
-          <a href="<?= e($base_url) ?>pages/login.php" class="btn btn--outline btn--sm">Log out</a>
         <?php endif; ?>
       </div>
     </nav>

@@ -1,13 +1,14 @@
 <?php
 /**
  * includes/header.php
- * Opens <html>, outputs <head> and opens <body>.
+ * Opens <html>, outputs <head> and opens <body>. Also protects client/freelancer/admin pages.
  * Pages set these BEFORE including it:
  *   $page_title  (string)  e.g. "Home"
  *   $user_role   (string)  public | client | freelancer | admin
  *   $base_url    (string)  e.g. "/Webdev/"  (must end with a slash)
  */
 require_once __DIR__ . '/helpers.php';
+require_once __DIR__ . '/auth.php';
 
 $base_url   = isset($base_url) ? $base_url : '/Webdev/';
 $page_title = isset($page_title) ? $page_title : 'TopTunity';
@@ -15,6 +16,19 @@ $user_role  = isset($user_role) ? $user_role : 'public';
 $meta_description = isset($meta_description)
     ? $meta_description
     : 'TopTunity connects clients who need projects done with skilled Filipino freelancers.';
+
+/* Access rule: a protected area needs a signed-in user with the matching role */
+if (in_array($user_role, ['client', 'freelancer', 'admin'], true)) {
+    $signed_in = tt_current_user();
+    if (!$signed_in || $signed_in['role'] !== $user_role) {
+        $here = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+        if (strpos($here, $base_url) === 0) {
+            $here = substr($here, strlen($base_url));
+        }
+        header('Location: ' . $base_url . 'pages/login.php?next=' . urlencode($here));
+        exit;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -30,6 +44,9 @@ $meta_description = isset($meta_description)
 
   <!-- variables.css MUST load before style.css -->
   <link rel="stylesheet" href="<?= e($base_url) ?>css/variables.css">
-  <link rel="stylesheet" href="<?= e($base_url) ?>css/style.css">
+  <link rel="stylesheet" href="<?= e($base_url) ?>css/style.css?v=<?= @filemtime(__DIR__ . '/../css/style.css') ?>">
 </head>
 <body>
+<?php if ($user_role === 'public' && ($flash = tt_flash())): ?>
+  <div class="flash-banner" role="status"><?= e($flash) ?></div>
+<?php endif; ?>

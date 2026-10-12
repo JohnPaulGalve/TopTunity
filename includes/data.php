@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/auth.php';
 /**
  * includes/data.php
  * Single source of project data for browse-projects.php and project-details.php.
@@ -287,6 +288,7 @@ function toptunity_freelancers()
                 ['title' => 'Sari-Sari Store POS System', 'category' => 'Web Development', 'tint' => '#CCFBF1'],
                 ['title' => 'Resort Booking Website', 'category' => 'Web Development', 'tint' => '#FFEDD5'],
                 ['title' => 'Clinic Inventory Dashboard', 'category' => 'Web Development', 'tint' => '#E0E7FF'],
+                ['title' => 'Café Menu Landing Page', 'category' => 'Web Development', 'tint' => '#FEF9C3'],
             ],
             'feedback' => [
                 ['by' => 'Grace Aquino', 'role' => 'Client', 'project' => 'Clinic Inventory Dashboard', 'date' => '2026-09-18', 'stars' => 5,
@@ -504,10 +506,18 @@ function toptunity_faqs()
     ];
 }
 
+
+/** True when the signed-in account is the demo client (Andrea). Other accounts start empty. */
+function tt_is_demo_account()
+{
+    return isset($_SESSION['user']) && $_SESSION['user']['role'] === 'client'
+        && strcasecmp($_SESSION['user']['email'], 'andrea.santos@kapelokal.ph') === 0;
+}
+
 /* ==========================================================================
    CLIENT AREA (logged-in client: Andrea Santos)
    ========================================================================== */
-function toptunity_current_client()
+function toptunity_current_client_default()
 {
     return [
         'name' => 'Andrea Santos', 'company' => 'Kapé Lokal Coffee Co.',
@@ -520,7 +530,7 @@ function toptunity_current_client()
  * status: open | ongoing | overdue | completed | past | cancelled
  * note:   optional extra line (e.g. closed by administrator)
  */
-function toptunity_client_projects()
+function toptunity_client_projects_sample()
 {
     return [
         1 => ['title' => 'Online Ordering Website for a Coffee Shop', 'category' => 'Web Development', 'status' => 'open',
@@ -558,6 +568,7 @@ function toptunity_status_label($status)
 /** Payments and deposits for the current client. status: pending | held | released | refunded | paid */
 function toptunity_client_payments()
 {
+    if (!tt_is_demo_account()) { return []; }
     return [
         ['date' => '2026-10-02', 'project' => 'Monthly Social Media Content Calendar', 'type' => 'Deposit', 'amount' => 14000, 'status' => 'pending'],
         ['date' => '2026-09-14', 'project' => 'Point-of-Sale and Inventory Dashboard', 'type' => 'Deposit', 'amount' => 36000, 'status' => 'held'],
@@ -571,6 +582,7 @@ function toptunity_client_payments()
 /** Recent notifications for the dashboard and notifications page. */
 function toptunity_client_notifications()
 {
+    if (!tt_is_demo_account()) { return []; }
     return [
         ['icon' => 'file', 'tint' => 'blue', 'title' => 'New proposals', 'text' => '3 new proposals on Online Ordering Website.', 'time' => '2h', 'new' => true],
         ['icon' => 'message', 'tint' => 'blue', 'title' => 'New messages', 'text' => 'Janelle Cruz sent you a message.', 'time' => '3h', 'new' => true],
@@ -582,6 +594,7 @@ function toptunity_client_notifications()
 /** Recent conversations for the dashboard and messages page. */
 function toptunity_client_messages()
 {
+    if (!tt_is_demo_account()) { return []; }
     return [
         ['name' => 'Janelle Cruz', 'project' => 'POS and Inventory Dashboard', 'text' => 'I pushed the low-stock alerts — can you test it today?', 'time' => '5m', 'unread' => true,
          'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'bun'],
@@ -669,6 +682,12 @@ function toptunity_project_tracking($id)
  */
 function toptunity_client_detail($id)
 {
+    $saved_here = tt_saved_projects_for_current_user();
+    if (isset($saved_here[$id])) {
+        $r = $saved_here[$id];
+        return ['title' => $r['title'], 'category' => $r['category'], 'desc' => $r['intro'], 'intro' => $r['intro'],
+                'features' => [], 'closing' => '', 'skills' => $r['skills'], 'files' => $r['files']];
+    }
     $cp = toptunity_client_projects()[$id] ?? null;
     if (!$cp) { return null; }
 
@@ -712,12 +731,14 @@ function toptunity_client_detail($id)
 /** Freelancer ids the client has saved. */
 function toptunity_saved_freelancer_ids()
 {
+    if (!tt_is_demo_account()) { return []; }
     return [1, 2, 3, 5];
 }
 
 /** Full notification list. cat is used by the filter tabs. */
 function toptunity_client_notifications_all()
 {
+    if (!tt_is_demo_account()) { return []; }
     return [
         ['cat' => 'proposals', 'icon' => 'file', 'tint' => 'blue', 'new' => true,
          'title' => 'New Proposals', 'text' => 'Jerome Castillo submitted a proposal on Online Ordering Website for a Coffee Shop.', 'time' => '2h ago'],
@@ -741,6 +762,7 @@ function toptunity_client_notifications_all()
 /** Message threads. Each has a list of messages: from = 'me' | 'them'. */
 function toptunity_client_threads()
 {
+    if (!tt_is_demo_account()) { return []; }
     return [
         [
             'name' => 'Miguel Reyes', 'project' => 'Online Ordering Website', 'project_id' => 1,
@@ -792,6 +814,7 @@ function toptunity_client_threads()
 /** Hourly billing rows for the billing page. */
 function toptunity_client_hourly_billing()
 {
+    if (!tt_is_demo_account()) { return []; }
     return [
         ['end' => '2026-07-31', 'project' => 'Weekly Menu Social Posts (July)', 'approved' => 24.0, 'rate' => 350, 'billed' => 8400, 'unused' => 1400, 'status' => 'paid'],
         ['end' => '2026-10-31', 'project' => 'Point-of-Sale and Inventory Dashboard', 'approved' => 32.5, 'rate' => 600, 'billed' => null, 'unused' => null, 'status' => 'upcoming'],
@@ -803,6 +826,7 @@ function toptunity_client_hourly_billing()
    ========================================================================== */
 function toptunity_client_reviews()
 {
+    if (!tt_is_demo_account()) { return []; }
     return [
         ['by' => 'Miguel Reyes', 'project' => 'Cafe Menu Landing Page', 'date' => '2026-09-02', 'stars' => 5,
          'text' => 'Clear requirements and very quick to reply. Andrea approved the work on the same day I submitted it. Would gladly work with Kapé Lokal again!', 'bg' => '#CCFBF1', 'style' => 'short'],
@@ -822,5 +846,402 @@ function toptunity_client_reviews()
          'text' => 'Payment flow was smooth. The scope grew a little, but we agreed on the changes.', 'bg' => '#DCFCE7', 'style' => 'short'],
         ['by' => 'Bea Lim', 'project' => 'Menu App Mockups', 'date' => '2026-02-18', 'stars' => 5,
          'text' => 'Great client. Clear about what she wanted and responsive on chat.', 'bg' => '#DBEAFE', 'style' => 'long'],
+    ];
+}
+
+
+/**
+ * The signed-in client (name from the account; styling from the default profile).
+ */
+function toptunity_current_client()
+{
+    $me = toptunity_current_client_default();
+    if (!empty($_SESSION['user']) && $_SESSION['user']['role'] === 'client') {
+        $me['name'] = $_SESSION['user']['name'];
+        if (!tt_is_demo_account()) {
+            $me['company'] = '';
+            $me['bg'] = '#CCFBF1';
+        }
+    }
+    return $me;
+}
+
+
+/* ==========================================================================
+   POSTED PROJECTS (saved to storage/projects.json, per client account)
+   ========================================================================== */
+
+/** Every project the signed-in client can see: the demo projects (demo account only) plus their own. */
+function toptunity_client_projects()
+{
+    $saved  = tt_saved_projects_for_current_user();
+    $sample = tt_is_demo_account() ? toptunity_client_projects_sample() : [];
+    return $sample + $saved;
+}
+
+function tt_projects_file()
+{
+    return dirname(__DIR__) . '/storage/projects.json';
+}
+
+function tt_load_saved_projects()
+{
+    if (!file_exists(tt_projects_file())) { return []; }
+    $data = json_decode((string) file_get_contents(tt_projects_file()), true);
+    return is_array($data) ? array_values($data) : [];
+}
+
+function tt_save_saved_projects($list)
+{
+    if (!is_dir(dirname(tt_projects_file()))) { mkdir(dirname(tt_projects_file()), 0775, true); }
+    file_put_contents(tt_projects_file(), json_encode(array_values($list), JSON_PRETTY_PRINT), LOCK_EX);
+}
+
+/** The current client's saved projects, keyed by project id (ids start at 1000). */
+function tt_saved_projects_for_current_user()
+{
+    $user = tt_current_user();
+    if (!$user || $user['role'] !== 'client') { return []; }
+    $out = [];
+    foreach (tt_load_saved_projects() as $r) {
+        if ((int) $r['owner'] === (int) $user['id']) { $out[(int) $r['id']] = $r; }
+    }
+    return $out;
+}
+
+function tt_next_saved_id()
+{
+    $next = 1000;
+    foreach (tt_load_saved_projects() as $r) { $next = max($next, (int) $r['id'] + 1); }
+    return $next;
+}
+
+/** Save a new project for the signed-in client. */
+function tt_add_saved_project($fields)
+{
+    $user  = tt_current_user();
+    $list  = tt_load_saved_projects();
+    $list[] = $fields + [
+        'id' => tt_next_saved_id(), 'owner' => (int) $user['id'], 'status' => 'open',
+        'proposals' => 0, 'freelancer' => null, 'posted' => date('Y-m-d'),
+    ];
+    tt_save_saved_projects($list);
+}
+
+/** Update one of the signed-in client's own projects. Returns false if it isn't theirs. */
+function tt_update_saved_project($id, $fields)
+{
+    $user = tt_current_user();
+    $list = tt_load_saved_projects();
+    foreach ($list as $i => $r) {
+        if ((int) $r['id'] === (int) $id && (int) $r['owner'] === (int) $user['id']) {
+            $list[$i] = array_merge($r, $fields);
+            tt_save_saved_projects($list);
+            return true;
+        }
+    }
+    return false;
+}
+
+function tt_human_size($bytes)
+{
+    return $bytes >= 1048576 ? number_format($bytes / 1048576, 1) . ' MB' : max(1, round($bytes / 1024)) . ' KB';
+}
+
+/**
+ * Save uploaded attachments (PDF, JPG, PNG, DOCX, up to 10 MB each) into storage/uploads.
+ * Returns ['files' => [...], 'errors' => [...]].
+ */
+function tt_handle_uploads($field)
+{
+    $files = []; $errors = [];
+    if (!isset($_FILES[$field]) || empty($_FILES[$field]['name'][0])) {
+        return ['files' => $files, 'errors' => $errors];
+    }
+    $allowed = ['pdf' => 'pdf', 'jpg' => 'image', 'jpeg' => 'image', 'png' => 'image', 'docx' => 'doc'];
+    $dir = dirname(__DIR__) . '/storage/uploads';
+    if (!is_dir($dir)) { mkdir($dir, 0775, true); }
+
+    foreach ($_FILES[$field]['name'] as $i => $name) {
+        $code = $_FILES[$field]['error'][$i];
+        if ($name === '' || $code === UPLOAD_ERR_NO_FILE) { continue; }
+        if ($code !== UPLOAD_ERR_OK) { $errors[] = "Could not upload $name."; continue; }
+        $ext  = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+        $size = (int) $_FILES[$field]['size'][$i];
+        if (!isset($allowed[$ext])) { $errors[] = "$name: only PDF, JPG, PNG or DOCX files are allowed."; continue; }
+        if ($size > 10 * 1024 * 1024) { $errors[] = "$name is larger than 10 MB."; continue; }
+        $stored = bin2hex(random_bytes(8)) . '.' . $ext;
+        if (!move_uploaded_file($_FILES[$field]['tmp_name'][$i], $dir . '/' . $stored)) { $errors[] = "Could not save $name."; continue; }
+        $files[] = ['name' => basename($name), 'stored' => $stored, 'size' => tt_human_size($size), 'type' => $allowed[$ext]];
+    }
+    return ['files' => $files, 'errors' => $errors];
+}
+
+/* ==========================================================================
+   FREELANCER AREA
+   The demo freelancer is Miguel Reyes (miguel.reyes@example.com). Other accounts start empty.
+   ========================================================================== */
+
+function tt_is_demo_freelancer()
+{
+    return isset($_SESSION['user']) && $_SESSION['user']['role'] === 'freelancer'
+        && strcasecmp($_SESSION['user']['email'], 'miguel.reyes@example.com') === 0;
+}
+
+/** The signed-in freelancer, for the sidebar and profile. */
+function toptunity_current_freelancer()
+{
+    $me = ['name' => '', 'title' => 'Freelancer', 'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'short'];
+    if (!empty($_SESSION['user']) && $_SESSION['user']['role'] === 'freelancer') {
+        $me['name'] = $_SESSION['user']['name'];
+    }
+    if (tt_is_demo_freelancer()) {
+        $f = toptunity_freelancer(1);
+        $me['title'] = $f['title'];
+        $me['bg']    = $f['bg'];
+        $me['hair']  = $f['hair'];
+        $me['style'] = $f['style'];
+    }
+    return $me;
+}
+
+/**
+ * Proposals the freelancer has sent.
+ * status: pending | selected | not_selected | withdrawn
+ */
+
+
+/** Skill match (0-100) between a freelancer's skills and a project's required skills. */
+function tt_skill_match($required, $skills)
+{
+    if (!$required) { return 0; }
+    $have = array_map('strtolower', $skills);
+    $hit = 0;
+    foreach ($required as $r) { if (in_array(strtolower($r), $have, true)) { $hit++; } }
+    return (int) round($hit / count($required) * 100);
+}
+
+/* ==========================================================================
+   FREELANCER: PROJECT DETAILS, EARNINGS, MESSAGES, NOTIFICATIONS, SAVED
+   ========================================================================== */
+
+
+
+
+
+/** Public project ids the freelancer has saved. */
+function toptunity_freelancer_saved_ids()
+{
+    return tt_is_demo_freelancer() ? [1, 4, 99] : [];
+}
+
+
+/** Reviews the freelancer has received (for My Reviews and the dashboard rating). */
+function toptunity_freelancer_reviews()
+{
+    if (!tt_is_demo_freelancer()) {
+        return ['avg' => 0, 'total' => 0, 'dist' => [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0], 'items' => []];
+    }
+    return [
+        'avg'   => 4.9,
+        'total' => 38,
+        'dist'  => [5 => 33, 4 => 4, 3 => 1, 2 => 0, 1 => 0],
+        'items' => [
+            ['by' => 'Grace Aquino', 'project' => 'Clinic Inventory Dashboard', 'date' => '2026-09-18', 'stars' => 5,
+             'text' => 'Miguel built our clinic inventory dashboard ahead of schedule. He explained every feature clearly and fixed small issues the same day.',
+             'bg' => '#FFEDD5', 'style' => 'bun'],
+            ['by' => 'Joy Bautista', 'project' => 'Sari-Sari Store POS System', 'date' => '2026-08-16', 'stars' => 5,
+             'text' => 'Our sari-sari store POS is so easy to use. Even my Lola can record sales now!',
+             'bg' => '#FEF9C3', 'style' => 'bun'],
+            ['by' => 'Ramon Villanueva', 'project' => 'Tuition Payment Tracker', 'date' => '2026-06-21', 'stars' => 4,
+             'text' => 'Good work on the payment tracking module. A few revisions were needed, but he handled them quickly.',
+             'bg' => '#CCFBF1', 'style' => 'short'],
+        ],
+    ];
+}
+
+/** Skills a freelancer can add (set by the administrator). */
+function toptunity_skill_catalog()
+{
+    return [
+        'Laravel' => 'Web Development', 'Laravel Livewire' => 'Web Development', 'PHP' => 'Web Development',
+        'MySQL' => 'Web Development', 'JavaScript' => 'Web Development', 'React' => 'Web Development',
+        'HTML/CSS' => 'Web Development', 'Bootstrap' => 'Web Development', 'REST API' => 'Web Development',
+        'WordPress' => 'Web Development', 'Flutter' => 'Mobile App Development', 'Firebase' => 'Mobile App Development',
+        'Figma' => 'UI/UX Design', 'UI Design' => 'UI/UX Design', 'Logo Design' => 'Graphic Design',
+        'Adobe Illustrator' => 'Graphic Design', 'Photoshop' => 'Graphic Design', 'Copywriting' => 'Writing and Content',
+        'SEO' => 'Digital Marketing', 'Social Media Marketing' => 'Digital Marketing', 'Data Entry' => 'Data Entry and Admin',
+        'Microsoft Excel' => 'Data Entry and Admin', 'Premiere Pro' => 'Video and Animation',
+    ];
+}
+
+/* ==========================================================================
+   FREELANCER SAMPLE DATA (matches the freelancer designs; demo freelancer = Miguel Reyes)
+   ========================================================================== */
+
+/** Proposals sent. status: pending | selected | not_selected | withdrawn. project_id is the public project id when there is one. */
+function toptunity_freelancer_proposals()
+{
+    if (!tt_is_demo_freelancer()) { return []; }
+    return [
+        ['id' => 1, 'project_id' => 1, 'title' => 'Online Ordering Website for a Coffee Shop', 'client' => 'Andrea Santos',
+         'category' => 'Web Development', 'type' => 'fixed', 'rate' => 0, 'offer' => 42000, 'days' => 21, 'status' => 'selected', 'sent' => '2026-10-02', 'match' => 95],
+        ['id' => 2, 'project_id' => 2, 'title' => 'Student Enrollment System for a Tutorial Center', 'client' => 'Ramon Villanueva',
+         'category' => 'Web Development', 'type' => 'hourly', 'rate' => 500, 'offer' => 500, 'days' => 30, 'status' => 'pending', 'sent' => '2026-10-02', 'match' => 95],
+        ['id' => 3, 'project_id' => 0, 'title' => 'Hotel Room Reservation Module', 'client' => 'Mark Francisco',
+         'category' => 'Web Development', 'type' => 'fixed', 'rate' => 0, 'offer' => 28000, 'days' => 18, 'status' => 'not_selected', 'sent' => '2026-09-24', 'match' => 80],
+        ['id' => 4, 'project_id' => 0, 'title' => 'Laravel API for a Delivery App', 'client' => 'Grace Aquino',
+         'category' => 'Web Development', 'type' => 'hourly', 'rate' => 700, 'offer' => 700, 'days' => 25, 'status' => 'pending', 'sent' => '2026-09-20', 'match' => 88],
+        ['id' => 5, 'project_id' => 0, 'title' => 'School Library Management System', 'client' => 'Ramon Villanueva',
+         'category' => 'Web Development', 'type' => 'fixed', 'rate' => 0, 'offer' => 35000, 'days' => 30, 'status' => 'withdrawn', 'sent' => '2026-09-12', 'match' => 90],
+    ];
+}
+
+/**
+ * Your projects. status: offer (client selected you, not accepted yet) | ongoing | overdue | completed.
+ * Hourly projects also have rate, max_hours and worklog.
+ */
+function toptunity_freelancer_projects()
+{
+    if (!tt_is_demo_freelancer()) { return []; }
+    return [
+        ['id' => 201, 'project_id' => 1, 'title' => 'Online Ordering Website for a Coffee Shop', 'client' => 'Andrea Santos',
+         'client_company' => 'Kapé Lokal Coffee Co.', 'category' => 'Web Development', 'status' => 'offer', 'type' => 'fixed',
+         'budget' => 42000, 'start' => '2026-10-08', 'deadline' => '2026-11-20', 'progress' => 0],
+        ['id' => 202, 'project_id' => 0, 'title' => 'Clinic Inventory Dashboard v2', 'client' => 'Grace Aquino',
+         'client_company' => 'Aquino Dental Clinic', 'category' => 'Web Development', 'status' => 'ongoing', 'type' => 'hourly',
+         'rate' => 650, 'max_hours' => 50, 'budget' => 32500, 'start' => '2026-09-21', 'deadline' => '2026-10-28', 'progress' => 63],
+        ['id' => 203, 'project_id' => 0, 'title' => 'Resort Booking Website Revamp', 'client' => 'Mark Francisco',
+         'client_company' => 'Resort Booking Co.', 'category' => 'Web Development', 'status' => 'ongoing', 'type' => 'fixed',
+         'budget' => 38000, 'start' => '2026-09-15', 'deadline' => '2026-10-18', 'progress' => 70],
+        ['id' => 204, 'project_id' => 0, 'title' => 'Tuition Payment Tracker', 'client' => 'Ramon Villanueva',
+         'client_company' => 'BrightPath Tutorial Center', 'category' => 'Web Development', 'status' => 'overdue', 'type' => 'fixed',
+         'budget' => 22000, 'start' => '2026-08-25', 'deadline' => '2026-09-30', 'progress' => 90],
+        ['id' => 205, 'project_id' => 0, 'title' => 'Sari-Sari Store POS System', 'client' => 'Joy Bautista',
+         'client_company' => 'Bautista Bakeshop', 'category' => 'Web Development', 'status' => 'completed', 'type' => 'fixed',
+         'budget' => 18000, 'start' => '2026-07-20', 'deadline' => '2026-08-15', 'progress' => 100],
+    ];
+}
+
+/** One project with its details: work log, revision request, submitted work and history. */
+function toptunity_freelancer_project($id)
+{
+    foreach (toptunity_freelancer_projects() as $p) {
+        if ((int) $p['id'] !== (int) $id) { continue; }
+        $p['worklog'] = [];
+        $p['revision'] = null;
+        $p['submitted'] = null;
+        $p['history'] = [];
+        $p['hours_logged'] = 0; $p['hours_approved'] = 0;
+        if ($id === 202) {
+            $p['worklog'] = [
+                ['date' => '2026-10-04', 'hours' => 4.0, 'task' => 'Monthly stock report export to Excel', 'status' => 'pending'],
+                ['date' => '2026-10-02', 'hours' => 5.5, 'task' => 'Supplier list and purchase order screens', 'status' => 'approved'],
+                ['date' => '2026-09-30', 'hours' => 6.0, 'task' => 'Batch and expiry date tracking for medicines', 'status' => 'approved'],
+                ['date' => '2026-09-28', 'hours' => 1.5, 'task' => 'Fixing unrelated printer driver issue', 'status' => 'rejected', 'note' => 'Outside the project requirements'],
+            ];
+            $p['hours_logged'] = 31.5; $p['hours_approved'] = 27.5;
+            $p['revision'] = ['date' => 'Oct 03, 2026', 'message' => 'Please add an Export to Excel button on the monthly stock report so our pharmacist can print it.'];
+            $p['submitted'] = ['message' => "Hi Ma'am Grace! I added the Export to Excel button on the monthly stock report. The file follows your pharmacy's template. Please check and let me know.",
+                               'files' => [['name' => 'clinic-inventory-v2.3.zip', 'size' => '5.1 MB']]];
+            $p['history'] = [
+                ['date' => 'Oct 04, 2026', 'status' => 'Hours logged', 'note' => '4.0 h · Pending'],
+                ['date' => 'Oct 03, 2026', 'status' => 'Revision requested', 'note' => 'Client'],
+                ['date' => 'Oct 02, 2026', 'status' => 'Hours approved', 'note' => '5.5 h · Client'],
+                ['date' => 'Sep 21, 2026', 'status' => 'Project started', 'note' => 'Payment held'],
+                ['date' => 'Sep 21, 2026', 'status' => 'Contract accepted', 'note' => 'Start date set'],
+                ['date' => 'Sep 20, 2026', 'status' => 'Freelancer selected', 'note' => 'Client'],
+            ];
+        }
+        if ($id === 201) {
+            $p['history'] = [['date' => 'Oct 07, 2026', 'status' => 'Freelancer selected', 'note' => 'Client']];
+        }
+        return $p;
+    }
+    return null;
+}
+
+/** Message threads. Each has messages with from = 'me' | 'them'. */
+function toptunity_freelancer_threads()
+{
+    if (!tt_is_demo_freelancer()) { return []; }
+    return [
+        ['name' => 'Andrea Santos', 'project' => 'Online Ordering Website for a Coffee Shop', 'time' => '5m', 'unread' => true,
+         'preview' => 'Thanks, I will check it today.', 'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'long',
+         'messages' => [
+            ['from' => 'them', 'text' => 'Hi Miguel! Your proposal looks great. Before I send the contract, can you include a short training video for my staff?', 'time' => 'Oct 04, 9:12 AM'],
+            ['from' => 'me', 'text' => 'Hello po! Yes, I always include a 5-minute walkthrough video. I also attached the ordering flow draft.', 'time' => 'Oct 04, 9:20 AM · Seen'],
+            ['from' => 'me', 'file' => ['name' => 'ordering-flow-draft.pdf', 'size' => '820 KB'], 'text' => 'Attached the ordering flow for your review.', 'time' => 'Oct 04, 9:41 AM · Seen'],
+            ['from' => 'them', 'text' => 'Thanks, I will check it today.', 'time' => 'Oct 04, 9:45 AM'],
+         ]],
+        ['name' => 'Grace Aquino', 'project' => 'Clinic Inventory Dashboard v2', 'time' => '1h', 'unread' => true,
+         'preview' => 'Approved 5.5 hours for Oct 2. Thank you!', 'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'bun',
+         'messages' => [
+            ['from' => 'them', 'text' => 'Approved 5.5 hours for Oct 2. Thank you!', 'time' => 'Oct 04, 10:02 AM'],
+         ]],
+        ['name' => 'Mark Francisco', 'project' => 'Resort Booking Website Revamp', 'time' => '1d', 'unread' => false,
+         'preview' => 'Can we add a GCash reference field?', 'bg' => '#DBEAFE', 'hair' => '#1E293B', 'style' => 'short',
+         'messages' => [
+            ['from' => 'them', 'text' => 'Can we add a GCash reference field?', 'time' => 'Oct 03, 4:15 PM'],
+         ]],
+        ['name' => 'Ramon Villanueva', 'project' => 'Tuition Payment Tracker', 'time' => '2d', 'unread' => false,
+         'preview' => 'Please send the final build when ready.', 'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'glasses',
+         'messages' => [
+            ['from' => 'them', 'text' => 'Please send the final build when ready.', 'time' => 'Oct 02, 1:30 PM'],
+         ]],
+        ['name' => 'Joy Bautista', 'project' => 'Sari-Sari Store POS System', 'time' => '1w', 'unread' => false,
+         'preview' => 'The POS is working great, thank you!', 'bg' => '#FEF9C3', 'hair' => '#1E293B', 'style' => 'bun',
+         'messages' => [
+            ['from' => 'them', 'text' => 'The POS is working great, thank you!', 'time' => 'Sep 28, 8:00 AM'],
+         ]],
+    ];
+}
+
+/** Notifications. cat is used by the filter tabs. */
+function toptunity_freelancer_notifications()
+{
+    if (!tt_is_demo_freelancer()) { return []; }
+    return [
+        ['cat' => 'offers', 'icon' => 'briefcase', 'tint' => 'orange', 'new' => true,
+         'title' => 'Project Offers', 'text' => 'Andrea Santos selected you and sent a contract for Online Ordering Website for a Coffee Shop.', 'time' => '1h ago'],
+        ['cat' => 'worklog', 'icon' => 'check-circle', 'tint' => 'teal', 'new' => true,
+         'title' => 'Work Log Updates', 'text' => 'Grace Aquino approved 5.5 hours on Clinic Inventory Dashboard v2.', 'time' => '3h ago'],
+        ['cat' => 'messages', 'icon' => 'message', 'tint' => 'blue', 'new' => true,
+         'title' => 'New Messages', 'text' => 'Mark Francisco: "Can we add a GCash reference field?"', 'time' => 'Yesterday'],
+        ['cat' => 'proposals', 'icon' => 'x-circle', 'tint' => 'slate', 'new' => false,
+         'title' => 'Proposal Results', 'text' => 'Your proposal for Hotel Room Reservation Module was not selected.', 'time' => 'Sep 26'],
+        ['cat' => 'revisions', 'icon' => 'refresh', 'tint' => 'orange', 'new' => false,
+         'title' => 'Revision Requests', 'text' => 'Mark Francisco requested a revision on Resort Booking Website Revamp.', 'time' => 'Sep 27'],
+        ['cat' => 'deadlines', 'icon' => 'alert', 'tint' => 'orange', 'new' => false,
+         'title' => 'Deadline Extensions and Overdue Alerts', 'text' => 'Tuition Payment Tracker passed its End Date and is now Overdue.', 'time' => 'Oct 01'],
+        ['cat' => 'payments', 'icon' => 'wallet', 'tint' => 'teal', 'new' => false,
+         'title' => 'Payments', 'text' => '₱16,200 (₱18,000 minus 10% fee) was released for Sari-Sari Store POS System.', 'time' => 'Aug 16'],
+        ['cat' => 'withdrawals', 'icon' => 'bank', 'tint' => 'blue', 'new' => false,
+         'title' => 'Withdrawal Updates', 'text' => 'Your withdrawal of ₱15,000 to GCash •••• 4821 was processed.', 'time' => 'Aug 18'],
+    ];
+}
+
+/** Earnings: balance, totals, completed payments and withdrawal requests. */
+function toptunity_freelancer_earnings()
+{
+    if (!tt_is_demo_freelancer()) {
+        return ['available' => 0, 'on_hold' => 0, 'net' => 0, 'fee' => 0, 'completed' => [], 'withdrawals' => []];
+    }
+    return [
+        'available' => 10400,
+        'on_hold'   => 5000,
+        'net'       => 50400,
+        'fee'       => 5600,
+        'completed' => [
+            ['date' => 'Sep 18, 2026', 'project' => 'Clinic Inventory Dashboard', 'billing' => 'Hourly · ₱650/hr', 'payment' => 26000, 'fee' => 2600, 'net' => 23400],
+            ['date' => 'Sep 02, 2026', 'project' => 'Café Menu Landing Page', 'billing' => 'Fixed Price', 'payment' => 12000, 'fee' => 1200, 'net' => 10800],
+            ['date' => 'Aug 15, 2026', 'project' => 'Sari-Sari Store POS System', 'billing' => 'Fixed Price', 'payment' => 18000, 'fee' => 1800, 'net' => 16200],
+        ],
+        'withdrawals' => [
+            ['date' => 'Oct 03, 2026', 'method' => 'GCash •••• 4821', 'amount' => 5000, 'status' => 'pending'],
+            ['date' => 'Sep 20, 2026', 'method' => 'BPI •••• 0937', 'amount' => 20000, 'status' => 'processed'],
+            ['date' => 'Sep 05, 2026', 'method' => 'BPI •••• 0937', 'amount' => 3000, 'status' => 'rejected'],
+            ['date' => 'Aug 18, 2026', 'method' => 'GCash •••• 4821', 'amount' => 15000, 'status' => 'processed'],
+        ],
     ];
 }

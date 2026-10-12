@@ -25,8 +25,8 @@ $refund_count   = count(array_filter($payments, function ($x) { return $x['statu
 
 /* Pending deposit: Monthly Social Media Content Calendar (hourly) */
 $pending_pid = 3;
-$pending     = $projects[$pending_pid];
-$pending_amt = $pending['budget'];
+$pending     = isset($projects[$pending_pid]) ? $projects[$pending_pid] : null;
+$pending_amt = $pending ? $pending['budget'] : 0;
 
 $filter = isset($_GET['type']) ? $_GET['type'] : 'all';
 $types  = ['all' => 'All types', 'Deposit' => 'Deposit', 'Refund' => 'Refund', 'Hourly Billing' => 'Hourly Billing'];
@@ -73,7 +73,8 @@ include '../includes/client-nav.php';
 <div class="billing-grid">
   <div class="stack">
 
-    <!-- Pending payments -->
+    <?php if ($pending): ?>
+    <!-- Pending payments --><!-- Pending payments -->
     <section class="panel">
       <div class="panel__head"><h2>Pending Payments</h2></div>
       <div class="pending-box" style="margin-bottom:0.8rem;">
@@ -103,6 +104,8 @@ include '../includes/client-nav.php';
         </div>
       </div>
     </section>
+
+    <?php endif; ?>
 
     <!-- Hourly billing -->
     <section class="panel">
@@ -175,6 +178,7 @@ include '../includes/client-nav.php';
   </div>
 
   <!-- Payment breakdown -->
+  <?php if ($pending): ?>
   <aside class="panel summary-card">
     <div class="panel__head"><h2>Payment Breakdown</h2></div>
     <p class="muted" style="margin-bottom:0.8rem;"><?= e($pending['title']) ?> · Hourly</p>
@@ -186,6 +190,7 @@ include '../includes/client-nav.php';
     <a href="#" class="btn btn--deposit"><?= icon('lock', 13) ?> Deposit Project Amount</a>
     <p class="fine-print">Simulated · No real money</p>
   </aside>
+<?php endif; ?>
 </div>
 
 </main>

@@ -1,60 +1,100 @@
 <?php
+/**
+ * freelancer/messages.php - Matches the Messages design. Sending is not connected to a database yet.
+ */
+$user_role     = "freelancer";
+$base_url      = "/Webdev/";
+$active_client = "";
+
+require_once __DIR__ . '/../includes/data.php';
+
+$threads = toptunity_freelancer_threads();
+$q       = isset($_GET['q']) ? trim($_GET['q']) : '';
+$open    = isset($_GET['c']) ? (int) $_GET['c'] : 0;
+if (!isset($threads[$open])) { $open = 0; }
+$thread  = $threads ? $threads[$open] : null;
+
+$shown = [];
+foreach ($threads as $i => $t) {
+    if ($q === '' || stripos($t['name'] . ' ' . $t['project'], $q) !== false) { $shown[$i] = $t; }
+}
+
 $page_title = "Messages";
-$user_role = "freelancer";
 include '../includes/header.php';
-include '../includes/nav.php';
+include '../includes/client-nav.php';
 ?>
 
-<div class="container" style="padding-top: 2rem; padding-bottom: 3rem;">
-  <h2>Messages</h2>
-  <p style="color: var(--color-muted-gray); font-size: 0.9rem; margin-bottom: 1.5rem;">Direct chat communication threads with client accounts[cite: 9, 72].</p>
-
-  <!-- Dual-Pane Interface -->
-  <div class="card" style="display: grid; grid-template-columns: 300px 1fr; gap: 0; padding: 0; overflow: hidden; min-height: 550px;">
-    
-    <!-- Left List -->
-    <div style="border-right: 1px solid var(--color-border-gray); background: var(--color-off-white);">
-      <div style="padding: 1rem; border-bottom: 1px solid var(--color-border-gray);">
-        <input type="text" placeholder="Search client chats..." style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border-gray); border-radius: 4px; font-size: 0.85rem;">
-      </div>
-      <div style="padding: 1rem; border-bottom: 1px solid var(--color-border-gray); background: #FFF; border-left: 4px solid var(--color-vibrant-teal); cursor: pointer;">
-        <div style="display: flex; justify-content: space-between;">
-          <strong>Andrea Santos</strong>
-          <small style="color: var(--color-muted-gray); font-size: 0.75rem;">10:42 AM</small>
-        </div>
-        <p style="font-size: 0.8rem; color: var(--color-muted-gray); margin-top: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Looks great! Thanks for sending this over.</p>
-      </div>
-    </div>
-
-    <!-- Right Thread -->
-    <div style="display: flex; flex-direction: column; justify-content: space-between; background: #FFF;">
-      <div style="padding: 1rem; border-bottom: 1px solid var(--color-border-gray); display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <h3 style="font-size: 1.1rem; margin: 0;">Andrea Santos</h3>
-          <p style="font-size: 0.8rem; color: var(--color-muted-gray);">Client • Kapé Lokal Coffee Co.[cite: 92]</p>
-        </div>
-        <a href="<?php echo $base_url; ?>freelancer/report-dispute.php?user=AndreaSantos" style="font-size: 0.8rem; color: var(--color-error-base);">Report Client</a>
-      </div>
-
-      <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; overflow-y: auto; max-height: 380px;">
-        <div style="align-self: flex-end; max-width: 70%; background: var(--color-deep-slate); color: #FFF; padding: 0.8rem; border-radius: 8px;">
-          <p style="font-size: 0.9rem;">Hello Andrea! I have finished setting up the menu categories for Kapé Lokal[cite: 91].</p>
-          <small style="color: var(--color-disabled-gray); font-size: 0.75rem; display: block; margin-top: 0.4rem; text-align: right;">10:30 AM</small>
-        </div>
-
-        <div style="align-self: flex-start; max-width: 70%; background: var(--color-off-white); border: 1px solid var(--color-border-gray); padding: 0.8rem; border-radius: 8px;">
-          <p style="font-size: 0.9rem;">Looks great! Thanks for sending this over. I will review it with our staff today.</p>
-          <small style="color: var(--color-muted-gray); font-size: 0.75rem; display: block; margin-top: 0.4rem;">10:42 AM</small>
-        </div>
-      </div>
-
-      <form action="#" method="POST" style="padding: 1rem; border-top: 1px solid var(--color-border-gray); display: flex; gap: 0.5rem;">
-        <input type="text" name="message" placeholder="Type your response..." required style="flex: 1; padding: 0.6rem; border: 1px solid var(--color-border-gray); border-radius: 4px; font-size: 0.9rem;">
-        <button type="submit" class="btn-primary">Send Message</button>
-      </form>
-    </div>
-
+<div class="welcome-row">
+  <div>
+    <h1>Messages</h1>
+    <p class="subtle">Talk with your clients about projects, proposals and contracts.</p>
   </div>
 </div>
+
+<div class="msg-layout" style="margin-top:1.25rem;">
+  <aside class="convo-pane">
+    <form class="convo-search" method="get" action="messages.php" role="search">
+      <div class="search-compact" style="width:100%;">
+        <?= icon('search', 15) ?>
+        <input type="search" name="q" value="<?= e($q) ?>" placeholder="Search Conversations…" aria-label="Search conversations">
+      </div>
+    </form>
+    <div class="convo-list">
+      <?php if (!$shown): ?><p class="muted" style="padding:1rem;">No conversations yet.</p><?php endif; ?>
+      <?php foreach ($shown as $i => $t): ?>
+        <a href="messages.php?c=<?= (int) $i ?><?= $q !== '' ? '&amp;q=' . e(urlencode($q)) : '' ?>" class="convo-item <?= $i === $open ? 'is-active' : '' ?>" style="display:flex; text-decoration:none;">
+          <?= avatar($t['bg'], $t['hair'], $t['style'], 36) ?>
+          <div class="convo-item__body">
+            <div class="convo-item__top"><strong><?= e($t['name']) ?><?php if ($t['unread']): ?><span class="unread-dot"></span><?php endif; ?></strong><time><?= e($t['time']) ?></time></div>
+            <small><?= e($t['project']) ?></small>
+            <p><?= e($t['preview']) ?></p>
+          </div>
+        </a>
+      <?php endforeach; ?>
+    </div>
+  </aside>
+
+  <?php if (!$thread): ?>
+    <section class="chat-pane" style="align-items:center; justify-content:center;">
+      <div class="empty-state empty-state--design" style="border:0;">
+        <div class="empty-art"><?= icon('message', 40) ?></div>
+        <h3>No conversations yet</h3>
+        <p>Messages with clients will appear here once you work with them.</p>
+      </div>
+    </section>
+  <?php else: ?>
+    <section class="chat-pane">
+      <header class="chat-head">
+        <div style="display:flex; align-items:center; gap:0.7rem;">
+          <?= avatar($thread['bg'], $thread['hair'], $thread['style'], 34) ?>
+          <div>
+            <strong><?= e($thread['name']) ?></strong>
+            <small>Conversation · <a href="project-details.php?id=201"><?= e($thread['project']) ?> · View Project</a></small>
+          </div>
+        </div>
+        <a href="report-dispute.php" class="btn btn--row-outline"><?= icon('flag', 13) ?> Report User</a>
+      </header>
+      <div class="chat-body">
+        <div class="day-tag">Today</div>
+        <?php foreach ($thread['messages'] as $m): ?>
+          <div class="bubble-row bubble-row--<?= $m['from'] === 'me' ? 'me' : 'them' ?>">
+            <?php if (!empty($m['file'])): ?>
+              <div class="bubble-file"><?= icon('file', 18) ?><span><?= e($m['file']['name']) ?></span><small><?= e($m['file']['size']) ?></small></div>
+            <?php endif; ?>
+            <div class="bubble" style="<?= !empty($m['file']) ? 'margin-top:0.4rem;' : '' ?>"><?= e($m['text']) ?></div>
+            <span class="bubble-time"><?= e($m['time']) ?></span>
+          </div>
+        <?php endforeach; ?>
+      </div>
+      <form class="composer" method="post" action="">
+        <textarea name="message" placeholder="Write a message…" rows="1" aria-label="Write a message"></textarea>
+        <button type="submit" class="btn btn--primary"><?= icon('send', 14) ?> Send</button>
+      </form>
+      <p class="msg-foot"><?= icon('lock', 11) ?> Messages are saved securely. The administrator can only view them when they are part of a report or dispute.</p>
+    </section>
+  <?php endif; ?>
+</div>
+
+</main>
 
 <?php include '../includes/footer.php'; ?>

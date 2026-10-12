@@ -99,7 +99,14 @@ include '../includes/client-nav.php';
   </form>
 </div>
 
-<?php if (!$visible): ?>
+<?php if (!$projects): ?>
+  <div class="empty-state empty-state--design" style="margin-top:1.5rem;">
+    <div class="empty-art"><?= icon('folder', 40) ?></div>
+    <h3>You haven't posted a project yet</h3>
+    <p>Post your first project and freelancers can start sending proposals.</p>
+    <a href="post-project.php" class="btn btn--primary"><?= icon('plus', 14) ?> Post a Project</a>
+  </div>
+<?php elseif (!$visible): ?>
   <div class="empty-state empty-state--design" style="margin-top:1.5rem;">
     <div class="empty-art"><?= icon('folder', 40) ?></div>
     <h3>No projects found</h3>

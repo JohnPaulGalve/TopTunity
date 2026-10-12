@@ -1,13 +1,44 @@
 <?php
 /**
- * pages/register.php - Account creation with role pre-selection
- * ?role=client or ?role=freelancer pre-selects the role (homepage buttons use this).
- * Form submission is not wired to a backend yet.
+ * pages/register.php - Create a client or freelancer account, then sign in.
+ * ?role=client|freelancer pre-selects the role (homepage buttons use this).
  */
 $user_role = "public";
 $base_url  = "/Webdev/";
 
-$role = (isset($_GET['role']) && $_GET['role'] === 'freelancer') ? 'freelancer' : 'client';
+require_once __DIR__ . '/../includes/auth.php';
+
+$role_in = isset($_POST['role']) ? $_POST['role'] : (isset($_GET['role']) ? $_GET['role'] : 'client');
+$role    = $role_in === 'freelancer' ? 'freelancer' : 'client';
+$next    = tt_clean_next(isset($_POST['next']) ? $_POST['next'] : (isset($_GET['next']) ? $_GET['next'] : ''));
+
+// Already signed in? Go straight to the home page.
+tt_redirect_if_signed_in($base_url, $next);
+
+$errors = [];
+$form   = ['name' => '', 'email' => ''];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $form['name']  = trim(isset($_POST['name']) ? $_POST['name'] : '');
+    $form['email'] = trim(isset($_POST['email']) ? $_POST['email'] : '');
+    $password      = isset($_POST['password']) ? $_POST['password'] : '';
+
+    if ($form['name'] === '')                                   { $errors[] = 'Please enter your full name.'; }
+    if (!filter_var($form['email'], FILTER_VALIDATE_EMAIL))     { $errors[] = 'Please enter a valid email address.'; }
+    if (strlen($password) < 8 || !preg_match('/\d/', $password)) { $errors[] = 'Your password must be at least 8 characters and include a number.'; }
+    if (empty($_POST['terms']))                                 { $errors[] = 'Please agree to the Terms and Privacy Policy.'; }
+
+    if (!$errors) {
+        $result = tt_register_user($form['name'], $form['email'], $password, $role);
+        if (is_string($result)) {
+            $errors[] = $result;
+        } else {
+            tt_login($result);
+            tt_flash('Welcome to TopTunity, ' . $result['name'] . '!');
+            tt_redirect_after_login($result, $next, $base_url);
+        }
+    }
+}
 
 $page_title = "Register";
 include '../includes/header.php';
@@ -18,7 +49,6 @@ include '../includes/nav.php';
   <div class="container">
     <div class="auth-wrap">
 
-      <!-- Left: value panel -->
       <div class="auth-art">
         <span class="auth-art__blob auth-art__blob--a"></span>
         <span class="auth-art__blob auth-art__blob--b"></span>
@@ -33,17 +63,25 @@ include '../includes/nav.php';
         </div>
       </div>
 
-      <!-- Right: form -->
       <div class="auth-form">
         <h2>Register</h2>
         <p>Create your TopTunity account.</p>
 
-        <form method="post" action="">
+        <?php if ($errors): ?>
+          <div class="form-alert" role="alert">
+            <?= icon('alert', 15) ?>
+            <div><?php foreach ($errors as $err): ?><div><?= e($err) ?></div><?php endforeach; ?></div>
+          </div>
+        <?php endif; ?>
+
+        <form method="post" action="register.php">
+          <input type="hidden" name="next" value="<?= e($next) ?>">
+
           <div class="field">
             <label for="name">Full Name</label>
             <div class="input-wrap">
               <?= icon('user', 16) ?>
-              <input type="text" id="name" name="name" placeholder="Your full name" autocomplete="name" required>
+              <input type="text" id="name" name="name" value="<?= e($form['name']) ?>" placeholder="Your full name" autocomplete="name" required>
             </div>
           </div>
 
@@ -51,7 +89,7 @@ include '../includes/nav.php';
             <label for="email">Email Address</label>
             <div class="input-wrap">
               <?= icon('mail', 16) ?>
-              <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+              <input type="email" id="email" name="email" value="<?= e($form['email']) ?>" placeholder="you@example.com" autocomplete="email" required>
             </div>
           </div>
 
@@ -87,7 +125,7 @@ include '../includes/nav.php';
           </div>
 
           <label class="check-label" style="margin-top:1rem;">
-            <input type="checkbox" name="terms" required>
+            <input type="checkbox" name="terms" value="1" required>
             I agree to the <a href="terms.php" class="link-teal">Terms and Privacy Policy</a>
           </label>
 

@@ -27,7 +27,10 @@ $pending_total  = array_sum(array_map(function ($x) {
 }, $payments));
 
 /* Projects shown in the table */
-$table_ids = [1, 2, 4, 6];
+$saved_rows = array_filter($projects, function ($k) { return $k >= 1000; }, ARRAY_FILTER_USE_KEY);
+krsort($saved_rows);                                  // newest posted first
+$demo_rows  = array_intersect_key($projects, array_flip([1, 2, 4, 6]));
+$projects_table = array_slice($saved_rows + $demo_rows, 0, 4, true);
 
 /* The project with the pending deposit */
 $pending_project = null;
@@ -104,7 +107,7 @@ foreach ($projects as $p) {
             </tr>
           </thead>
           <tbody>
-            <?php foreach ($table_ids as $id): $p = $projects[$id]; ?>
+            <?php foreach ($projects_table as $id => $p): ?>
               <tr>
                 <td>
                   <strong><?= e($p['title']) ?></strong>
@@ -116,6 +119,9 @@ foreach ($projects as $p) {
                 <td class="num"><a href="<?= e($base_url) ?>client/project-tracking.php?id=<?= (int) $id ?>" class="view">View</a></td>
               </tr>
             <?php endforeach; ?>
+            <?php if (!$projects_table): ?>
+              <tr><td colspan="5" class="muted" style="text-align:center; padding:1.2rem;">No projects yet. <a href="post-project.php" class="view">Post your first project</a></td></tr>
+            <?php endif; ?>
           </tbody>
         </table>
       </div>
@@ -127,6 +133,7 @@ foreach ($projects as $p) {
         <h2>Recent Messages</h2>
         <a href="<?= e($base_url) ?>client/messages.php" class="panel__link">Open Messages →</a>
       </div>
+      <?php if (!$messages): ?><p class="muted">No messages yet.</p><?php endif; ?>
       <?php foreach ($messages as $m): ?>
         <div class="msg-item">
           <?= avatar($m['bg'], $m['hair'], $m['style'], 34) ?>
@@ -151,6 +158,7 @@ foreach ($projects as $p) {
         <h2>Recent Notifications</h2>
         <a href="<?= e($base_url) ?>client/notifications.php" class="panel__link">All</a>
       </div>
+      <?php if (!$notes): ?><p class="muted">No notifications yet.</p><?php endif; ?>
       <?php foreach ($notes as $n): ?>
         <div class="notif-item">
           <span class="icon-box icon-box--<?= e($n['tint']) ?>"><?= icon($n['icon'], 15) ?></span>

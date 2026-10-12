@@ -105,3 +105,123 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 });
+
+
+// Client area: the menu button collapses and restores the sidebar
+document.addEventListener('DOMContentLoaded', function () {
+  var menuBtn = document.querySelector('.app-menu-btn');
+  var shell = document.querySelector('.app-shell');
+  if (menuBtn && shell) {
+    menuBtn.addEventListener('click', function () {
+      var collapsed = shell.classList.toggle('app-shell--collapsed');
+      menuBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    });
+  }
+});
+
+/* ==========================================================================
+   FORM VALIDATION (all forms)
+   Shows a message under each invalid field instead of the browser's pop-up.
+   Checks: required, email, minimum length, a number in passwords, password
+   confirmation, minimum numbers, dates from today onward, and required checkboxes.
+   Add data-no-validate to a <form> to skip it.
+   ========================================================================== */
+(function () {
+  var EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function fieldWrap(el) {
+    return el.closest('.field') || el.parentNode;
+  }
+
+  function clearError(el) {
+    el.classList.remove('is-invalid');
+    var wrap = fieldWrap(el);
+    var old = wrap.querySelector(':scope > .field-error');
+    if (old) { old.remove(); }
+  }
+
+  function showError(el, message) {
+    clearError(el);
+    el.classList.add('is-invalid');
+    var note = document.createElement('div');
+    note.className = 'field-error';
+    note.setAttribute('role', 'alert');
+    note.textContent = message;
+    fieldWrap(el).appendChild(note);
+  }
+
+  function isEmpty(el) {
+    if (el.tagName === 'SELECT') {
+      return el.value === '' || (el.options[el.selectedIndex] && el.options[el.selectedIndex].disabled);
+    }
+    return el.value.trim() === '';
+  }
+
+  function validate(el, form) {
+    if (el.type === 'hidden' || el.type === 'file' || el.type === 'radio' || el.disabled) { return ''; }
+
+    if (el.type === 'checkbox') {
+      return el.hasAttribute('required') && !el.checked ? 'Please tick this box to continue.' : '';
+    }
+    if (el.hasAttribute('required') && isEmpty(el)) {
+      return el.tagName === 'SELECT' ? 'Please choose an option.' : 'This field is required.';
+    }
+    if (isEmpty(el)) { return ''; }
+
+    if (el.type === 'email' && !EMAIL.test(el.value.trim())) {
+      return 'Please enter a valid email address.';
+    }
+    if (el.type === 'number' && el.min !== '' && Number(el.value) < Number(el.min)) {
+      return 'Please enter a number of at least ' + el.min + '.';
+    }
+    if (el.type === 'date' && el.min !== '' && el.value < el.min) {
+      return 'Please choose a date from ' + el.min + ' onward.';
+    }
+    if (el.minLength > 0 && el.value.length < el.minLength) {
+      return 'Please use at least ' + el.minLength + ' characters.';
+    }
+    if (el.type === 'password' && el.minLength > 0 && !/\d/.test(el.value)) {
+      return 'Please include at least one number.';
+    }
+    if (el.name === 'confirm') {
+      var first = form.querySelector('input[type="password"][name="new"], input[type="password"][name="password"]');
+      if (first && first.value !== el.value) { return 'The passwords do not match.'; }
+    }
+    return '';
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('form').forEach(function (form) {
+      if (form.hasAttribute('data-no-validate')) { return; }
+      var fields = form.querySelectorAll('input, select, textarea');
+      var hasRules = Array.prototype.some.call(fields, function (el) {
+        return el.hasAttribute('required') || el.minLength > 0 || el.min !== '' || el.type === 'email' || el.name === 'confirm';
+      });
+      if (!hasRules) { return; }
+
+      form.setAttribute('novalidate', '');
+
+      fields.forEach(function (el) {
+        el.addEventListener('input', function () { clearError(el); });
+        el.addEventListener('change', function () { clearError(el); });
+      });
+
+      form.addEventListener('submit', function (e) {
+        var firstBad = null;
+        fields.forEach(function (el) {
+          var message = validate(el, form);
+          if (message) {
+            showError(el, message);
+            if (!firstBad) { firstBad = el; }
+          } else {
+            clearError(el);
+          }
+        });
+        if (firstBad) {
+          e.preventDefault();
+          firstBad.focus();
+        }
+      });
+    });
+  });
+})();

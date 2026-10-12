@@ -34,7 +34,7 @@ include '../includes/client-nav.php';
       </div>
       <div class="field">
         <label for="acc-email">Email Address</label>
-        <div class="input-wrap"><?= icon('mail', 16) ?><input id="acc-email" name="email" type="email" value="andrea.santos@kapelokal.ph"></div>
+        <div class="input-wrap"><?= icon('mail', 16) ?><input id="acc-email" name="email" type="email" value="<?= e(tt_current_user()['email'] ?? '') ?>"></div>
       </div>
       <div class="form-actions--plain">
         <button type="submit" class="btn btn--deep" style="background:var(--color-deep-slate); color:#FFFFFF;">Save Changes</button>
@@ -49,11 +49,11 @@ include '../includes/client-nav.php';
     <form method="post" action="">
       <div class="field" style="margin-top:0;">
         <label for="cur-pass">Current Password</label>
-        <div class="input-wrap"><?= icon('lock', 16) ?><input id="cur-pass" name="current" type="password" value="password123" autocomplete="current-password"><span class="input-eye"><?= icon('eye', 16) ?></span></div>
+        <div class="input-wrap"><?= icon('lock', 16) ?><input id="cur-pass" name="current" type="password" autocomplete="current-password"><span class="input-eye"><?= icon('eye', 16) ?></span></div>
       </div>
       <div class="field">
         <label for="new-pass">New Password</label>
-        <div class="input-wrap" style="box-shadow:0 0 0 3px rgba(0,148,136,0.12); border-radius:var(--radius-sm);"><?= icon('lock', 16) ?><input id="new-pass" name="new" type="password" value="password123" minlength="8" autocomplete="new-password" style="border-color:var(--color-vibrant-teal);"><span class="input-eye"><?= icon('eye', 16) ?></span></div>
+        <div class="input-wrap" style="box-shadow:0 0 0 3px rgba(0,148,136,0.12); border-radius:var(--radius-sm);"><?= icon('lock', 16) ?><input id="new-pass" name="new" type="password" minlength="8" autocomplete="new-password" style="border-color:var(--color-vibrant-teal);"><span class="input-eye"><?= icon('eye', 16) ?></span></div>
         <p class="hint">At least 8 characters with a number.</p>
       </div>
       <div class="form-actions--plain">
