@@ -3,10 +3,17 @@
  * freelancer/notifications.php - Matches the Notifications design, with category tabs.
  */
 $user_role     = "freelancer";
-$base_url      = "/Webdev/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "";
 
 require_once __DIR__ . '/../includes/data.php';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mark_all'])) {
+    tt_mark_all_read();
+    tt_flash('All notifications were marked as read.');
+    header('Location: ' . $_SERVER['REQUEST_URI']);
+    exit;
+}
+
 
 $all  = toptunity_freelancer_notifications();
 $tabs = [
@@ -34,7 +41,7 @@ include '../includes/client-nav.php';
     <h1>Notifications</h1>
     <p class="subtle">You have <?= (int) $unread ?> unread notification<?= $unread === 1 ? '' : 's' ?>.</p>
   </div>
-  <a href="#" class="btn-link-teal"><?= icon('zap', 14) ?> Mark all as read</a>
+  <form method="post" style="display:inline;"><button type="submit" name="mark_all" value="1" class="btn-link-teal" style="background:none; border:0; cursor:pointer;"><?= icon('zap', 14) ?> Mark all as read</button></form>
 </div>
 
 <nav class="notif-tabs" aria-label="Filter notifications">

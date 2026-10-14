@@ -4,14 +4,20 @@
  * Removing is not connected to a database yet.
  */
 $user_role     = "freelancer";
-$base_url      = "/Webdev/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "";
 
 require_once __DIR__ . '/../includes/data.php';
+tt_handle_favourite();
 
 $ids   = toptunity_freelancer_saved_ids();
 $open  = [];
 foreach (toptunity_listing() as $row) { $open[(int) $row['id']] = $row; }
+foreach (tt_load_saved_projects() as $sp) {
+    if ($sp['status'] !== 'open') { continue; }
+    $open[(int) $sp['id']] = ['id' => $sp['id'], 'title' => $sp['title'],
+        'amount' => $sp['type'] === 'hourly' ? $sp['rate'] : $sp['budget'], 'deadline' => $sp['deadline']];
+}
 
 $page_title = "Saved Projects";
 include '../includes/header.php';
@@ -53,7 +59,10 @@ include '../includes/client-nav.php';
           <?php endif; ?>
         </div>
         <div class="project-row__actions">
-          <a href="#" class="btn" style="color:var(--color-error-base); background:transparent; box-shadow:none;">Remove from Saved</a>
+          <form method="post" action="saved-projects.php" style="display:inline;">
+            <input type="hidden" name="favourite" value="project"><input type="hidden" name="item" value="<?= (int) $id ?>">
+            <button type="submit" class="btn" style="color:var(--color-error-base); background:transparent; box-shadow:none;">Remove from Saved</button>
+          </form>
           <?php if ($row): ?>
             <a href="<?= e($base_url) ?>pages/project-details.php?id=<?= (int) $id ?>" class="btn--row-dark">View Details</a>
           <?php endif; ?>

@@ -4,10 +4,41 @@
  * ?tab=personal|business. Saving is not connected to a database yet.
  */
 $user_role     = "client";
-$base_url      = "/Webdev/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "";
 
 require_once __DIR__ . '/../includes/data.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_photo'])) {
+    tt_remove_photo();
+    tt_flash('Your profile photo was removed.');
+    header('Location: ' . $_SERVER['REQUEST_URI']);
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['photo'])) {
+    $err = tt_save_photo();
+    tt_flash($err ? 'Could not save: ' . $err : 'Your profile photo was updated.');
+    header('Location: ' . $_SERVER['REQUEST_URI']);
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $cur = tt_client_profile() ?: [];
+    $data = [
+        'full_name' => $_POST['full_name'] ?? '',
+        'company'   => $_POST['company'] ?? ($_POST['business_name'] ?? ($cur['company'] ?? '')),
+        'location'  => $_POST['location'] ?? ($cur['location'] ?? ''),
+        'contact'   => $_POST['contact'] ?? ($cur['phone'] ?? ''),
+        'about'     => $_POST['about'] ?? ($cur['about'] ?? ''),
+        'address'   => $_POST['address'] ?? ($cur['address'] ?? ''),
+        'tin'       => $_POST['tin'] ?? ($cur['tin'] ?? ''),
+    ];
+    $err = tt_save_client_profile($data);
+    tt_flash($err ? 'Could not save: ' . $err : 'Your profile was saved.');
+    header('Location: ' . $_SERVER['REQUEST_URI']);
+    exit;
+}
 
 $me      = toptunity_current_client();
 $demo    = tt_is_demo_account();
@@ -33,10 +64,15 @@ include '../includes/client-nav.php';
 <div class="two-col" style="margin-top:1.25rem;">
   <div class="stack">
     <section class="profile-card">
-      <?= avatar($me['bg'], $me['hair'], $me['style'], 96) ?>
+      <?php $my_photo = tt_user_photo((int) tt_current_user()['id'], 'client'); ?><?php if ($my_photo): ?><img src="<?= e($base_url) ?>download.php?photo=<?= (int) tt_current_user()['id'] ?>" alt="Profile photo" style="width:96px; height:96px; border-radius:50%; object-fit:cover;"><?php else: ?><?= avatar($me['bg'], $me['hair'], $me['style'], 96) ?><?php endif; ?>
       <h2><?= e($me['name']) ?></h2>
       <p>Owner, <?= e($me['company']) ?></p>
-      <button type="button" class="btn btn--outline btn--sm"><?= icon('upload', 13) ?> Upload Photo</button>
+      <form method="post" enctype="multipart/form-data" style="display:inline;">
+        <label class="btn btn--outline btn--sm" style="cursor:pointer;"><?= icon('upload', 13) ?> Upload Photo<input type="file" name="photo" accept="image/png,image/jpeg" onchange="this.form.submit()" style="display:none;"></label>
+      </form>
+      <?php if (!empty($my_photo)): ?>
+      <form method="post" style="margin-top:0.5rem;"><button type="submit" name="remove_photo" value="1" class="btn btn--row-outline btn--sm">Remove Photo</button></form>
+      <?php endif; ?>
       <div class="rating-box">
         <div><?= stars($avg) ?></div>
         <strong><?= e($avg) ?></strong>
@@ -55,24 +91,24 @@ include '../includes/client-nav.php';
       <?php if ($tab === 'personal'): ?>
         <div class="form-grid-2">
           <div class="field"><label for="full-name">Full Name</label><input class="input" id="full-name" name="full_name" value="<?= e($me['name']) ?>"></div>
-          <div class="field"><label for="company">Company (optional)</label><input class="input" id="company" name="company" value="<?= e($me['company']) ?>"></div>
+          <div class="field"><label for="company">Company (optional)</label><input class="input" id="company" name="company" value="<?= e(tt_pv('company', $me['company'])) ?>"></div>
           <div class="field"><label for="location">Location</label>
-            <div class="input-wrap"><?= icon('map-pin', 16) ?><input id="location" name="location" value="<?= e($demo ? 'Quezon City, Philippines' : '') ?>"></div>
+            <div class="input-wrap"><?= icon('map-pin', 16) ?><input id="location" name="location" value="<?= e(tt_pv('location', $demo ? 'Quezon City, Philippines' : '')) ?>"></div>
           </div>
           <div class="field"><label for="contact">Contact Number</label>
-            <div class="input-wrap"><?= icon('phone', 16) ?><input id="contact" name="contact" value="<?= e($demo ? '+63 917 555 0142' : '') ?>"></div>
+            <div class="input-wrap"><?= icon('phone', 16) ?><input id="contact" name="contact" value="<?= e(tt_pv('phone', $demo ? '+63 917 555 0142' : '')) ?>"></div>
           </div>
           <div class="field full"><label for="about">About</label>
-            <textarea id="about" name="about" class="input" rows="4" style="height:auto; padding:0.7rem; font-size:0.82rem;"><?= e($demo ? 'Kapé Lokal is a small specialty coffee shop in Maginhawa, Quezon City serving locally sourced Batangas and Benguet beans. I usually hire freelancers for web, design and social media work.' : '') ?></textarea>
+            <textarea id="about" name="about" class="input" rows="4" style="height:auto; padding:0.7rem; font-size:0.82rem;"><?= e(tt_pv('about', $demo ? 'Kapé Lokal is a small specialty coffee shop in Maginhawa, Quezon City serving locally sourced Batangas and Benguet beans. I usually hire freelancers for web, design and social media work.' : '')) ?></textarea>
           </div>
         </div>
       <?php else: ?>
         <div class="form-grid-2">
-          <div class="field"><label for="biz-name">Business Name</label><input class="input" id="biz-name" name="business_name" value="<?= e($me['company']) ?>"></div>
+          <div class="field"><label for="biz-name">Business Name</label><input class="input" id="biz-name" name="business_name" value="<?= e(tt_pv('company', $me['company'])) ?>"></div>
           <div class="field"><label for="biz-type">Business Type</label>
             <select class="input" id="biz-type" name="business_type"><option selected>Food and beverage</option><option>Retail</option><option>Clinic or health</option><option>Education</option><option>Other</option></select>
           </div>
-          <div class="field full"><label for="biz-address">Business Address</label><input class="input" id="biz-address" name="address" value="<?= e($demo ? 'Maginhawa Street, Quezon City' : '') ?>"></div>
+          <div class="field full"><label for="biz-address">Business Address</label><input class="input" id="biz-address" name="address" value="<?= e(tt_pv('address', $demo ? 'Maginhawa Street, Quezon City' : '')) ?>"></div>
           <div class="field"><label for="biz-tin">Business ID or TIN (optional)</label><input class="input" id="biz-tin" name="tin" placeholder="e.g. 123-456-789-000"></div>
         </div>
       <?php endif; ?>

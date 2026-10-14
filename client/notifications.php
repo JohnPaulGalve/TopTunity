@@ -4,10 +4,17 @@
  * Filter with ?cat=all|proposals|responses|messages|work|hours|deadline|payments|refunds
  */
 $user_role     = "client";
-$base_url      = "/Webdev/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "";
 
 require_once __DIR__ . '/../includes/data.php';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mark_all'])) {
+    tt_mark_all_read();
+    tt_flash('All notifications were marked as read.');
+    header('Location: ' . $_SERVER['REQUEST_URI']);
+    exit;
+}
+
 
 $all = toptunity_client_notifications_all();
 
@@ -39,7 +46,7 @@ include '../includes/client-nav.php';
     <h1>Notifications</h1>
     <p class="subtle">You have <?= (int) $unread_total ?> unread notification<?= $unread_total === 1 ? '' : 's' ?>.</p>
   </div>
-  <a href="#" class="btn-link-teal"><?= icon('check', 14) ?> Mark all as read</a>
+  <form method="post" style="display:inline;"><button type="submit" name="mark_all" value="1" class="btn-link-teal" style="background:none; border:0; cursor:pointer;"><?= icon('check', 14) ?> Mark all as read</button></form>
 </div>
 
 <nav class="notif-tabs" aria-label="Filter notifications">

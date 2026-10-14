@@ -3,7 +3,7 @@
  * freelancer/my-proposals.php - Matches the My Proposals design.
  */
 $user_role     = "freelancer";
-$base_url      = "/Webdev/";
+$base_url      = "/TopTunity/";
 $active_client = "proposals";
 
 require_once __DIR__ . '/../includes/data.php';

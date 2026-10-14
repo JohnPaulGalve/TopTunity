@@ -4,7 +4,7 @@
  * Uploading, editing and removing are not connected to a database yet.
  */
 $user_role     = "freelancer";
-$base_url      = "/Webdev/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "";
 
 require_once __DIR__ . '/../includes/data.php';
@@ -20,7 +20,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (mb_strlen($form['title']) < 3)                 { $errors[] = 'Enter a title for this sample.'; }
     if (!in_array($form['category'], $cats, true))     { $errors[] = 'Choose a category.'; }
     if (empty($_FILES['sample']['name'][0]))           { $errors[] = 'Choose an image or PDF to upload.'; }
+    $up = tt_handle_uploads('sample');
+    $errors = array_merge($errors, $up['errors']);
     if (!$errors) {
+        tt_save_attachments('portfolio', (int) tt_current_user()['id'], $up['files'], $form['title']);
         tt_flash('Your portfolio sample was uploaded.');
         header('Location: ' . $base_url . 'freelancer/portfolio.php');
         exit;
@@ -48,6 +51,15 @@ include '../includes/client-nav.php';
     <a href="#upload" class="btn btn--dark">Upload Portfolio</a>
   </div>
 <?php else: ?>
+  <?php $my_samples = tt_attachments('portfolio', (int) tt_current_user()['id']); if ($my_samples): ?>
+  <section class="box" style="margin-bottom:1rem;">
+    <h2 style="margin-bottom:0.6rem;">Uploaded samples</h2>
+    <?php foreach ($my_samples as $ms): ?>
+      <div class="file-row" style="margin-top:0.5rem;"><?= icon('file', 15) ?><?= tt_file_name_html($ms, $base_url) ?><?php if (!empty($ms['label'])): ?><span class="muted"><?= e($ms['label']) ?></span><?php endif; ?><span class="file-row__size"><?= e($ms['size']) ?></span></div>
+    <?php endforeach; ?>
+  </section>
+  <?php endif; ?>
+
   <div class="portfolio-grid" style="grid-template-columns: repeat(4, 1fr); margin-top:1.25rem;">
     <?php foreach ($items as $item): ?>
       <div class="portfolio-item">

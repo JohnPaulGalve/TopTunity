@@ -1,15 +1,19 @@
-
-
 <?php
 /**
  * pages/index.php - Public homepage
  * Sections: Hero, Guide, Categories, New projects, Top talent,
  *           Testimonials, Pricing preview.
- */ini_set('display_errors', 1);
-error_reporting(E_ALL);
+ */
 $page_title = "Home";
 $user_role  = "public";
-$base_url   = "/Webdev/";
+$base_url   = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
+
+require_once __DIR__ . '/../includes/auth.php';
+$__u = tt_current_user();
+if ($__u && in_array($__u['role'], ['client', 'freelancer'], true)) {
+    header('Location: ' . $base_url . tt_home_for($__u['role']));
+    exit;
+}
 
 include '../includes/header.php';
 include '../includes/nav.php';

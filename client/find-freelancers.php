@@ -4,10 +4,11 @@
  * Same search, skill filter and sort as Browse Freelancers, with Save buttons.
  */
 $user_role     = "client";
-$base_url      = "/Webdev/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "freelancers";
 
 require_once __DIR__ . '/../includes/data.php';
+tt_handle_favourite();
 
 $all   = toptunity_freelancers();
 $saved = toptunity_saved_freelancer_ids();
@@ -106,7 +107,7 @@ include '../includes/client-nav.php';
         <?php if ($q !== ''): ?><input type="hidden" name="q" value="<?= e($q) ?>"><?php endif; ?>
         <?php if ($skill !== ''): ?><input type="hidden" name="skill" value="<?= e($skill) ?>"><?php endif; ?>
         <span>
-          <?= $total ? "Showing $from–$to of $total freelancers" . ($skill ? " with " . e($skill) : '') : 'No freelancers found' ?> · Sort by
+          <?= $total ? "Showing {$from}–{$to} of {$total} freelancers" . ($skill ? " with " . e($skill) : '') : 'No freelancers found' ?> · Sort by
         </span>
         <label class="sort-select">
           <select name="sort" data-autosubmit>
@@ -150,7 +151,10 @@ include '../includes/client-nav.php';
               <div class="freelancer-row__rating"><?= stars($f['rating']) ?> <strong><?= e($f['rating']) ?></strong> · <?= (int) $f['reviews'] ?> reviews</div>
               <div class="price">₱<?= number_format($f['rate']) ?><span class="price__unit">/hr</span></div>
               <div class="heart-row">
-                <a href="#" class="heart-btn <?= $is_saved ? 'is-saved' : '' ?>" aria-label="<?= $is_saved ? 'Saved' : 'Save freelancer' ?>"><?= icon('heart', 15) ?></a>
+                <form method="post" action="find-freelancers.php" style="display:inline;">
+                  <input type="hidden" name="favourite" value="freelancer"><input type="hidden" name="item" value="<?= (int) $fid ?>">
+                  <button type="submit" class="heart-btn <?= $is_saved ? 'is-saved' : '' ?>" aria-label="<?= $is_saved ? 'Saved' : 'Save freelancer' ?>"><?= icon('heart', 15) ?></button>
+                </form>
                 <a href="freelancer-profile.php?id=<?= (int) $fid ?>" class="btn btn--teal-outline">View Profile</a>
               </div>
             </div>

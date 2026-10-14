@@ -4,7 +4,7 @@
  * ?role=client|freelancer pre-selects the role (homepage buttons use this).
  */
 $user_role = "public";
-$base_url  = "/Webdev/";
+$base_url  = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 
 require_once __DIR__ . '/../includes/auth.php';
 
@@ -89,7 +89,7 @@ include '../includes/nav.php';
             <label for="email">Email Address</label>
             <div class="input-wrap">
               <?= icon('mail', 16) ?>
-              <input type="email" id="email" name="email" value="<?= e($form['email']) ?>" placeholder="you@example.com" autocomplete="email" required>
+              <input type="email" id="email" name="email" value="<?= e($form['email']) ?>" placeholder="you@example.com" autocomplete="username" autocapitalize="none" spellcheck="false" required>
             </div>
           </div>
 

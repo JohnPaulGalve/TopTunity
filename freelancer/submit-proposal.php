@@ -4,21 +4,38 @@
  * Sending is not connected to a database yet.
  */
 $user_role     = "freelancer";
-$base_url      = "/Webdev/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "find";
 
 require_once __DIR__ . '/../includes/data.php';
 
 $id      = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $project = null;
-foreach (toptunity_listing() as $row) { if ((int) $row['id'] === $id) { $project = $row; } }
-$full    = $project ? toptunity_project($id) : null;
+$db_project = $id >= 1000 ? tt_db_project($id) : null;
+if ($db_project) {
+    $cl = db()->prepare('SELECT name FROM users WHERE id = ?');
+    $cl->execute([(int) $db_project['client_id']]);
+    $cat = db()->prepare('SELECT name FROM categories WHERE id = ?');
+    $cat->execute([(int) $db_project['category_id']]);
+    $project = ['id' => $id, 'title' => $db_project['title'], 'category' => $cat->fetchColumn() ?: 'Web Development',
+                'client' => $cl->fetchColumn(), 'type' => $db_project['billing_type'],
+                'amount' => $db_project['billing_type'] === 'hourly' ? (int) $db_project['hourly_rate'] : (int) $db_project['budget'],
+                'max_hours' => (int) $db_project['max_hours'], 'deadline' => $db_project['deadline'],
+                'proposals' => count(tt_db_proposals($id)), 'desc' => $db_project['description'], 'skills' => []];
+} else {
+    foreach (toptunity_listing() as $row) { if ((int) $row['id'] === $id) { $project = $row; } }
+}
+$full    = ($project && !$db_project) ? toptunity_project($id) : null;
 $skills  = tt_is_demo_freelancer() ? toptunity_freelancer(1)['skills'] : [];
 $req     = $full ? $full['skills'] : [];
 $match   = tt_skill_match($req, $skills);
 $have    = count(array_intersect(array_map('strtolower', $req), array_map('strtolower', $skills)));
 $sent    = false;
-foreach (toptunity_freelancer_proposals() as $pr) { if ($project && (int) $pr['project_id'] === $id) { $sent = true; } }
+if ($db_project) {
+    foreach (tt_db_proposals($id) as $pr) { if ((int) $pr['freelancer_id'] === (int) tt_current_user()['id']) { $sent = true; } }
+} else {
+    foreach (toptunity_freelancer_proposals() as $pr) { if ($project && (int) $pr['project_id'] === $id) { $sent = true; } }
+}
 $deadline_passed = $project && $project['deadline'] < date('Y-m-d');
 
 $errors = [];
@@ -32,6 +49,10 @@ if ($project && !$sent && !$deadline_passed && $_SERVER['REQUEST_METHOD'] === 'P
     if ($form['days'] === '' || $form['days'] < 1)    { $errors[] = 'Enter how many days you need to finish.'; }
     if (mb_strlen($form['letter']) < 50)              { $errors[] = 'Your cover letter should be at least 50 characters.'; }
     if (empty($_POST['confirm']))                     { $errors[] = 'Please confirm that you can deliver this project.'; }
+    if (!$errors && $db_project) {
+        $err = tt_db_submit_proposal($id, $form['offer'], $form['days'], $form['letter']);
+        if ($err) { $errors[] = $err; }
+    }
     if (!$errors) {
         tt_flash('Your proposal was sent. You can track it in My Proposals.');
         header('Location: ' . $base_url . 'freelancer/my-proposals.php');

@@ -1,70 +1,56 @@
 <?php
-$page_title = "Platform Payments & Escrow Logs";
-$user_role = "admin";
+/**
+ * admin/payments.php - Payments and transactions (database).
+ */
+$user_role     = "admin";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
+$active_client = "payments";
+
+require_once __DIR__ . '/../includes/data.php';
+
+$rows   = toptunity_admin_payments();   // demo rows plus real records
+$totals = toptunity_admin_money_totals();
+$cls    = ['held' => 'held', 'released' => 'released', 'paid' => 'released', 'refunded' => 'refunded'];
+
+$page_title = "Payments and Transactions";
 include '../includes/header.php';
-include '../includes/nav.php';
+include '../includes/client-nav.php';
 ?>
 
-<div class="container" style="padding-top: 3rem; padding-bottom: 3rem;">
-  <h2>Payments & Escrow Audit Logs</h2>
-  <p style="color: var(--color-muted-gray); margin-bottom: 2rem;">Real-time master ledger of simulated escrow deposits, payouts, and platform fee collections[cite: 11, 84].</p>
-
-  <!-- Summary Cards -->
-  <div class="grid-3" style="margin-bottom: 2rem;">
-    <div class="card">
-      <p style="font-size: 0.85rem; color: var(--color-muted-gray);">Escrow Funds Currently Held</p>
-      <h3 style="font-size: 2rem; color: var(--color-vibrant-teal);">₱340,000</h3>
-    </div>
-    <div class="card">
-      <p style="font-size: 0.85rem; color: var(--color-muted-gray);">Total Released Payouts</p>
-      <h3 style="font-size: 2rem; color: var(--color-deep-slate);">₱1,280,000</h3>
-    </div>
-    <div class="card">
-      <p style="font-size: 0.85rem; color: var(--color-muted-gray);">10% Platform Revenue Earned</p>
-      <h3 style="font-size: 2rem; color: var(--color-coral-orange);">₱128,000</h3>[cite: 12, 92]
-    </div>
+<div class="welcome-row">
+  <div>
+    <h1>Payments and Transactions</h1>
+    <p class="subtle">All transactions are simulated (dummy). No real money is used.</p>
   </div>
+</div>
 
-  <!-- Master Payments Table -->
-  <div class="card">
-    <h3 style="margin-bottom: 1rem;">Transaction Master Ledger</h3>
-    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
-      <thead>
-        <tr style="border-bottom: 2px solid var(--color-border-gray); background: var(--color-off-white);">
-          <th style="padding: 0.75rem;">TX ID</th>
-          <th style="padding: 0.75rem;">Date</th>
-          <th style="padding: 0.75rem;">Type</th>
-          <th style="padding: 0.75rem;">Client / Freelancer</th>
-          <th style="padding: 0.75rem;">Gross</th>
-          <th style="padding: 0.75rem;">10% Fee</th>
-          <th style="padding: 0.75rem;">Net Amount</th>
-          <th style="padding: 0.75rem;">Status</th>
-        </tr>
-      </thead>
+<div class="stat-grid" style="grid-template-columns: repeat(3, 1fr); margin-top:1.25rem;">
+  <div class="stat-card"><div class="stat-card__top"><span class="stat-card__label">Escrow payments held</span><span class="icon-box icon-box--blue"><?= icon('lock', 16) ?></span></div><span class="stat-card__value">₱<?= number_format($totals['held']) ?></span><span class="muted"><?= (int) $totals['held_projects'] ?> projects in escrow</span></div>
+  <div class="stat-card"><div class="stat-card__top"><span class="stat-card__label">Payments released</span><span class="icon-box icon-box--teal"><?= icon('check-circle', 16) ?></span></div><span class="stat-card__value">₱<?= number_format($totals['released']) ?></span><span class="muted">All time</span></div>
+  <div class="stat-card"><div class="stat-card__top"><span class="stat-card__label">Service fees</span><span class="icon-box icon-box--orange"><?= icon('dollar', 16) ?></span></div><span class="stat-card__value">₱<?= number_format($totals['fees']) ?></span><span class="muted">Platform fee earned</span></div>
+</div>
+
+<section class="admin-list" style="margin-top:1.25rem;">
+  <div style="overflow-x:auto;">
+    <table class="data-table">
+      <thead><tr><th>Date</th><th>Project · Billing</th><th>Type</th><th class="num">Amount</th><th class="num">Service fee</th><th>Status</th></tr></thead>
       <tbody>
-        <tr style="border-bottom: 1px solid var(--color-border-gray);">
-          <td style="padding: 0.75rem;">#TX-9041</td>
-          <td style="padding: 0.75rem;">Oct 01, 2026</td>
-          <td style="padding: 0.75rem;">Escrow Deposit</td>
-          <td style="padding: 0.75rem;">Andrea Santos[cite: 92]</td>
-          <td style="padding: 0.75rem;">₱45,000[cite: 93]</td>
-          <td style="padding: 0.75rem;">--</td>
-          <td style="padding: 0.75rem;">₱45,000</td>
-          <td style="padding: 0.75rem;"><span class="badge badge-warning">Held in Escrow</span>[cite: 50]</td>
-        </tr>
-        <tr style="border-bottom: 1px solid var(--color-border-gray);">
-          <td style="padding: 0.75rem;">#TX-8820</td>
-          <td style="padding: 0.75rem;">Sep 18, 2026</td>
-          <td style="padding: 0.75rem;">Project Payout</td>
-          <td style="padding: 0.75rem;">Miguel Reyes[cite: 95]</td>
-          <td style="padding: 0.75rem;">₱25,000</td>
-          <td style="padding: 0.75rem; color: var(--color-error-base);">-₱2,500[cite: 92]</td>
-          <td style="padding: 0.75rem; font-weight: bold; color: var(--color-success-base);">₱22,500</td>
-          <td style="padding: 0.75rem;"><span class="badge badge-success">Completed</span></td>
-        </tr>
+        <?php if (!$rows): ?><tr><td colspan="6" class="muted" style="text-align:center; padding:1.2rem;">No payments yet.</td></tr><?php endif; ?>
+        <?php foreach ($rows as $r): ?>
+          <tr>
+            <td><?= e($r['date']) ?></td>
+            <td><strong><?= e($r['project']) ?></strong><small><?= e($r['billing']) ?><?= !empty($r['sample']) ? ' · Sample' : '' ?></small></td>
+            <td><?= e($r['type']) ?></td>
+            <td class="num">₱<?= number_format($r['amount']) ?></td>
+            <td class="num"><?= !empty($r['fee']) ? '₱' . number_format($r['fee']) : '—' ?></td>
+            <td><span class="status status--<?= e($cls[$r['status']] ?? 'cancelled') ?>"><?= e(ucfirst($r['status'])) ?></span></td>
+          </tr>
+        <?php endforeach; ?>
       </tbody>
     </table>
   </div>
-</div>
+</section>
+
+</main>
 
 <?php include '../includes/footer.php'; ?>

@@ -4,7 +4,7 @@
  * The fee percentage is hard-coded here; move it to platform settings later.
  */
 $user_role = "public";
-$base_url  = "/Webdev/";
+$base_url  = "/TopTunity/";
 $fee_pct   = 10;
 
 $page_title = "Pricing";

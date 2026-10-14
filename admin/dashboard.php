@@ -1,103 +1,129 @@
 <?php
-$page_title = "Admin Dashboard";
-$user_role = "admin";
-include '../includes/header.php';
-include '../includes/nav.php';
+/**
+ * admin/dashboard.php - Platform statistics (matches the Admin Dashboard design).
+ * Money and chart figures are sample values from the design; the user count is live.
+ */
+$user_role     = "admin";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
+$active_client = "dashboard";
 
-// Mock Platform System Stats
-$total_users = 148;
-$total_projects = 52;
-$escrow_volume = "₱340,000";
-$revenue_collected = "₱34,000"; // 10% Platform fee total
+require_once __DIR__ . '/../includes/data.php';
+
+$users   = toptunity_admin_users();
+$clients = count(array_filter($users, function ($u) { return $u['role'] === 'client'; }));
+$freel   = count(array_filter($users, function ($u) { return $u['role'] === 'freelancer'; }));
+$total   = max(1, count($users));
+
+$fee = tt_service_fee();
+$money = toptunity_admin_money_totals();
+$status_bars = [['Open', 118], ['Past Deadline', 14], ['Ongoing', 86], ['Overdue', 9], ['Completed', 203], ['Closed', 21], ['Cancelled', 12]];
+$max_status = max(array_column($status_bars, 1));
+$months  = ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'];
+$held    = [215, 250, 275, 305, 345, 487];
+$release = [150, 180, 200, 230, 260, 285];
+$fees    = [15, 18, 20, 23, 25, 29];
+$max_money = 600;
+
+$page_title = "Admin Dashboard";
+include '../includes/header.php';
+include '../includes/client-nav.php';
 ?>
 
-<div class="container" style="padding-top: 2rem; padding-bottom: 3rem;">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-    <div>
-      <h2>Platform Administrator Dashboard</h2>
-      <p style="color: var(--color-muted-gray);">Monitor system analytics, user activity, escrow volume, and platform revenue[cite: 10, 77].</p>
-    </div>
-    <a href="<?php echo $base_url; ?>admin/reports-generation.php" class="btn-primary">Generate Reports</a>
+<div class="welcome-row">
+  <div>
+    <h1>Admin Dashboard</h1>
+    <p class="subtle">Platform statistics as of <?= e(date('l, F j, Y')) ?>.</p>
   </div>
+  <a href="<?= e($base_url) ?>admin/reports-generation.php" class="btn btn--primary btn--sm-block"><?= icon('clipboard', 16) ?> Generate Reports</a>
+</div>
 
-  <!-- Metric Cards -->
-  <div class="grid-4" style="margin-bottom: 2rem;">
-    <div class="card">
-      <p style="font-size: 0.85rem; color: var(--color-muted-gray);">Total Registered Users</p>
-      <h3 style="font-size: 2rem; color: var(--color-deep-slate);"><?php echo $total_users; ?></h3>
-      <a href="<?php echo $base_url; ?>admin/user-management.php" style="font-size: 0.85rem; color: var(--color-vibrant-teal);">Manage accounts &rarr;</a>
-    </div>
-    <div class="card">
-      <p style="font-size: 0.85rem; color: var(--color-muted-gray);">Platform Projects</p>
-      <h3 style="font-size: 2rem; color: var(--color-deep-slate);"><?php echo $total_projects; ?></h3>
-      <a href="<?php echo $base_url; ?>admin/project-moderation.php" style="font-size: 0.85rem; color: var(--color-vibrant-teal);">Moderate listings &rarr;</a>
-    </div>
-    <div class="card">
-      <p style="font-size: 0.85rem; color: var(--color-muted-gray);">Active Escrow Volume</p>
-      <h3 style="font-size: 2rem; color: var(--color-vibrant-teal);"><?php echo $escrow_volume; ?></h3>
-      <a href="<?php echo $base_url; ?>admin/payments.php" style="font-size: 0.85rem; color: var(--color-vibrant-teal);">View payments &rarr;</a>
-    </div>
-    <div class="card">
-      <p style="font-size: 0.85rem; color: var(--color-muted-gray);">10% Fee Commission Collected</p>
-      <h3 style="font-size: 2rem; color: var(--color-coral-orange);"><?php echo $revenue_collected; ?></h3>
-      <a href="<?php echo $base_url; ?>admin/payments.php" style="font-size: 0.85rem; color: var(--color-vibrant-teal);">Fee logs &rarr;</a>
-    </div>
+<div class="stat-grid" style="margin-top:1.25rem;">
+  <div class="stat-card stat-card--admin">
+    <div class="stat-card__top"><span class="stat-card__label">Number of Users</span><span class="icon-box icon-box--teal"><?= icon('users', 16) ?></span></div>
+    <span class="stat-card__value"><?= number_format(count($users)) ?></span>
+    <span class="muted">+124 this month</span>
   </div>
-
-  <!-- Overview Grid -->
-  <div style="display: grid; grid-template-columns: 1fr 340px; gap: 2rem;">
-    <main>
-      <div class="card" style="margin-bottom: 2rem;">
-        <h3>Platform Activity Overview</h3>
-        <p style="color: var(--color-muted-gray); font-size: 0.85rem; margin-bottom: 1rem;">Recent contract updates and financial logs[cite: 10, 77].</p>
-        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
-          <thead>
-            <tr style="border-bottom: 2px solid var(--color-border-gray); background: var(--color-off-white);">
-              <th style="padding: 0.6rem;">Event</th>
-              <th style="padding: 0.6rem;">User Account</th>
-              <th style="padding: 0.6rem;">Amount</th>
-              <th style="padding: 0.6rem;">Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr style="border-bottom: 1px solid var(--color-border-gray);">
-              <td style="padding: 0.6rem;">Escrow Deposit</td>
-              <td style="padding: 0.6rem;">Andrea Santos (Client)[cite: 92]</td>
-              <td style="padding: 0.6rem;">₱45,000[cite: 93]</td>
-              <td style="padding: 0.6rem;">Oct 01, 2026</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--color-border-gray);">
-              <td style="padding: 0.6rem;">10% Fee Commission Recorded</td>
-              <td style="padding: 0.6rem;">Miguel Reyes (Freelancer)[cite: 95]</td>
-              <td style="padding: 0.6rem; color: var(--color-success-base);">+₱2,500[cite: 92]</td>
-              <td style="padding: 0.6rem;">Sep 18, 2026</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </main>
-
-    <!-- Admin Action Quick Links -->
-    <aside style="display: flex; flex-direction: column; gap: 1rem;">
-      <div class="card">
-        <h3 style="font-size: 1rem; margin-bottom: 1rem;">Pending Admin Actions</h3>
-        <div style="display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.85rem;">
-          <a href="<?php echo $base_url; ?>admin/withdrawal-requests.php" style="display: flex; justify-content: space-between; padding: 0.5rem; background: var(--color-off-white); border-radius: 4px;">
-            <span>Withdrawal Requests</span>
-            <span class="badge badge-warning">2 Pending</span>[cite: 11]
-          </a>
-          <a href="<?php echo $base_url; ?>admin/dispute-management.php" style="display: flex; justify-content: space-between; padding: 0.5rem; background: var(--color-off-white); border-radius: 4px;">
-            <span>Open Disputes</span>
-            <span class="badge badge-error">1 Open</span>[cite: 11]
-          </a>
-          <a href="<?php echo $base_url; ?>admin/reported-content.php" style="display: flex; justify-content: space-between; padding: 0.5rem; background: var(--color-off-white); border-radius: 4px;">
-            <span>Flagged Content</span>
-            <span class="badge badge-info">3 Reports</span>[cite: 10]
-          </a>
-        </div>
-      </div>
-    </aside>
+  <div class="stat-card stat-card--admin">
+    <div class="stat-card__top"><span class="stat-card__label">Payments Held</span><span class="icon-box icon-box--blue"><?= icon('lock', 16) ?></span></div>
+    <span class="stat-card__value">₱<?= number_format($money['held']) ?></span>
+    <span class="muted"><?= (int) $money['held_projects'] ?> projects in escrow</span>
+  </div>
+  <div class="stat-card stat-card--admin">
+    <div class="stat-card__top"><span class="stat-card__label">Payments Released</span><span class="icon-box icon-box--teal"><?= icon('check-circle', 16) ?></span></div>
+    <span class="stat-card__value">₱<?= number_format($money['released']) ?></span>
+    <span class="muted">All time</span>
+  </div>
+  <div class="stat-card stat-card--admin">
+    <div class="stat-card__top"><span class="stat-card__label">Service Fees Earned</span><span class="icon-box icon-box--orange"><?= icon('dollar', 16) ?></span></div>
+    <span class="stat-card__value">₱<?= number_format($money['fees']) ?></span>
+    <span class="muted">At <?= (int) $fee ?>% service fee</span>
   </div>
 </div>
+
+<div class="chart-grid">
+  <section class="chart-card">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+      <div><h2>Projects by Status</h2><p class="sub">463 projects</p></div>
+      <span class="count-chip">This month</span>
+    </div>
+    <div class="bars" style="margin-top:1.2rem;">
+      <?php foreach ($status_bars as $b): $h = round($b[1] / $max_status * 100); ?>
+        <div class="bars__col">
+          <span class="bars__val"><?= (int) $b[1] ?></span>
+          <div class="bars__bar" style="height:<?= (int) $h ?>%;"></div>
+          <span class="bars__label"><?= e($b[0]) ?></span>
+        </div>
+      <?php endforeach; ?>
+    </div>
+  </section>
+
+  <section class="chart-card">
+    <h2>Number of Users</h2>
+    <p class="sub">By role</p>
+    <div class="donut-wrap">
+      <div class="donut" style="background: conic-gradient(#1E293B 0 37%, #009488 37% 100%);">
+        <div class="donut__center"><strong><?= number_format(742 + 1244) ?></strong><small>total users</small></div>
+      </div>
+      <div class="donut-legend">
+        <div><i style="background:#1E293B;"></i> Clients<strong>742</strong>37%</div>
+        <div><i style="background:#009488;"></i> Freelancers<strong>1,244</strong>63%</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="chart-grid chart-grid--2">
+  <section class="chart-card">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+      <div><h2>Payments Held vs Released</h2><p class="sub">Monthly, May–Oct 2026</p></div>
+      <div><span class="legend"><i></i> Held</span><span class="legend"><i class="alt"></i> Released</span></div>
+    </div>
+    <div class="bars" style="margin-top:1.2rem;">
+      <?php foreach ($months as $i => $m): ?>
+        <div class="bars__col" style="flex-direction:row; gap:0.2rem; align-items:flex-end; justify-content:center;">
+          <div class="bars__bar" style="height:<?= round($held[$i] / $max_money * 100) ?>%; max-width:24px;"></div>
+          <div class="bars__bar bars__bar--alt" style="height:<?= round($release[$i] / $max_money * 100) ?>%; max-width:24px;"></div>
+          <span class="bars__label"><?= e($m) ?></span>
+        </div>
+      <?php endforeach; ?>
+    </div>
+  </section>
+
+  <section class="chart-card">
+    <h2>Service Fees Earned</h2>
+    <p class="sub">Monthly, May–Oct 2026</p>
+    <div class="bars" style="margin-top:1.2rem;">
+      <?php foreach ($months as $i => $m): ?>
+        <div class="bars__col">
+          <span class="bars__val">₱<?= (int) $fees[$i] ?>k</span>
+          <div class="bars__bar" style="height:<?= round($fees[$i] / 40 * 100) ?>%;"></div>
+          <span class="bars__label"><?= e($m) ?></span>
+        </div>
+      <?php endforeach; ?>
+    </div>
+  </section>
+</div>
+
+</main>
 
 <?php include '../includes/footer.php'; ?>

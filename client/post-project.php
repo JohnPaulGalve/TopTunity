@@ -4,7 +4,7 @@
  * Saves to storage/projects.json, so the project appears on the dashboard and My Projects.
  */
 $user_role     = "client";
-$base_url      = "/Webdev/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "post";
 
 require_once __DIR__ . '/../includes/data.php';
@@ -92,15 +92,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'skills'    => $in['skills'],
             'files'     => array_merge($editing ? $editing['files'] : [], $uploads['files']),
         ];
-        if ($editing) {
-            tt_update_saved_project($edit_id, $record);
-            tt_flash('Your changes were saved.');
-        } else {
-            tt_add_saved_project($record);
-            tt_flash('Your project was posted. It now appears on your dashboard and in My Projects.');
+        try {
+            if ($editing) {
+                if (!tt_update_saved_project($edit_id, $record)) {
+                    throw new RuntimeException('This project is not yours to edit.');
+                }
+                tt_save_attachments('project', $edit_id, $uploads['files']);
+                tt_flash('Your changes were saved.');
+            } else {
+                $new_id = tt_add_saved_project($record);
+                tt_save_attachments('project', $new_id, $uploads['files']);
+                tt_flash('Your project was posted. It now appears on your dashboard and in My Projects.');
+            }
+            header('Location: ' . $base_url . 'client/my-projects.php');
+            exit;
+        } catch (Throwable $e) {
+            // Show the real reason on the page instead of a blank "500" error
+            $errors[] = 'The project could not be saved. Reason: ' . $e->getMessage();
         }
-        header('Location: ' . $base_url . 'client/my-projects.php');
-        exit;
     }
 }
 

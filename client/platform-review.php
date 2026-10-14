@@ -3,15 +3,25 @@
  * client/platform-review.php - Rate and review TopTunity (matches the Platform Review design).
  * Submitting is not connected to a database yet.
  */
+require_once __DIR__ . '/../includes/data.php';
 $user_role     = "client";
-$base_url      = "/Webdev/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "";
 
 $labels = [5 => 'Excellent', 4 => 'Very good', 3 => 'Good', 2 => 'Fair', 1 => 'Poor'];
 $rating = isset($_POST['rating']) ? max(1, min(5, (int) $_POST['rating'])) : 5;
 $text   = "I posted our ordering website project on a Monday and had twelve solid proposals by Wednesday. The match percentage helped me shortlist fast, and holding the payment until I approved the work gave me peace of mind.";
 if (!tt_is_demo_account()) { $text = ""; }
+$mine = tt_my_platform_review();
+if ($mine) { $rating = (int) $mine['rating']; $text = $mine['body']; }
 $max    = 1000;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $err = tt_save_platform_review((int) ($_POST['rating'] ?? 0), $_POST['review'] ?? '');
+    tt_flash($err ? 'Could not save: ' . $err : 'Thank you. Your platform review was sent to the administrator.');
+    header('Location: ' . $_SERVER['REQUEST_URI']);
+    exit;
+}
 
 $page_title = "Platform Review";
 include '../includes/header.php';

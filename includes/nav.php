@@ -9,7 +9,7 @@
  * ($page_aliases). A page can also force a highlight by setting
  * $nav_active = 'pages/some-page.php' before including this file.
  */
-$base_url  = isset($base_url) ? $base_url : '/Webdev/';
+$base_url  = isset($base_url) ? $base_url : (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $user_role = isset($user_role) ? $user_role : 'public';
 
 $menus = [
@@ -64,7 +64,7 @@ if (isset($nav_active)) {
 ?>
 <header class="navbar">
   <div class="container navbar__inner">
-    <a href="<?= e($base_url) ?>pages/index.php" class="brand-logo" aria-label="TopTunity home">TopTunity<span class="logo-star" aria-hidden="true">&#10022;</span></a>
+    <a href="<?= e($base_url . tt_brand_home()) ?>" class="brand-logo" aria-label="TopTunity home">TopTunity<span class="logo-star" aria-hidden="true">&#10022;</span></a>
 
     <button class="nav-toggle" type="button" aria-controls="site-menu" aria-expanded="false" aria-label="Toggle navigation">
       <?= icon('menu', 24) ?>

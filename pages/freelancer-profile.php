@@ -4,7 +4,7 @@
  * Accepts ?id=N, or ?name=Full Name (used by homepage links).
  */
 $user_role = "public";
-$base_url  = "/Webdev/";
+$base_url  = "/TopTunity/";
 
 require_once __DIR__ . '/../includes/data.php';
 

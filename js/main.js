@@ -225,3 +225,23 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 })();
+
+/* Placeholder links (href="#") show a short notice instead of doing nothing.
+   Popup close/cancel links are skipped, because they use # to close the popup. */
+document.addEventListener('click', function (e) {
+  var a = e.target.closest && e.target.closest('a[href="#"]');
+  if (!a || a.closest('.modal-overlay')) { return; }
+  e.preventDefault();
+  var box = document.getElementById('tt-toast');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'tt-toast';
+    box.className = 'tt-toast';
+    box.setAttribute('role', 'status');
+    document.body.appendChild(box);
+  }
+  box.textContent = 'This action will work once the database is connected.';
+  box.classList.add('is-visible');
+  clearTimeout(box._t);
+  box._t = setTimeout(function () { box.classList.remove('is-visible'); }, 2800);
+});

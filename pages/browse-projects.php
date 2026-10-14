@@ -6,7 +6,7 @@
  */
 $page_title = "Browse Projects";
 $user_role  = "public";
-$base_url   = "/Webdev/";
+$base_url   = "/TopTunity/";
 
 include '../includes/header.php';
 include '../includes/nav.php';

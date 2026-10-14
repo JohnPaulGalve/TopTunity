@@ -5,7 +5,7 @@
  * Submitting is not connected to a database yet.
  */
 $user_role     = "client";
-$base_url      = "/Webdev/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "projects";
 
 require_once __DIR__ . '/../includes/data.php';
@@ -36,6 +36,26 @@ $submissions = [
     ['type' => 'Report', 'about' => 'Daniel Ocampo · Freelancer', 'reason' => 'Abusive or inappropriate messages', 'date' => 'Sep 28, 2026', 'status' => 'pending'],
     ['type' => 'Dispute', 'about' => 'Menu Board and Cup Sleeve Design', 'reason' => 'Freelancer stopped responding', 'date' => 'Sep 12, 2026', 'status' => 'released'],
 ];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $up  = tt_handle_uploads('attachments');
+    $err = $up['errors'] ? implode(' ', $up['errors']) : null;
+    if ($err) {
+        // files were rejected: nothing is saved
+    } elseif ($tab === 'report') {
+        $err = tt_db_report($_POST['type'] ?? 'User', $_POST['reason'] ?? '', $_POST['details'] ?? '');
+        $ok  = 'Your report was sent to the administrator.';
+    } else {
+        $pid   = (int) ($_POST['project_id'] ?? 0);
+        $title = isset($open_projects[$pid]) ? $open_projects[$pid]['title'] : 'Project';
+        $err   = tt_db_dispute($pid, $title, $_POST['reason'] ?? '', $_POST['details'] ?? '');
+        $ok    = 'Your dispute was filed. The administrator will review it.';
+    }
+    if (!$err) { tt_save_attachments($GLOBALS['tt_last']['type'], $GLOBALS['tt_last']['id'], $up['files']); }
+    tt_flash($err ? 'Could not save: ' . $err : $ok);
+    header('Location: ' . $_SERVER['REQUEST_URI']);
+    exit;
+}
 
 $page_title = "Report and Dispute";
 include '../includes/header.php';
@@ -81,7 +101,7 @@ include '../includes/client-nav.php';
 
 <?php else: ?>
   <section class="box" style="margin-top:1.25rem;">
-    <form method="post" action="">
+    <form method="post" action="" enctype="multipart/form-data">
       <?php if ($tab === 'report'): ?>
         <div class="two-col" style="margin-top:0; grid-template-columns:1fr 1fr; gap:1rem;">
           <div class="field" style="margin-top:0;">

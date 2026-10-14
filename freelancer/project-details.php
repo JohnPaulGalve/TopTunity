@@ -5,7 +5,7 @@
  * Saving is not connected to a database yet.
  */
 $user_role     = "freelancer";
-$base_url      = "/Webdev/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "projects";
 
 require_once __DIR__ . '/../includes/data.php';
@@ -31,6 +31,17 @@ if ($p && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['log_hours'])) {
         header('Location: ' . $base_url . 'freelancer/project-details.php?id=' . $id);
         exit;
     }
+}
+
+if ($p && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_work'])) {
+    $up = tt_handle_uploads('deliverables');
+    if ($up['errors']) { tt_flash('Could not submit: ' . implode(' ', $up['errors'])); }
+    else {
+        tt_save_attachments('deliverable', $id, $up['files']);
+        tt_flash(count($up['files']) ? 'Your work was submitted to the client.' : 'Add at least one file to submit your work.');
+    }
+    header('Location: ' . $_SERVER['REQUEST_URI']);
+    exit;
 }
 
 $page_title = $p ? $p['title'] : 'Project not found';
@@ -139,7 +150,7 @@ include '../includes/client-nav.php';
       <?php if ($p['status'] === 'completed'): ?>
         <p class="muted">The work was approved and the payment was released.</p>
       <?php else: ?>
-        <form method="post" action="project-details.php?id=<?= (int) $id ?>" style="margin-top:0.6rem;">
+        <form method="post" action="project-details.php?id=<?= (int) $id ?>" style="margin-top:0.6rem;" enctype="multipart/form-data">
           <div class="field" style="margin-top:0;">
             <label for="msg-client">Message to client</label>
             <textarea id="msg-client" name="message" class="input" rows="3" style="height:auto; padding:0.7rem; font-size:0.8rem;" placeholder="Explain what you delivered and what to check."><?= $p['submitted'] ? e($p['submitted']['message']) : '' ?></textarea>
@@ -150,10 +161,13 @@ include '../includes/client-nav.php';
             <small>PDF, DOCX, PNG, ZIP up to 20 MB</small>
             <input type="file" name="deliverables[]" multiple>
           </label>
+          <?php foreach (tt_attachments('deliverable', $id) as $f): ?>
+            <div class="file-row" style="margin-top:0.6rem;"><?= icon('file', 15) ?><?= tt_file_name_html($f, $base_url) ?><span class="file-row__size"><?= e($f['size']) ?></span></div>
+          <?php endforeach; ?>
           <?php foreach (($p['submitted']['files'] ?? []) as $f): ?>
             <div class="file-row" style="margin-top:0.6rem;"><?= icon('file', 15) ?><span><?= e($f['name']) ?></span><span class="file-row__size"><?= e($f['size']) ?></span></div>
           <?php endforeach; ?>
-          <div class="form-actions--plain"><button type="submit" class="btn btn--primary"><?= icon('upload', 14) ?> Submit Completed Work</button></div>
+          <div class="form-actions--plain"><button type="submit" name="submit_work" value="1" class="btn btn--primary"><?= icon('upload', 14) ?> Submit Completed Work</button></div>
         </form>
       <?php endif; ?>
     </section>

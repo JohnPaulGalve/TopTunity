@@ -5,12 +5,12 @@
  * Pages set these BEFORE including it:
  *   $page_title  (string)  e.g. "Home"
  *   $user_role   (string)  public | client | freelancer | admin
- *   $base_url    (string)  e.g. "/Webdev/"  (must end with a slash)
+ *   $base_url    (string)  e.g. (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/')  (must end with a slash)
  */
 require_once __DIR__ . '/helpers.php';
 require_once __DIR__ . '/auth.php';
 
-$base_url   = isset($base_url) ? $base_url : '/Webdev/';
+$base_url   = isset($base_url) ? $base_url : (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $page_title = isset($page_title) ? $page_title : 'TopTunity';
 $user_role  = isset($user_role) ? $user_role : 'public';
 $meta_description = isset($meta_description)
@@ -20,7 +20,12 @@ $meta_description = isset($meta_description)
 /* Access rule: a protected area needs a signed-in user with the matching role */
 if (in_array($user_role, ['client', 'freelancer', 'admin'], true)) {
     $signed_in = tt_current_user();
-    if (!$signed_in || $signed_in['role'] !== $user_role) {
+    if ($signed_in && $signed_in['role'] !== $user_role) {
+        // Signed in, but this page belongs to another role: send them to their own dashboard
+        header('Location: ' . $base_url . tt_home_for($signed_in['role']));
+        exit;
+    }
+    if (!$signed_in) {
         $here = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         if (strpos($here, $base_url) === 0) {
             $here = substr($here, strlen($base_url));

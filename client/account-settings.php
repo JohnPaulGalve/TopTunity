@@ -4,10 +4,23 @@
  * Saving is not connected to a database yet.
  */
 $user_role     = "client";
-$base_url      = "/Webdev/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "";
 
 require_once __DIR__ . '/../includes/data.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['current'])) {
+        $err = tt_change_password($_POST['current'], $_POST['new'] ?? '', $_POST['confirm'] ?? ($_POST['new'] ?? ''));
+        $ok  = 'Your password was updated.';
+    } else {
+        $err = tt_update_account($_POST['name'] ?? '', $_POST['email'] ?? '');
+        $ok  = 'Your account details were saved.';
+    }
+    tt_flash($err ? 'Could not save: ' . $err : $ok);
+    header('Location: ' . $_SERVER['REQUEST_URI']);
+    exit;
+}
 $me = toptunity_current_client();
 
 $page_title = "Account Settings";
@@ -49,11 +62,11 @@ include '../includes/client-nav.php';
     <form method="post" action="">
       <div class="field" style="margin-top:0;">
         <label for="cur-pass">Current Password</label>
-        <div class="input-wrap"><?= icon('lock', 16) ?><input id="cur-pass" name="current" type="password" autocomplete="current-password"><span class="input-eye"><?= icon('eye', 16) ?></span></div>
+        <div class="input-wrap"><?= icon('lock', 16) ?><input id="cur-pass" name="current" type="password" autocomplete="current-password"><span class="input-eye" role="button" tabindex="0" aria-label="Show password" aria-pressed="false"><span class="eye-icon eye-icon--open"><?= icon('eye', 16) ?></span><span class="eye-icon eye-icon--off"><?= icon('eye-off', 16) ?></span></span></div>
       </div>
       <div class="field">
         <label for="new-pass">New Password</label>
-        <div class="input-wrap" style="box-shadow:0 0 0 3px rgba(0,148,136,0.12); border-radius:var(--radius-sm);"><?= icon('lock', 16) ?><input id="new-pass" name="new" type="password" minlength="8" autocomplete="new-password" style="border-color:var(--color-vibrant-teal);"><span class="input-eye"><?= icon('eye', 16) ?></span></div>
+        <div class="input-wrap" style="box-shadow:0 0 0 3px rgba(0,148,136,0.12); border-radius:var(--radius-sm);"><?= icon('lock', 16) ?><input id="new-pass" name="new" type="password" minlength="8" autocomplete="new-password" style="border-color:var(--color-vibrant-teal);"><span class="input-eye" role="button" tabindex="0" aria-label="Show password" aria-pressed="false"><span class="eye-icon eye-icon--open"><?= icon('eye', 16) ?></span><span class="eye-icon eye-icon--off"><?= icon('eye-off', 16) ?></span></span></div>
         <p class="hint">At least 8 characters with a number.</p>
       </div>
       <div class="form-actions--plain">
@@ -65,4 +78,24 @@ include '../includes/client-nav.php';
 
 </main>
 
+<script>
+/* Show / hide password (self-contained on this page) */
+(function () {
+  document.querySelectorAll('.input-eye').forEach(function (eye) {
+    function toggle() {
+      var wrap = eye.closest('.input-wrap');
+      var input = wrap ? wrap.querySelector('input') : null;   // the field itself (its type changes on each click)
+      if (!input) { return; }
+      var show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      eye.setAttribute('aria-pressed', show ? 'true' : 'false');
+      eye.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    }
+    eye.addEventListener('click', toggle);
+    eye.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+    });
+  });
+})();
+</script>
 <?php include '../includes/footer.php'; ?>

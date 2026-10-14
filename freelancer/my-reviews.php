@@ -4,7 +4,7 @@
  * NEW file (not in the original plan) because the design shows it as its own page.
  */
 $user_role     = "freelancer";
-$base_url      = "/Webdev/";
+$base_url      = "/TopTunity/";
 $active_client = "";
 
 require_once __DIR__ . '/../includes/data.php';

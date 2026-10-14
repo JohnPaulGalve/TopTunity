@@ -3,10 +3,11 @@
  * freelancer/find-projects.php - Matches the Find Projects design: recommended projects, filters, listing.
  */
 $user_role     = "freelancer";
-$base_url      = "/Webdev/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "find";
 
 require_once __DIR__ . '/../includes/data.php';
+tt_handle_favourite();
 
 $categories = ['Web Development', 'Mobile App Development', 'Graphic Design', 'UI/UX Design',
                'Writing and Content', 'Digital Marketing', 'Video and Animation', 'Data Entry and Admin'];
@@ -24,6 +25,14 @@ foreach (toptunity_listing() as $row) {
     $req  = $full ? $full['skills'] : [];
     $rows[] = $row + ['match' => tt_skill_match($req, $skills), 'skills' => $req ?: $row['skills'],
                       'desc' => $full ? $full['desc'] : $row['desc']];
+}
+
+foreach (tt_load_saved_projects() as $sp) {
+    if ($sp['status'] !== 'open') { continue; }
+    $rows[] = ['id' => $sp['id'], 'title' => $sp['title'], 'category' => $sp['category'], 'client' => 'Client',
+               'type' => $sp['type'], 'amount' => $sp['type'] === 'hourly' ? $sp['rate'] : $sp['budget'],
+               'deadline' => $sp['deadline'], 'proposals' => $sp['proposals'], 'status' => 'open', 'age_h' => 0,
+               'match' => tt_skill_match($sp['skills'], $skills), 'skills' => $sp['skills'], 'desc' => $sp['intro']];
 }
 
 $counts = array_fill_keys($categories, 0);
@@ -114,7 +123,10 @@ include '../includes/client-nav.php';
               <p class="muted"><?= e($r['client']) ?> · <?= e($r['category']) ?></p>
               <div class="chips" style="margin-top:0.5rem;"><?php foreach ($r['skills'] as $s): ?><span class="chip"><?= e($s) ?></span><?php endforeach; ?></div>
               <div class="rec-card__actions">
-                <a href="#" class="btn btn--row-outline"><?= icon('bookmark', 13) ?> Save Project</a>
+                <form method="post" action="find-projects.php" style="display:inline;">
+                  <input type="hidden" name="favourite" value="project"><input type="hidden" name="item" value="<?= (int) $r['id'] ?>">
+                  <button type="submit" class="btn btn--row-outline"><?= icon('bookmark', 13) ?> <?= in_array((int) $r['id'], toptunity_freelancer_saved_ids(), true) ? 'Saved' : 'Save Project' ?></button>
+                </form>
                 <a href="<?= e($base_url) ?>pages/project-details.php?id=<?= (int) $r['id'] ?>" class="btn--row-dark">View Details</a>
               </div>
             </div>
@@ -157,7 +169,10 @@ include '../includes/client-nav.php';
             <div class="project-row__actions" style="flex-direction:column; align-items:flex-end;">
               <div style="font-family:var(--font-heading); font-weight:700; font-size:1.05rem;"><?= $r['type'] === 'hourly' ? '₱' . number_format($r['amount']) . '/hr' : '₱' . number_format($r['amount']) ?></div>
               <div style="display:flex; gap:0.45rem;">
-                <a href="#" class="btn btn--row-outline" aria-label="Save"><?= icon('bookmark', 13) ?></a>
+                <form method="post" action="find-projects.php" style="display:inline;">
+                  <input type="hidden" name="favourite" value="project"><input type="hidden" name="item" value="<?= (int) $r['id'] ?>">
+                  <button type="submit" class="btn btn--row-outline" aria-label="Save"><?= icon('bookmark', 13) ?></button>
+                </form>
                 <a href="<?= e($base_url) ?>pages/project-details.php?id=<?= (int) $r['id'] ?>" class="btn--row-dark">View Details</a>
               </div>
             </div>

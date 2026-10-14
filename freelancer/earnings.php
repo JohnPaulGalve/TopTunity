@@ -1,30 +1,32 @@
 <?php
 /**
- * freelancer/earnings.php - Matches the Earnings and Withdrawals design.
- * Withdrawals are simulated and not connected to a database yet.
+ * freelancer/earnings.php - Earnings, held payments and withdrawals (database).
  */
 $user_role     = "freelancer";
-$base_url      = "/Webdev/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "earnings";
 
 require_once __DIR__ . '/../includes/data.php';
 
-$money   = toptunity_freelancer_earnings();
 $methods = ['gcash' => 'GCash', 'bank' => 'Bank Account'];
 $errors  = [];
-$form    = ['amount' => 10000, 'method' => 'gcash', 'account' => 'Miguel Reyes · 0917 •••• 4821'];
+$form    = ['amount' => '', 'method' => 'gcash', 'account' => ''];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $form['amount'] = (int) (isset($_POST['amount']) ? $_POST['amount'] : 0);
-    $form['method'] = isset($_POST['method']) && isset($methods[$_POST['method']]) ? $_POST['method'] : 'gcash';
-    if ($form['amount'] < 500)                         { $errors[] = 'The minimum withdrawal is ₱500.'; }
-    elseif ($form['amount'] > $money['available'])     { $errors[] = 'You can withdraw at most ₱' . number_format($money['available']) . '.'; }
-    if (!$errors) {
-        tt_flash('Withdrawal of ₱' . number_format($form['amount']) . ' was requested (simulated). It is held until processed.');
+    $form['amount']  = isset($_POST['amount']) ? $_POST['amount'] : '';
+    $form['method']  = isset($_POST['method']) && isset($methods[$_POST['method']]) ? $_POST['method'] : 'gcash';
+    $form['account'] = trim(isset($_POST['account']) ? $_POST['account'] : '');
+    $err = tt_db_withdraw((int) $form['amount'], $form['method'], $form['account']);
+    if ($err) { $errors[] = $err; }
+    else {
+        tt_flash('Withdrawal of ₱' . number_format((int) $form['amount']) . ' was requested. It is held until it is processed.');
         header('Location: ' . $base_url . 'freelancer/earnings.php');
         exit;
     }
 }
+
+$money = toptunity_freelancer_earnings();   // demo figures plus real balances and records
+$real  = tt_freelancer_money();              // real balance only (the limit for withdrawals)
 
 $page_title = "Earnings and Withdrawals";
 include '../includes/header.php';
@@ -38,106 +40,69 @@ include '../includes/client-nav.php';
   </div>
 </div>
 
-<div class="notice-bar" style="margin-top:1.25rem;">
-  <?= icon('info', 15) ?> All transactions are simulated (dummy). No real money is sent. Each action only updates your balance and records in the database.
+<div class="stat-grid" style="grid-template-columns: repeat(3, 1fr); margin-top:1.25rem;">
+  <div class="stat-card"><div class="stat-card__top"><span class="stat-card__label">Available balance</span><span class="icon-box icon-box--teal"><?= icon('wallet', 16) ?></span></div><span class="stat-card__value">₱<?= number_format($money['available']) ?></span><span class="muted">Ready to withdraw</span></div>
+  <div class="stat-card"><div class="stat-card__top"><span class="stat-card__label">Total earned</span><span class="icon-box icon-box--blue"><?= icon('check-circle', 16) ?></span></div><span class="stat-card__value">₱<?= number_format($money['earned']) ?></span><span class="muted">After the service fee</span></div>
+  <div class="stat-card"><div class="stat-card__top"><span class="stat-card__label">Held by clients</span><span class="icon-box icon-box--orange"><?= icon('lock', 16) ?></span></div><span class="stat-card__value">₱<?= number_format($money['on_hold']) ?></span><span class="muted">Released when work is approved</span></div>
 </div>
 
-<div class="stat-grid" style="grid-template-columns: 1.2fr 1fr 1fr; margin-top:1rem;">
-  <div class="stat-card" style="background:var(--color-deep-slate); border-color:var(--color-deep-slate);">
-    <span class="stat-card__label" style="color:#CBD5E1;">Available Balance</span>
-    <span class="stat-card__value" style="color:#FFFFFF; font-size:2rem;">₱<?= number_format($money['available']) ?></span>
-    <span class="muted" style="color:#94A3B8;">₱<?= number_format($money['on_hold']) ?> on hold for a pending withdrawal</span>
-  </div>
-  <div class="stat-card">
-    <div class="stat-card__top"><span class="stat-card__label">Net Earnings</span><span class="icon-box icon-box--teal"><?= icon('dollar', 16) ?></span></div>
-    <span class="stat-card__value">₱<?= number_format($money['net']) ?></span>
-    <span class="muted">From <?= count($money['completed']) ?> completed projects</span>
-  </div>
-  <div class="stat-card">
-    <div class="stat-card__top"><span class="stat-card__label">Platform Service Fee Deducted</span><span class="icon-box icon-box--orange"><?= icon('percent', 16) ?></span></div>
-    <span class="stat-card__value">₱<?= number_format($money['fee']) ?></span>
-    <span class="muted">10% of ₱<?= number_format($money['fee'] * 10) ?></span>
-  </div>
-</div>
-
-<div class="billing-grid">
-  <div class="stack">
-    <section class="panel">
-      <div class="panel__head"><h2>Completed Project Payments</h2></div>
-      <div style="overflow-x:auto;">
-        <table class="data-table">
-          <thead><tr><th>Date</th><th>Project · Billing</th><th class="num">Payment</th><th class="num">Service Fee</th><th class="num">Net</th></tr></thead>
-          <tbody>
-            <?php foreach ($money['completed'] as $c): ?>
-              <tr>
-                <td><?= e($c['date']) ?></td>
-                <td><strong><?= e($c['project']) ?></strong><small><?= e($c['billing']) ?></small></td>
-                <td class="num">₱<?= number_format($c['payment']) ?></td>
-                <td class="num" style="color:var(--color-error-base);">– ₱<?= number_format($c['fee']) ?></td>
-                <td class="num" style="color:var(--color-teal-dark); font-weight:700;">₱<?= number_format($c['net']) ?></td>
-              </tr>
-            <?php endforeach; ?>
-            <tr>
-              <td colspan="2"><strong>Total</strong></td>
-              <td class="num"><strong>₱<?= number_format(array_sum(array_column($money['completed'], 'payment'))) ?></strong></td>
-              <td class="num" style="color:var(--color-error-base);"><strong>– ₱<?= number_format(array_sum(array_column($money['completed'], 'fee'))) ?></strong></td>
-              <td class="num" style="color:var(--color-teal-dark);"><strong>₱<?= number_format(array_sum(array_column($money['completed'], 'net'))) ?></strong></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <section class="panel">
-      <div class="panel__head"><h2>Withdrawal Request Status</h2></div>
-      <div style="overflow-x:auto;">
-        <table class="data-table">
-          <thead><tr><th>Date</th><th>Method</th><th class="num">Amount</th><th>Status</th></tr></thead>
-          <tbody>
-            <?php foreach ($money['withdrawals'] as $w): ?>
-              <tr>
-                <td><?= e($w['date']) ?></td>
-                <td><?= e($w['method']) ?></td>
-                <td class="num">₱<?= number_format($w['amount']) ?></td>
-                <td>
-                  <span class="status status--<?= $w['status'] === 'pending' ? 'pending' : ($w['status'] === 'processed' ? 'released' : 'past') ?>"><?= e(ucfirst($w['status'])) ?></span>
-                  <?php if ($w['status'] === 'rejected'): ?><small class="muted"> returned to balance</small><?php endif; ?>
-                </td>
-              </tr>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </div>
-
-  <aside class="panel summary-card">
-    <div class="panel__head"><h2>Request Withdrawal</h2></div>
-    <?php if ($errors): ?><div class="form-alert" role="alert" style="margin-top:0;"><?= icon('alert', 15) ?><div><?php foreach ($errors as $err): ?><div><?= e($err) ?></div><?php endforeach; ?></div></div><?php endif; ?>
+<div class="two-col" style="grid-template-columns: 1fr 1fr; margin-top:1.25rem;">
+  <section class="panel" style="margin-top:0;">
+    <div class="panel__head"><h2>Request a Withdrawal</h2></div>
+    <?php if ($errors): ?><div class="form-alert" role="alert"><?= icon('alert', 15) ?><div><?php foreach ($errors as $err): ?><div><?= e($err) ?></div><?php endforeach; ?></div></div><?php endif; ?>
     <form method="post" action="earnings.php">
-      <div class="field" style="margin-top:0.6rem;">
-        <label for="w-amount">Amount (₱)</label>
-        <div class="input-prefix"><span>₱</span><input class="input" type="number" id="w-amount" name="amount" min="500" max="<?= (int) $money['available'] ?>" step="1" value="<?= e($form['amount']) ?>" required></div>
-        <span class="hint">Available: ₱<?= number_format($money['available']) ?></span>
+      <div class="field" style="margin-top:0;">
+        <label for="wd-amount">Amount (₱)</label>
+        <input class="input" id="wd-amount" name="amount" type="number" min="500" max="<?= (int) $real['available'] ?>" value="<?= e($form['amount']) ?>">
+        <p class="hint">Minimum ₱500. You can withdraw up to ₱<?= number_format($real['available']) ?> from your real earnings. Sample balances cannot be withdrawn.</p>
       </div>
       <div class="field">
-        <label>Withdraw to</label>
-        <div class="role-options" style="grid-template-columns:1fr 1fr;">
-          <?php foreach ($methods as $key => $label): ?>
-            <label class="role-card"><input type="radio" name="method" value="<?= e($key) ?>" <?= $form['method'] === $key ? 'checked' : '' ?>>
-              <span class="role-card__body"><span><strong><?= e($label) ?></strong></span><span class="role-card__dot"></span></span></label>
-          <?php endforeach; ?>
+        <label for="wd-method">Method</label>
+        <select class="input" id="wd-method" name="method"><?php foreach ($methods as $k => $l): ?><option value="<?= e($k) ?>" <?= $form['method'] === $k ? 'selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?></select>
+      </div>
+      <div class="field">
+        <label for="wd-account">Account number</label>
+        <input class="input" id="wd-account" name="account" value="<?= e($form['account']) ?>" placeholder="e.g. 0917 000 0000">
+      </div>
+      <button type="submit" class="btn btn--primary" style="margin-top:1rem;" <?= $real['available'] < 500 ? 'disabled' : '' ?>>Request Withdrawal</button>
+    </form>
+  </section>
+
+  <section class="panel" style="margin-top:0;">
+    <div class="panel__head"><h2>Withdrawal Requests</h2></div>
+    <?php if (!$money['withdrawals']): ?><p class="muted">No withdrawal requests yet.</p><?php endif; ?>
+    <?php foreach ($money['withdrawals'] as $w): ?>
+      <div class="pay-item">
+        <div class="pay-item__top">
+          <div><strong>₱<?= number_format($w['amount']) ?> · <?= e($w['method']) ?></strong><small><?= e($w['date']) ?><?= !empty($w['sample']) ? ' · Sample' : '' ?></small></div>
+          <span class="status status--<?= $w['status'] === 'processed' ? 'released' : ($w['status'] === 'rejected' ? 'past' : 'pending') ?>"><?= e(ucfirst($w['status'])) ?></span>
         </div>
       </div>
-      <div class="field">
-        <label>Account name / number</label>
-        <div class="input-wrap"><?= icon('user', 16) ?><input value="<?= e($form['account']) ?>" readonly></div>
-      </div>
-      <button type="submit" class="btn btn--primary btn--full">Request Withdrawal</button>
-      <p class="fine-print">Simulated · No real money. The amount is held from your balance until the administrator marks it as processed (or returned if rejected).</p>
-    </form>
-  </aside>
+    <?php endforeach; ?>
+  </section>
 </div>
+
+<section class="admin-list" style="margin-top:1.25rem;">
+  <p class="section-tag" style="padding:0.9rem 1rem 0;">Payments on your projects</p>
+  <div style="overflow-x:auto;">
+    <table class="data-table">
+      <thead><tr><th>Date</th><th>Project</th><th>Billing</th><th class="num">Payment</th><th class="num">Service fee</th><th class="num">You receive</th></tr></thead>
+      <tbody>
+        <?php if (!$money['completed']): ?><tr><td colspan="6" class="muted" style="text-align:center; padding:1.2rem;">No payments yet.</td></tr><?php endif; ?>
+        <?php foreach ($money['completed'] as $e): ?>
+          <tr>
+            <td><?= e($e['date']) ?></td>
+            <td><strong><?= e($e['project']) ?></strong><?= !empty($e['sample']) ? '<small>Sample</small>' : '' ?></td>
+            <td><?= e($e['billing']) ?></td>
+            <td class="num">₱<?= number_format($e['payment']) ?></td>
+            <td class="num">₱<?= number_format($e['fee']) ?></td>
+            <td class="num">₱<?= number_format($e['net']) ?></td>
+          </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+  </div>
+</section>
 
 </main>
 

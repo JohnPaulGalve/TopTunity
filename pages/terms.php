@@ -4,7 +4,7 @@
  * The table of contents jumps to each section by anchor.
  */
 $user_role = "public";
-$base_url  = "/Webdev/";
+$base_url  = "/TopTunity/";
 
 $page_title = "Terms and Privacy Policy";
 include '../includes/header.php';

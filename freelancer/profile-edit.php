@@ -4,7 +4,7 @@
  * Saving is not connected to a database yet.
  */
 $user_role     = "freelancer";
-$base_url      = "/Webdev/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "";
 
 require_once __DIR__ . '/../includes/data.php';
@@ -24,6 +24,20 @@ $form = [
     'about'     => $demo ? $f['about'][0] : '',
 ];
 $errors = [];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_photo'])) {
+    tt_remove_photo();
+    tt_flash('Your profile photo was removed.');
+    header('Location: ' . $_SERVER['REQUEST_URI']);
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['photo'])) {
+    $err = tt_save_photo();
+    tt_flash($err ? 'Could not save: ' . $err : 'Your profile photo was updated.');
+    header('Location: ' . $_SERVER['REQUEST_URI']);
+    exit;
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     foreach ($form as $k => $v) { $form[$k] = trim(isset($_POST[$k]) ? $_POST[$k] : ''); }
@@ -57,10 +71,15 @@ include '../includes/client-nav.php';
 <div class="two-col" style="margin-top:1.25rem;">
   <div class="stack">
     <section class="profile-card">
-      <?= avatar($me['bg'], $me['hair'], $me['style'], 96) ?>
+      <?php $my_photo = tt_user_photo((int) tt_current_user()['id'], 'freelancer'); ?><?php if ($my_photo): ?><img src="<?= e($base_url) ?>download.php?photo=<?= (int) tt_current_user()['id'] ?>" alt="Profile photo" style="width:96px; height:96px; border-radius:50%; object-fit:cover;"><?php else: ?><?= avatar($me['bg'], $me['hair'], $me['style'], 96) ?><?php endif; ?>
       <h2><?= e($form['name']) ?></h2>
       <p><?= e($form['title']) ?></p>
-      <button type="button" class="btn btn--outline btn--sm"><?= icon('upload', 13) ?> Upload Photo</button>
+      <form method="post" enctype="multipart/form-data" style="display:inline;">
+        <label class="btn btn--outline btn--sm" style="cursor:pointer;"><?= icon('upload', 13) ?> Upload Photo<input type="file" name="photo" accept="image/png,image/jpeg" onchange="this.form.submit()" style="display:none;"></label>
+      </form>
+      <?php if (!empty($my_photo)): ?>
+      <form method="post" style="margin-top:0.5rem;"><button type="submit" name="remove_photo" value="1" class="btn btn--row-outline btn--sm">Remove Photo</button></form>
+      <?php endif; ?>
       <div class="rating-box">
         <div><?= stars($rev['avg']) ?></div>
         <strong><?= e($rev['avg']) ?></strong>

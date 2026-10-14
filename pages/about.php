@@ -4,7 +4,7 @@
  * Stats are calculated from the site data, not typed in.
  */
 $user_role = "public";
-$base_url  = "/Webdev/";
+$base_url  = "/TopTunity/";
 
 require_once __DIR__ . '/../includes/data.php';
 

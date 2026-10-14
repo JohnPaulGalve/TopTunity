@@ -3,7 +3,7 @@
  * client/dashboard.php - Client home: stats, posted projects, notifications, messages.
  */
 $user_role     = "client";
-$base_url      = "/Webdev/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "dashboard";
 
 require_once __DIR__ . '/../includes/data.php';
@@ -25,6 +25,10 @@ $ongoing_count  = count(array_filter($projects, function ($p) { return $p['statu
 $pending_total  = array_sum(array_map(function ($x) {
     return $x['status'] === 'pending' ? $x['amount'] : 0;
 }, $payments));
+// Real contracts waiting for a deposit are pending payments too
+foreach (tt_client_billing_projects() as $rp) {
+    if ($rp['contract_status'] === 'active' && empty($rp['escrow_status'])) { $pending_total += (int) $rp['agreed_amount']; }
+}
 
 /* Projects shown in the table */
 $saved_rows = array_filter($projects, function ($k) { return $k >= 1000; }, ARRAY_FILTER_USE_KEY);

@@ -3,7 +3,7 @@
  * freelancer/dashboard.php - Matches the Freelancer Dashboard design.
  */
 $user_role     = "freelancer";
-$base_url      = "/Webdev/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "dashboard";
 
 require_once __DIR__ . '/../includes/data.php';
@@ -16,10 +16,15 @@ $notes     = array_slice(toptunity_freelancer_notifications(), 0, 4);
 $threads   = array_slice(toptunity_freelancer_threads(), 0, 3);
 $skills    = tt_is_demo_freelancer() ? toptunity_freelancer(1)['skills'] : [];
 
-$pending  = count(array_filter($proposals, function ($p) { return $p['status'] === 'pending'; }));
-$selected = count(array_filter($proposals, function ($p) { return $p['status'] === 'selected'; }));
+$real_statuses = tt_freelancer_db_proposal_statuses();   // real proposals sent by this freelancer
+$pending  = count(array_filter($proposals, function ($p) { return $p['status'] === 'pending'; }))
+          + count(array_filter($real_statuses, function ($st) { return $st === 'pending'; }));
+$selected = count(array_filter($proposals, function ($p) { return $p['status'] === 'selected'; }))
+          + count(array_filter($real_statuses, function ($st) { return $st === 'selected'; }));
+$proposal_total = count($proposals) + count($real_statuses);
 $ongoing  = array_values(array_filter($projects, function ($p) { return in_array($p['status'], ['ongoing', 'overdue'], true); }));
 $overdue  = count(array_filter($ongoing, function ($p) { return $p['status'] === 'overdue'; }));
+$ongoing_total  = count($ongoing) + tt_freelancer_db_ongoing_count();
 
 $page_title = "Freelancer Dashboard";
 include '../includes/header.php';
@@ -37,13 +42,13 @@ include '../includes/client-nav.php';
 <div class="stat-grid">
   <div class="stat-card">
     <div class="stat-card__top"><span class="stat-card__label">Proposals</span><span class="icon-box icon-box--teal"><?= icon('file', 16) ?></span></div>
-    <span class="stat-card__value"><?= count($proposals) ?></span>
+    <span class="stat-card__value"><?= (int) $proposal_total ?></span>
     <span class="muted"><?= (int) $pending ?> pending · <?= (int) $selected ?> selected</span>
     <a href="my-proposals.php" class="stat-card__link">My Proposals →</a>
   </div>
   <div class="stat-card">
     <div class="stat-card__top"><span class="stat-card__label">Ongoing Projects</span><span class="icon-box icon-box--blue"><?= icon('clock', 16) ?></span></div>
-    <span class="stat-card__value"><?= count($ongoing) ?></span>
+    <span class="stat-card__value"><?= (int) $ongoing_total ?></span>
     <span class="muted"><?= (int) $overdue ?> overdue</span>
     <a href="my-projects.php" class="stat-card__link">My Projects →</a>
   </div>

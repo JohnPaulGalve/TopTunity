@@ -3,7 +3,7 @@
  * pages/guide.php - How TopTunity works, for clients and freelancers
  */
 $user_role = "public";
-$base_url  = "/Webdev/";
+$base_url  = "/TopTunity/";
 
 $page_title = "Guide";
 include '../includes/header.php';

@@ -5,7 +5,7 @@
  * ?action=logout signs the user out.
  */
 $user_role = "public";
-$base_url  = "/Webdev/";
+$base_url  = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 
 require_once __DIR__ . '/../includes/auth.php';
 
@@ -31,6 +31,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = tt_find_user_by_email($email);
     if (!$user || !password_verify($password, $user['password'])) {
         $error = 'The email or password is incorrect.';
+    } elseif ($user['role'] === 'admin') {
+        // Administrators sign in only on the admin page
+        $error = 'Administrator accounts sign in at the admin page only.';
     } else {
         tt_login($user);
         tt_redirect_after_login($user, $next, $base_url);
@@ -70,7 +73,7 @@ include '../includes/nav.php';
             <label for="email">Email Address</label>
             <div class="input-wrap">
               <?= icon('mail', 16) ?>
-              <input type="email" id="email" name="email" value="<?= e($email) ?>" placeholder="you@example.com" autocomplete="email" required>
+              <input type="email" id="email" name="email" value="<?= e($email) ?>" placeholder="you@example.com" autocomplete="username" autocapitalize="none" spellcheck="false" required>
             </div>
           </div>
 

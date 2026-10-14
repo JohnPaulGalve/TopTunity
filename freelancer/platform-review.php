@@ -4,7 +4,7 @@
  * Sending is not connected to a database yet.
  */
 $user_role     = "freelancer";
-$base_url      = "/Webdev/";
+$base_url      = "/TopTunity/";
 $active_client = "";
 
 require_once __DIR__ . '/../includes/data.php';

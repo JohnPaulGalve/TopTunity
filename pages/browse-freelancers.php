@@ -5,13 +5,14 @@
  */
 $page_title = "Browse Freelancers";
 $user_role  = "public";
-$base_url   = "/Webdev/";
+$base_url   = "/TopTunity/";
 
 include '../includes/header.php';
 include '../includes/nav.php';
 require_once __DIR__ . '/../includes/data.php';
 
 $all = toptunity_freelancers();
+foreach ($all as $k => $f) { $all[$k]['id'] = $k; }
 
 $sort_options = [
     'top_rated'  => 'Top Rated',

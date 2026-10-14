@@ -5,10 +5,11 @@
  * Accepts ?id=N. Falls back to the first freelancer if the ID is unknown.
  */
 $user_role     = "client";
-$base_url      = "/Webdev/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "freelancers";
 
 require_once __DIR__ . '/../includes/data.php';
+tt_handle_favourite();
 
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $f  = toptunity_freelancer($id);
@@ -45,7 +46,10 @@ include '../includes/client-nav.php';
   <div class="profile-actions" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
     <a href="hire-freelancer.php?freelancer=<?= (int) $id ?>" class="btn btn--hire"><?= icon('user-plus', 15) ?> Hire</a>
     <a href="messages.php" class="btn btn--row-outline"><?= icon('message', 13) ?> Message Freelancer</a>
-    <a href="#" class="btn btn--row-outline" style="<?= $saved ? 'color:var(--color-error-base);' : '' ?>"><?= icon('heart', 13) ?> <?= $saved ? 'Saved' : 'Save Freelancer' ?></a>
+    <form method="post" action="freelancer-profile.php?id=<?= (int) $id ?>" style="display:inline;">
+      <input type="hidden" name="favourite" value="freelancer"><input type="hidden" name="item" value="<?= (int) $id ?>">
+      <button type="submit" class="btn btn--row-outline" style="<?= $saved ? 'color:var(--color-error-base);' : '' ?>"><?= icon('heart', 13) ?> <?= $saved ? 'Saved' : 'Save Freelancer' ?></button>
+    </form>
     <a href="report-dispute.php?user=<?= (int) $id ?>" class="btn btn--row-outline"><?= icon('flag', 13) ?> Report User</a>
   </div>
 </div>

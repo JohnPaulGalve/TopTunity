@@ -4,7 +4,7 @@
  * Shows all three steps at once, as in the design. Wire each step to a backend later.
  */
 $user_role = "public";
-$base_url  = "/Webdev/";
+$base_url  = "/TopTunity/";
 
 $page_title = "Forgot Password";
 include '../includes/header.php';

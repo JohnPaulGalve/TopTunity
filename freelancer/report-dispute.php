@@ -4,7 +4,7 @@
  * ?tab=report|dispute|submissions. Submitting is not connected to a database yet.
  */
 $user_role     = "freelancer";
-$base_url      = "/Webdev/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "";
 
 require_once __DIR__ . '/../includes/data.php';
@@ -24,11 +24,31 @@ $reasons_report  = ['Fake or misleading project posting', 'Abusive or inappropri
 $reasons_dispute = ['Client did not approve or pay for work', 'Scope changed without agreement', 'Payment or release problem', 'Client stopped responding', 'Other'];
 $projects = array_filter(toptunity_freelancer_projects(), function ($p) { return $p['status'] === 'ongoing'; });
 
+// Real projects this freelancer is working on (added to the sample list)
+$me_id = (int) tt_current_user()['id'];
+foreach (db()->query("SELECT id, title FROM projects WHERE freelancer_id = $me_id AND status IN ('ongoing','overdue')")->fetchAll() as $rp) {
+    $projects[] = ['id' => 1000 + (int) $rp['id'], 'title' => $rp['title'], 'status' => 'ongoing'];
+}
+
 $errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $details = trim(isset($_POST['details']) ? $_POST['details'] : '');
     if (mb_strlen($details) < 20) { $errors[] = 'Describe what happened (at least 20 characters).'; }
+    $up = tt_handle_uploads('attachments');
+    $errors = array_merge($errors, $up['errors']);
     if (!$errors) {
+        if ($tab === 'dispute') {
+            $pid   = (int) ($_POST['project'] ?? 0);
+            $title = 'Project';
+            foreach ($projects as $pp) { if ((int) $pp['id'] === $pid) { $title = $pp['title']; } }
+            $e2 = tt_db_dispute($pid, $title, $_POST['reason'] ?? '', $details);
+        } else {
+            $e2 = tt_db_report($_POST['type'] ?? 'User', $_POST['reason'] ?? '', $details);
+        }
+        if ($e2) { $errors[] = $e2; }
+    }
+    if (!$errors) {
+        tt_save_attachments($GLOBALS['tt_last']['type'], $GLOBALS['tt_last']['id'], $up['files']);
         tt_flash('Your ' . ($tab === 'dispute' ? 'dispute' : 'report') . ' was sent to the administrator for review.');
         header('Location: ' . $base_url . 'freelancer/report-dispute.php?tab=submissions');
         exit;
@@ -86,7 +106,7 @@ include '../includes/client-nav.php';
     <?php if ($errors): ?>
       <div class="form-alert" role="alert" style="margin-top:0;"><?= icon('alert', 15) ?><div><?php foreach ($errors as $err): ?><div><?= e($err) ?></div><?php endforeach; ?></div></div>
     <?php endif; ?>
-    <form method="post" action="report-dispute.php?tab=<?= e($tab) ?>">
+    <form method="post" action="report-dispute.php?tab=<?= e($tab) ?>" enctype="multipart/form-data">
       <?php if ($tab === 'report'): ?>
         <div class="two-col" style="margin-top:0; grid-template-columns:1fr 1fr; gap:1rem;">
           <div class="field" style="margin-top:0;">

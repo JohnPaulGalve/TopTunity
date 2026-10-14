@@ -3,7 +3,7 @@
  * pages/contact.php - Public contact form. Submission is not wired to a backend yet.
  */
 $user_role = "public";
-$base_url  = "/Webdev/";
+$base_url  = "/TopTunity/";
 
 $page_title = "Contact Us";
 include '../includes/header.php';

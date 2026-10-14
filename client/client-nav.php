@@ -7,7 +7,7 @@
  *   $page_title, $base_url  (as usual)
  * Pages must set $app_shell = true (footer.php closes the shell using it).
  */
-$base_url      = isset($base_url) ? $base_url : '/Webdev/';
+$base_url      = isset($base_url) ? $base_url : '/TopTunity/';
 $active_client = isset($active_client) ? $active_client : '';
 $app_shell     = true;
 $me            = toptunity_current_client();

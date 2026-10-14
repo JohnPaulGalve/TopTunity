@@ -4,7 +4,7 @@
  * Filter with ?role=client|freelancer. Paginates 9 per page.
  */
 $user_role = "public";
-$base_url  = "/Webdev/";
+$base_url  = "/TopTunity/";
 
 require_once __DIR__ . '/../includes/data.php';
 

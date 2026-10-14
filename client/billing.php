@@ -1,39 +1,59 @@
 <?php
 /**
- * client/billing.php - Deposits, held funds, refunds, hourly billing and payment history.
- * All payments are simulated. Buttons do not move money yet.
+ * client/billing.php - Pending payments, hourly billing, payment history and breakdown.
+ * Demo rows (for demo accounts) are shown as sample data. Real deposits and releases
+ * come from the database and have working buttons.
  */
 $user_role     = "client";
-$base_url      = "/Webdev/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "billing";
 
 require_once __DIR__ . '/../includes/data.php';
 
-$projects = toptunity_client_projects();
-$payments = toptunity_client_payments();
-$hourly   = toptunity_client_hourly_billing();
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $site = (int) ($_POST['project'] ?? 0);
+    $act  = $_POST['action'] ?? '';
+    if ($act === 'sample') {
+        header('Location: ' . $base_url . 'client/billing.php');
+        exit;
+    }
+    $err  = $act === 'deposit' ? tt_db_deposit($site) : ($act === 'release' ? tt_db_release($site) : 'Unknown action.');
+    tt_flash($err ? 'Could not continue: ' . $err : ($act === 'deposit' ? 'Deposit recorded. The money is held until you release it.' : 'Payment released. The freelancer has been notified.'));
+    header('Location: ' . $base_url . 'client/billing.php');
+    exit;
+}
+
+$projects = toptunity_client_projects();           // demo projects plus real ones
+$payments = toptunity_client_payments();           // demo rows plus real deposits and releases
+$hourly   = toptunity_client_hourly_billing();     // demo hourly table (empty for real accounts)
+$real_projects = tt_client_billing_projects();
 
 $sum = function ($statuses) use ($payments) {
     return array_sum(array_map(function ($x) use ($statuses) {
         return in_array($x['status'], $statuses, true) ? $x['amount'] : 0;
     }, $payments));
 };
-$held_total     = $sum(['held']);
-$paid_total     = $sum(['paid', 'released']);
-$refund_total   = $sum(['refunded']);
-$refund_count   = count(array_filter($payments, function ($x) { return $x['status'] === 'refunded'; }));
+$demo = tt_is_demo_account();
+$held_total   = $sum(['held']);
+$real_paid    = 0; $real_refunds = 0;
+foreach (tt_client_payment_history() as $h) { if ($h['status'] === 'released') { $real_paid += (int) $h['amount']; } }
+$paid_total   = ($demo ? 61400 : 0) + $real_paid;      // design lifetime total for the demo, plus real releases
+$refund_total = ($demo ? 6250 : 0) + $real_refunds;
+$refund_count = ($demo ? 2 : 0);
 
-/* Pending deposit: Monthly Social Media Content Calendar (hourly) */
-$pending_pid = 3;
-$pending     = isset($projects[$pending_pid]) ? $projects[$pending_pid] : null;
+/* Demo pending deposit: Monthly Social Media Content Calendar (hourly), sample only */
+$pending     = isset($projects[3]) && $demo ? $projects[3] : null;
 $pending_amt = $pending ? $pending['budget'] : 0;
+$waiting     = isset($projects[1]) && $demo ? $projects[1] : null;
 
 $filter = isset($_GET['type']) ? $_GET['type'] : 'all';
-$types  = ['all' => 'All types', 'Deposit' => 'Deposit', 'Refund' => 'Refund', 'Hourly Billing' => 'Hourly Billing'];
+$types  = ['all' => 'All types', 'Deposit' => 'Deposit', 'Release' => 'Release', 'Refund' => 'Refund', 'Hourly Billing' => 'Hourly Billing'];
 if (!isset($types[$filter])) { $filter = 'all'; }
 $history = array_values(array_filter($payments, function ($x) use ($filter) {
     return $filter === 'all' || $x['type'] === $filter;
 }));
+
+$sample_held = array_filter($payments, function ($x) { return $x['status'] === 'held' && !empty($x['sample']); });
 
 $page_title = "Billing and Payments";
 include '../includes/header.php';
@@ -43,7 +63,7 @@ include '../includes/client-nav.php';
 <div class="welcome-row">
   <div>
     <h1>Billing and Payments</h1>
-    <p class="subtle">Pay for your projects and manage your billing records.</p>
+    <p class="subtle">Deposit the agreed amount when a contract is active. Release it when you approve the work.</p>
   </div>
 </div>
 
@@ -61,7 +81,7 @@ include '../includes/client-nav.php';
   <div class="stat-card">
     <div class="stat-card__top"><span class="stat-card__label">Total Paid</span><span class="icon-box icon-box--teal"><?= icon('check-circle', 16) ?></span></div>
     <span class="stat-card__value">₱<?= number_format($paid_total) ?></span>
-    <span class="muted">Since Feb 2025</span>
+    <span class="muted">Released to freelancers</span>
   </div>
   <div class="stat-card">
     <div class="stat-card__top"><span class="stat-card__label">Refunds</span><span class="icon-box icon-box--orange"><?= icon('refresh', 16) ?></span></div>
@@ -73,41 +93,101 @@ include '../includes/client-nav.php';
 <div class="billing-grid">
   <div class="stack">
 
-    <?php if ($pending): ?>
-    <!-- Pending payments --><!-- Pending payments -->
+    <!-- Pending payments: sample items (demo) and real projects waiting for a deposit -->
     <section class="panel">
       <div class="panel__head"><h2>Pending Payments</h2></div>
+
+      <?php if ($pending): ?>
       <div class="pending-box" style="margin-bottom:0.8rem;">
         <div class="pay-item">
           <div class="pay-item__top">
             <div>
               <strong><?= e($pending['title']) ?></strong>
-              <span class="status status--<?= $pending['type'] === 'hourly' ? 'ongoing' : 'open' ?>" style="margin-top:0.4rem;"><?= $pending['type'] === 'hourly' ? 'Hourly' : 'Fixed Price' ?></span>
+              <span class="status status--ongoing" style="margin-top:0.4rem;">Hourly</span>
               <small>₱<?= number_format($pending['rate']) ?>/hr × <?= (int) $pending['max_hours'] ?> hrs max · Contract accepted Oct 02, 2026</small>
             </div>
             <span class="pay-item__amount">₱<?= number_format($pending_amt) ?></span>
           </div>
-          <div class="pay-item__action"><a href="#" class="btn btn--deposit">Deposit Project Amount</a></div>
-        </div>
-      </div>
-      <div class="pending-box" style="background:#FFFFFF; border-color:var(--color-border-gray);">
-        <div class="pay-item">
-          <div class="pay-item__top">
-            <div>
-              <strong><?= e($projects[1]['title']) ?></strong>
-              <span class="status status--pending" style="margin-top:0.4rem;">Fixed Price</span>
-              <small>Waiting for Miguel Reyes to accept the contract</small>
-            </div>
-            <span class="pay-item__amount">₱<?= number_format($projects[1]['budget'] ?? 42000) ?></span>
+          <div class="pay-item__action">
+            <form method="post" action="billing.php">
+              <input type="hidden" name="action" value="sample">
+              <button type="submit" class="btn btn--deposit"><?= icon('lock', 13) ?> Deposit Project Amount</button>
+            </form>
           </div>
-          <div class="pay-item__action"><a href="#" class="btn btn--deposit" aria-disabled="true">Deposit Project Amount</a></div>
         </div>
       </div>
+      <?php endif; ?>
+
+      <?php if ($waiting): ?>
+        <div class="pending-box" style="margin-bottom:0.8rem; background:#FFFFFF; border-color:var(--color-border-gray);">
+          <div class="pay-item">
+            <div class="pay-item__top">
+              <div>
+                <strong><?= e($waiting['title']) ?></strong>
+                <span class="status status--open" style="margin-top:0.4rem;">Fixed Price</span>
+                <small>Waiting for Miguel Reyes to accept the contract</small>
+              </div>
+              <span class="pay-item__amount">₱42,000</span>
+            </div>
+            <div class="pay-item__action"><a href="#" class="btn btn--deposit" aria-disabled="true">Deposit Project Amount</a></div>
+          </div>
+        </div>
+      <?php endif; ?>
+
+      <?php foreach ($real_projects as $p):
+        if ($p['contract_status'] !== 'active' || !empty($p['escrow_status'])) { continue; } ?>
+        <div class="pending-box" style="margin-bottom:0.8rem;">
+          <div class="pay-item">
+            <div class="pay-item__top">
+              <div><strong><?= e($p['title']) ?></strong><small>Freelancer: <?= e($p['freelancer_name']) ?> · Contract accepted</small></div>
+              <span class="pay-item__amount">₱<?= number_format($p['agreed_amount']) ?></span>
+            </div>
+            <div class="pay-item__action">
+              <form method="post" action="billing.php">
+                <input type="hidden" name="action" value="deposit"><input type="hidden" name="project" value="<?= (int) ($p['id'] + 1000) ?>">
+                <button type="submit" class="btn btn--deposit"><?= icon('lock', 13) ?> Deposit Project Amount</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      <?php endforeach; ?>
+
+      <?php foreach ($real_projects as $p):
+        if ($p['escrow_status'] !== 'held') { continue; } ?>
+        <div class="pending-box" style="margin-bottom:0.8rem; background:#FFFFFF; border-color:var(--color-border-gray);">
+          <div class="pay-item">
+            <div class="pay-item__top">
+              <div><strong><?= e($p['title']) ?></strong><small>Held until you approve the work · Freelancer: <?= e($p['freelancer_name']) ?></small></div>
+              <span class="pay-item__amount">₱<?= number_format($p['escrow_amount']) ?></span>
+            </div>
+            <div class="pay-item__action">
+              <form method="post" action="billing.php" onsubmit="return confirm('Release this payment? This cannot be undone.');">
+                <input type="hidden" name="action" value="release"><input type="hidden" name="project" value="<?= (int) ($p['id'] + 1000) ?>">
+                <button type="submit" class="btn btn--primary"><?= icon('check-circle', 13) ?> Approve and Release</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      <?php endforeach; ?>
+
+      <?php foreach ($sample_held as $h): ?>
+        <div class="pending-box" style="margin-bottom:0.8rem; background:#FFFFFF; border-color:var(--color-border-gray);">
+          <div class="pay-item">
+            <div class="pay-item__top">
+              <div><strong><?= e($h['project']) ?></strong><small>Sample · held until the End Date</small></div>
+              <span class="pay-item__amount">₱<?= number_format($h['amount']) ?></span>
+            </div>
+          </div>
+        </div>
+      <?php endforeach; ?>
+
+      <?php if (!$pending && !$sample_held && !array_filter($real_projects, function ($p) { return $p['contract_status'] === 'active'; })): ?>
+        <p class="muted">Nothing is pending right now.</p>
+      <?php endif; ?>
     </section>
 
-    <?php endif; ?>
-
-    <!-- Hourly billing -->
+    <!-- Hourly billing (demo) -->
+    <?php if ($hourly): ?>
     <section class="panel">
       <div class="panel__head">
         <h2>Hourly Billing</h2>
@@ -136,6 +216,7 @@ include '../includes/client-nav.php';
         </table>
       </div>
     </section>
+    <?php endif; ?>
 
     <!-- Payment history -->
     <section class="panel">
@@ -163,7 +244,7 @@ include '../includes/client-nav.php';
             <?php foreach ($history as $x): ?>
               <tr>
                 <td><?= e(date('M d, Y', strtotime($x['date']))) ?></td>
-                <td><strong><?= e($x['project']) ?></strong><small><?= e($x['type']) ?></small></td>
+                <td><strong><?= e($x['project']) ?></strong><small><?= e($x['type']) ?><?= !empty($x['sample']) ? ' · Sample' : '' ?></small></td>
                 <td class="num">₱<?= number_format($x['amount']) ?></td>
                 <td><span class="status status--<?= e($x['status']) ?>"><?= e(ucfirst($x['status'])) ?></span></td>
                 <td><a href="#" class="view" aria-label="Download receipt"><?= icon('file', 15) ?></a></td>
@@ -177,20 +258,23 @@ include '../includes/client-nav.php';
 
   </div>
 
-  <!-- Payment breakdown -->
+  <!-- Payment breakdown (demo hourly project) -->
   <?php if ($pending): ?>
   <aside class="panel summary-card">
     <div class="panel__head"><h2>Payment Breakdown</h2></div>
-    <p class="muted" style="margin-bottom:0.8rem;"><?= e($pending['title']) ?> · Hourly</p>
+    <p class="muted" style="margin-bottom:0.8rem;"><?= e($pending['title']) ?> · Hourly · Sample</p>
     <div class="kv"><span>Hourly rate</span><strong>₱<?= number_format($pending['rate']) ?>/hr</strong></div>
     <div class="kv"><span>Maximum hours</span><strong><?= (int) $pending['max_hours'] ?> hrs</strong></div>
     <div class="kv"><span>Platform service fee (10%)</span><strong style="color:var(--color-muted-gray); font-weight:500;">deducted from freelancer</strong></div>
     <div class="kv" style="border-top:1px solid var(--color-border-gray); margin-top:0.4rem; padding-top:0.8rem;"><span>You pay</span><strong class="big" style="font-size:1rem;">₱<?= number_format($pending_amt) ?></strong></div>
     <p class="fee-note">Held until the End Date (<?= e(date('M d, Y', strtotime($pending['deadline']))) ?>). Only approved hours are billed; the unused deposit is refunded.</p>
-    <a href="#" class="btn btn--deposit"><?= icon('lock', 13) ?> Deposit Project Amount</a>
+    <form method="post" action="billing.php" style="margin-top:0.8rem;">
+      <input type="hidden" name="action" value="sample">
+      <button type="submit" class="btn btn--deposit" style="width:100%;"><?= icon('lock', 13) ?> Deposit Project Amount</button>
+    </form>
     <p class="fine-print">Simulated · No real money</p>
   </aside>
-<?php endif; ?>
+  <?php endif; ?>
 </div>
 
 </main>

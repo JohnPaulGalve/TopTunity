@@ -4,7 +4,7 @@
  * Accept and decline are shown as popups (CSS :target). Saving is not connected to a database yet.
  */
 $user_role     = "freelancer";
-$base_url      = "/Webdev/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "projects";
 
 require_once __DIR__ . '/../includes/data.php';
@@ -15,7 +15,17 @@ $tab  = isset($_GET['tab']) && isset($tabs[$_GET['tab']]) ? $_GET['tab'] : 'all'
 $counts = ['all' => count($all)];
 foreach ($all as $p) { $counts[$p['status']] = ($counts[$p['status']] ?? 0) + 1; }
 
-$offers = array_values(array_filter($all, function ($p) { return $p['status'] === 'offer'; }));
+if (!empty($_POST['respond'])) {
+    $accept = $_POST['respond'] === 'accept';
+    $err = tt_db_respond_contract((int) $_POST['project'], $accept);
+    tt_flash($err ?: ($accept ? 'Contract accepted. The project is now ongoing.' : 'You declined the contract. The project is open again.'));
+    header('Location: ' . $base_url . 'freelancer/my-projects.php');
+    exit;
+}
+$offers = array_map(function ($r) {
+    return ['id' => 1000 + (int) $r['id'], 'title' => $r['title'], 'client' => $r['client_name'], 'client_company' => '',
+            'budget' => (int) ($r['agreed_amount'] ?: $r['budget']), 'deadline' => $r['deadline'], 'status' => 'offer'];
+}, tt_db_freelancer_offers());
 $rows   = array_values(array_filter($all, function ($p) use ($tab) {
     return $p['status'] !== 'offer' && ($tab === 'all' || $tab === $p['status']);
 }));
@@ -63,7 +73,7 @@ include '../includes/client-nav.php';
       <div class="offer-row__actions">
         <a href="#accept" class="btn btn--primary">Accept Project</a>
         <a href="#contract" class="btn btn--row-outline">View Contract</a>
-        <a href="#" class="btn btn--danger-outline">Decline</a>
+        <form method="post" action="my-projects.php" style="display:inline;"><input type="hidden" name="project" value="<?= (int) $o['id'] ?>"><button name="respond" value="decline" class="btn btn--danger-outline">Decline</button></form>
       </div>
     </div>
   </section>
@@ -96,8 +106,8 @@ include '../includes/client-nav.php';
       </div>
       <label class="agree"><input type="checkbox" required> I agree to the contract terms</label>
       <div class="modal__foot">
-        <a href="#" class="btn btn--danger-outline">Decline Project</a>
-        <a href="my-projects.php" class="btn btn--primary">Accept Project</a>
+        <form method="post" action="my-projects.php" style="display:inline;"><input type="hidden" name="project" value="<?= (int) $o['id'] ?>"><button name="respond" value="decline" class="btn btn--danger-outline">Decline Project</button></form>
+        <form method="post" action="my-projects.php" style="display:inline;"><input type="hidden" name="project" value="<?= (int) $o['id'] ?>"><button name="respond" value="accept" class="btn btn--primary">Accept Project</button></form>
       </div>
     </div>
   </div>

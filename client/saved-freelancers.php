@@ -4,10 +4,11 @@
  * Removing is not connected to a database yet.
  */
 $user_role     = "client";
-$base_url      = "/Webdev/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "freelancers";
 
 require_once __DIR__ . '/../includes/data.php';
+tt_handle_favourite();
 
 $saved = array_filter(array_map('toptunity_freelancer', toptunity_saved_freelancer_ids()));
 
@@ -39,7 +40,10 @@ include '../includes/client-nav.php';
         <p class="saved-card__role"><?= e($f['title']) ?></p>
         <div class="stars"><?= stars($f['rating']) ?> <strong><?= e($f['rating']) ?></strong></div>
         <a href="freelancer-profile.php?id=<?= (int) $fid ?>" class="btn btn--teal-outline">View Profile</a>
-        <a href="#" class="saved-card__remove"><?= icon('heart', 13) ?> Remove from Saved</a>
+        <form method="post" action="saved-freelancers.php" style="display:inline;">
+          <input type="hidden" name="favourite" value="freelancer"><input type="hidden" name="item" value="<?= (int) $fid ?>">
+          <button type="submit" class="saved-card__remove" style="background:none; border:0; cursor:pointer;"><?= icon('heart', 13) ?> Remove from Saved</button>
+        </form>
       </article>
     <?php endforeach; ?>
   </div>

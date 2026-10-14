@@ -4,7 +4,7 @@
  * Step 1 picks one of your open projects. Continue opens the contract on project-tracking.
  */
 $user_role     = "client";
-$base_url      = "/Webdev/";
+$base_url      = "/TopTunity/";
 $active_client = "freelancers";
 
 require_once __DIR__ . '/../includes/data.php';

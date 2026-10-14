@@ -4,7 +4,7 @@
  * Open a thread with ?c=N (0-based index). Sending is not connected to a database yet.
  */
 $user_role     = "client";
-$base_url      = "/Webdev/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "";
 
 require_once __DIR__ . '/../includes/data.php';
@@ -15,7 +15,34 @@ $threads = toptunity_client_threads();
 $q      = isset($_GET['q']) ? trim($_GET['q']) : '';
 $open   = isset($_GET['c']) ? (int) $_GET['c'] : 0;
 if (!isset($threads[$open])) { $open = 0; }
+if (isset($_GET['with'])) {
+    foreach ($threads as $ti => $tt) { if (!empty($tt['real']) && (int) $tt['with'] === (int) $_GET['with']) { $open = $ti; } }
+}
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message'])) {
+    $t = $threads[$open] ?? null;
+    if ($t && !empty($t['real'])) {
+        $err = tt_send_message($t['with'], $_POST['message']);
+        tt_flash($err ? 'Could not send: ' . $err : 'Message sent.');
+        header('Location: ' . $base_url . 'client/messages.php?with=' . (int) $t['with']);
+    } else {
+        $dk = 'demo_' . (int) tt_current_user()['id'];
+        $key = ($threads[$open]['name'] ?? '') . '|' . ($threads[$open]['project_id'] ?? 0);
+        $body = trim($_POST['message']);
+        if ($body !== '' && mb_strlen($body) <= 2000) {
+            $_SESSION[$dk][$key][] = ['from' => 'me', 'text' => $body, 'time' => 'Just now'];
+        }
+        header('Location: ' . $_SERVER['REQUEST_URI']);
+    }
+    exit;
+}
+if (!empty($threads[$open]['real'])) { tt_mark_thread_read($threads[$open]['with']); }
+
 $thread = $threads ? $threads[$open] : null;
+if ($thread && empty($thread['real'])) {
+    $dk = 'demo_' . (int) tt_current_user()['id'];
+    $key = $thread['name'] . '|' . ($thread['project_id'] ?? 0);
+    if (!empty($_SESSION[$dk][$key])) { $thread['messages'] = array_merge($thread['messages'], $_SESSION[$dk][$key]); }
+}
 
 $shown = [];
 foreach ($threads as $i => $t) {

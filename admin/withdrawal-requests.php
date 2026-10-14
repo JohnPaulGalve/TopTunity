@@ -1,43 +1,86 @@
 <?php
-$page_title = "Freelancer Withdrawal Requests";
-$user_role = "admin";
+/**
+ * admin/withdrawal-requests.php - Freelancer withdrawal requests (database).
+ */
+$user_role     = "admin";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
+$active_client = "withdraw";
+
+require_once __DIR__ . '/../includes/data.php';
+
+$all  = toptunity_admin_withdrawals();   // real requests first, then demo rows
+$want = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+$sel  = null;
+foreach ($all as $w) { if ((int) $w['id'] === $want && empty($w['sample'])) { $sel = $w; } }
+if (!$sel) { foreach ($all as $w) { if (empty($w['sample'])) { $sel = $w; break; } } }
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $sel) {
+    $action = $_POST['action'] ?? '';
+    $reason = trim($_POST['reason'] ?? '');
+    $err = in_array($action, ['process', 'reject'], true) ? tt_db_process_withdrawal((int) $sel['id'], $action, $reason) : 'Choose an action.';
+    tt_flash($err ? 'Could not continue: ' . $err : ($action === 'process' ? 'Marked as processed.' : 'Rejected. The amount returns to the freelancer\'s balance.'));
+    header('Location: ' . $base_url . 'admin/withdrawal-requests.php?id=' . (int) $sel['id']);
+    exit;
+}
+
+$cls = ['pending' => 'pending', 'processed' => 'released', 'rejected' => 'past'];
+$money_label = function ($m) { return $m; };
+$page_title = "Withdrawal Requests";
 include '../includes/header.php';
-include '../includes/nav.php';
+include '../includes/client-nav.php';
 ?>
 
-<div class="container" style="padding-top: 3rem; padding-bottom: 3rem;">
-  <h2>Withdrawal Requests Approval Panel</h2>
-  <p style="color: var(--color-muted-gray); margin-bottom: 2rem;">Review and process simulated GCash or Bank payout requests submitted by freelancers[cite: 11, 85].</p>
-
-  <div class="card">
-    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
-      <thead>
-        <tr style="border-bottom: 2px solid var(--color-border-gray); background: var(--color-off-white);">
-          <th style="padding: 0.75rem;">Request ID</th>
-          <th style="padding: 0.75rem;">Freelancer Name</th>
-          <th style="padding: 0.75rem;">Method</th>
-          <th style="padding: 0.75rem;">Account / Mobile</th>
-          <th style="padding: 0.75rem;">Requested Amount</th>
-          <th style="padding: 0.75rem;">Date</th>
-          <th style="padding: 0.75rem;">Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr style="border-bottom: 1px solid var(--color-border-gray);">
-          <td style="padding: 0.75rem;">#WDR-102</td>
-          <td style="padding: 0.75rem;"><strong>Miguel Reyes</strong>[cite: 95]</td>
-          <td style="padding: 0.75rem;">GCash</td>
-          <td style="padding: 0.75rem;">0917 888 1234</td>
-          <td style="padding: 0.75rem; font-weight: bold; color: var(--color-vibrant-teal);">₱10,000</td>
-          <td style="padding: 0.75rem;">Oct 07, 2026</td>
-          <td style="padding: 0.75rem; display: flex; gap: 0.5rem;">
-            <button class="btn-primary" style="padding: 0.2rem 0.5rem; font-size: 0.75rem; background: var(--color-success-base);">Mark Processed</button>[cite: 11, 85]
-            <button class="btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.75rem; color: var(--color-error-base);">Reject</button>[cite: 11, 85]
-          </td>
-        </tr>
-      </tbody>
-    </table>
+<div class="welcome-row">
+  <div>
+    <h1>Withdrawal Requests</h1>
+    <p class="subtle">Review freelancers' withdrawal requests.</p>
   </div>
 </div>
+
+<div class="admin-layout" style="margin-top:1.25rem;">
+  <section class="admin-list">
+    <div style="overflow-x:auto;">
+      <table class="data-table">
+        <thead><tr><th>Date</th><th>Freelancer</th><th>Method</th><th class="num">Amount</th><th>Status</th></tr></thead>
+        <tbody>
+          <?php if (!$all): ?><tr><td colspan="5" class="muted" style="text-align:center; padding:1.2rem;">No withdrawal requests yet.</td></tr><?php endif; ?>
+          <?php foreach ($all as $w): ?>
+            <tr class="<?= $sel && $w['id'] === $sel['id'] ? 'is-selected' : '' ?>">
+              <td><?= e($w['date']) ?></td>
+              <td><?php if (empty($w['sample'])): ?><a href="withdrawal-requests.php?id=<?= (int) $w['id'] ?>"><strong><?= e($w['freelancer']) ?></strong></a><?php else: ?><strong><?= e($w['freelancer']) ?></strong><small>Sample</small><?php endif; ?></td>
+              <td><?= e($w['method']) ?></td>
+              <td class="num">₱<?= number_format($w['amount']) ?></td>
+              <td><span class="status status--<?= e($cls[$w['status']]) ?>"><?= e(ucfirst($w['status'])) ?></span></td>
+            </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <aside class="admin-side">
+    <h2>Request Details</h2>
+    <?php if (!$sel): ?>
+      <p class="muted">No request selected.</p>
+    <?php else: ?>
+      <div class="kv"><span>Freelancer</span><strong><?= e($sel['freelancer']) ?></strong></div>
+      <div class="kv"><span>Method</span><strong><?= e($sel['method']) ?></strong></div>
+      <div class="kv"><span>Account</span><strong><?= e($sel['account']) ?></strong></div>
+      <div class="kv"><span>Amount</span><strong>₱<?= number_format($sel['amount']) ?></strong></div>
+      <div class="kv"><span>Status</span><span class="status status--<?= e($cls[$sel['status']]) ?>"><?= e(ucfirst($sel['status'])) ?></span></div>
+
+      <?php if ($sel['status'] === 'pending'): ?>
+        <form method="post" action="withdrawal-requests.php?id=<?= (int) $sel['id'] ?>" style="margin-top:0.9rem;">
+          <button type="submit" name="action" value="process" class="btn btn--green btn--block">✓ Mark as Processed</button>
+          <input class="input" name="reason" placeholder="Reason, if rejecting (10+ characters)" style="margin-top:0.6rem; height:38px;">
+          <button type="submit" name="action" value="reject" class="btn btn--block" style="margin-top:0.5rem; background:#FFFFFF; border:1px solid var(--color-error-base); color:var(--color-error-base);">Mark as Rejected</button>
+        </form>
+        <p class="note-line" style="margin-top:0.7rem;">The freelancer is notified. Rejected amounts return to their balance.</p>
+      <?php endif; ?>
+    <?php endif; ?>
+  </aside>
+</div>
+
+</main>
 
 <?php include '../includes/footer.php'; ?>

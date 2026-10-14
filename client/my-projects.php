@@ -5,7 +5,7 @@
  * Shows 6 per page. Buttons depend on each project's status.
  */
 $user_role     = "client";
-$base_url      = "/Webdev/";
+$base_url      = "/TopTunity/";
 $active_client = "projects";
 
 require_once __DIR__ . '/../includes/data.php';

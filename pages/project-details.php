@@ -4,7 +4,7 @@
  * Reads ?id= from the URL. Sample data below stands in for a database query.
  */
 $user_role = "public";
-$base_url  = "/Webdev/";
+$base_url  = "/TopTunity/";
 
 require_once __DIR__ . '/../includes/data.php';
 
