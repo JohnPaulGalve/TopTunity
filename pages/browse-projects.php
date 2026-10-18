@@ -14,10 +14,7 @@ include '../includes/nav.php';
 require_once __DIR__ . '/../includes/data.php';
 $all_projects = toptunity_listing();
 
-$categories = [
-    'Web Development', 'Mobile App Development', 'Graphic Design', 'UI/UX Design',
-    'Writing and Content', 'Digital Marketing', 'Video and Animation', 'Data Entry and Admin',
-];
+$categories = toptunity_category_catalog();
 
 /* ---------- Read & validate query string ---------- */
 $q        = isset($_GET['q']) ? trim($_GET['q']) : '';
@@ -62,7 +59,7 @@ function browse_url($state, $override = [])
 /* ---------- Category counts (always across all projects) ---------- */
 $counts = array_fill_keys($categories, 0);
 foreach ($all_projects as $p) {
-    $counts[$p['category']]++;
+    if (isset($counts[$p['category']])) { $counts[$p['category']]++; }
 }
 
 /* ---------- Filter ---------- */

@@ -8,12 +8,7 @@ $page_title = "Home";
 $user_role  = "public";
 $base_url   = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 
-require_once __DIR__ . '/../includes/auth.php';
-$__u = tt_current_user();
-if ($__u && in_array($__u['role'], ['client', 'freelancer'], true)) {
-    header('Location: ' . $base_url . tt_home_for($__u['role']));
-    exit;
-}
+require_once __DIR__ . '/../includes/data.php';
 
 include '../includes/header.php';
 include '../includes/nav.php';
@@ -36,12 +31,26 @@ $freelancer_steps = [
     ['Get reviewed',      'Get paid and build your rating'],
 ];
 
-$categories = [
-    ['Web Development',        'code',       'teal',   '2 open projects'],
-    ['Mobile App Development', 'smartphone', 'orange', '1 open project'],
-    ['Graphic Design',         'pen-tool',   'slate',  '1 open project'],
-    ['UI/UX Design',           'frame',      'teal',   '1 open project'],
+$category_icons = [
+    'Web Development' => ['code', 'teal'],
+    'Mobile App Development' => ['smartphone', 'orange'],
+    'Graphic Design' => ['pen-tool', 'slate'],
+    'UI/UX Design' => ['frame', 'teal'],
+    'Writing and Content' => ['file', 'orange'],
+    'Digital Marketing' => ['megaphone', 'blue'],
+    'Video and Animation' => ['video', 'slate'],
+    'Data Entry and Admin' => ['clipboard', 'teal'],
 ];
+$category_counts = [];
+foreach (toptunity_listing() as $listed_project) {
+    $category_counts[$listed_project['category']] = ($category_counts[$listed_project['category']] ?? 0) + 1;
+}
+$categories = [];
+foreach (toptunity_category_catalog() as $category) {
+    $style = $category_icons[$category] ?? ['briefcase', 'teal'];
+    $count = $category_counts[$category] ?? 0;
+    $categories[] = [$category, $style[0], $style[1], $count . ' open ' . ($count === 1 ? 'project' : 'projects')];
+}
 
 $projects = [
     [
@@ -118,10 +127,9 @@ $testimonials = [
 
         <div class="social-proof">
           <div class="avatar-group">
-            <?= avatar('#DBEAFE', '#1E293B', 'short', 32) ?>
-            <?= avatar('#FFEDD5', '#1E293B', 'glasses', 32) ?>
-            <?= avatar('#CCFBF1', '#1E293B', 'bun', 32) ?>
-            <?= avatar('#FEF9C3', '#1E293B', 'long', 32) ?>
+            <?php foreach (['aira-villareal.svg', 'miguel-reyes.svg', 'bea-lim.svg', 'janelle-cruz.svg'] as $avatar_asset): ?>
+              <?= tt_avatar_image_html($avatar_asset, 32, $base_url, 'TopTunity member') ?>
+            <?php endforeach; ?>
           </div>
           <div>
             <div class="social-proof__rating"><?= stars(4.8) ?> 4.8/5</div>
@@ -135,32 +143,7 @@ $testimonials = [
         <span class="hero-art__blob hero-art__blob--peach"></span>
         <span class="hero-art__blob hero-art__blob--white"></span>
 
-        <!-- Replace with <img src="<?= e($base_url) ?>images/hero.svg"> if you have final artwork -->
-        <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#1E293B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-          <!-- hair (back) -->
-          <path d="M88 120C78 60 115 28 152 30C195 32 222 68 212 122C218 150 208 170 196 176L104 176C92 168 84 146 88 120Z" fill="#1E293B"/>
-          <!-- neck -->
-          <rect x="134" y="150" width="30" height="40" fill="#fff"/>
-          <!-- body -->
-          <path d="M50 300C50 235 82 192 148 186C214 192 246 235 246 300Z" fill="#fff"/>
-          <path d="M126 188L148 214L170 188"/>
-          <!-- face -->
-          <ellipse cx="150" cy="118" rx="40" ry="46" fill="#fff"/>
-          <!-- hair (front) -->
-          <path d="M108 112C110 74 168 66 190 104C170 94 134 94 108 112Z" fill="#1E293B"/>
-          <path d="M104 120C100 150 104 164 112 170L116 132Z" fill="#1E293B"/>
-          <path d="M196 120C200 150 196 164 188 170L184 132Z" fill="#1E293B"/>
-          <!-- face details -->
-          <circle cx="134" cy="122" r="2.6" fill="#1E293B" stroke="none"/>
-          <circle cx="164" cy="122" r="2.6" fill="#1E293B" stroke="none"/>
-          <path d="M138 138Q150 148 162 137"/>
-          <!-- laptop -->
-          <path d="M150 236L268 208L274 262L158 284Z" fill="#fff"/>
-          <path d="M168 246L258 226" stroke="#CBD5E1" stroke-width="2"/>
-          <!-- arm + hand -->
-          <path d="M62 300C68 262 104 244 150 254" fill="none"/>
-          <ellipse cx="154" cy="260" rx="12" ry="7" fill="#fff"/>
-        </svg>
+        <img src="<?= e(tt_image_url($base_url, 'images/Illustrations/Homepage/hero-freelancer.svg')) ?>" alt="" class="hero-illustration">
       </div>
     </div>
   </section>

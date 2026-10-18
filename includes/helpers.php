@@ -12,6 +12,74 @@ if (!function_exists('e')) {
     }
 }
 
+if (!function_exists('tt_avatar_assets')) {
+    /** Avatar illustrations available to regular users; admin artwork is opt-in. */
+    function tt_avatar_assets($include_admin = false)
+    {
+        static $allAssets = null;
+        if ($allAssets === null) {
+            $allAssets = array_map('basename', glob(dirname(__DIR__) . '/images/Avatars/*.svg') ?: []);
+            sort($allAssets, SORT_NATURAL | SORT_FLAG_CASE);
+        }
+        if ($include_admin) { return $allAssets; }
+        return array_values(array_filter($allAssets, function ($asset) {
+            return strtolower(pathinfo($asset, PATHINFO_FILENAME)) !== 'toptunity-admin-at';
+        }));
+    }
+}
+
+if (!function_exists('tt_random_avatar_asset')) {
+    function tt_random_avatar_asset()
+    {
+        $assets = tt_avatar_assets();
+        if (!$assets) { throw new RuntimeException('No avatar illustrations were found in images/Avatars.'); }
+        return $assets[random_int(0, count($assets) - 1)];
+    }
+}
+
+if (!function_exists('tt_valid_avatar_asset')) {
+    function tt_valid_avatar_asset($asset, $allow_admin = false)
+    {
+        return in_array((string) $asset, tt_avatar_assets($allow_admin), true) ? (string) $asset : null;
+    }
+}
+
+if (!function_exists('tt_avatar_asset_for_name')) {
+    function tt_avatar_asset_for_name($name)
+    {
+        $slug = strtolower(trim((string) $name));
+        $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
+        $slug = trim($slug, '-');
+        if ($slug === 'toptunity-admin' && in_array('toptunity-admin-AT.svg', tt_avatar_assets(true), true)) {
+            return 'toptunity-admin-AT.svg';
+        }
+        foreach (tt_avatar_assets(true) as $asset) {
+            if (strtolower(pathinfo($asset, PATHINFO_FILENAME)) === $slug) { return $asset; }
+        }
+        return null;
+    }
+}
+
+if (!function_exists('tt_image_url')) {
+    function tt_image_url($base, $path)
+    {
+        $segments = explode('/', ltrim((string) $path, '/'));
+        return rtrim((string) $base, '/') . '/' . implode('/', array_map('rawurlencode', $segments));
+    }
+}
+
+if (!function_exists('tt_avatar_image_html')) {
+    function tt_avatar_image_html($asset, $size, $base, $alt = '', $allow_admin = false)
+    {
+        $asset = tt_valid_avatar_asset($asset, $allow_admin);
+        if (!$asset) { return ''; }
+        $size = max(1, (int) $size);
+        return '<img src="' . e(tt_image_url($base, 'images/Avatars/' . $asset)) . '" alt="' . e($alt)
+            . '" width="' . $size . '" height="' . $size . '" style="width:' . $size . 'px; height:' . $size
+            . 'px; border-radius:50%; object-fit:cover; flex-shrink:0;">';
+    }
+}
+
 if (!function_exists('icon')) {
     /** Inline SVG icon (Lucide-style, inherits currentColor). */
     function icon($name, $size = 18)

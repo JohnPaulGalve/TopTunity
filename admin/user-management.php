@@ -1,7 +1,7 @@
 <?php
 /**
  * admin/user-management.php - Client and freelancer lists with user details (matches the User Management design).
- * Suspend, reactivate and deactivate are not saved to a database yet.
+ * User status changes are saved for live accounts and isolated per demo-admin session.
  */
 $user_role     = "admin";
 $base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
@@ -10,9 +10,16 @@ $active_client = "users";
 require_once __DIR__ . '/../includes/data.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $act = isset($_POST['action']) ? $_POST['action'] : '';
-    $labels = ['suspend' => 'suspended', 'reactivate' => 'reactivated', 'deactivate' => 'deactivated'];
-    header('Location: ' . $base_url . 'admin/user-management.php' . (isset($_GET['tab']) ? '?tab=' . urlencode($_GET['tab']) : ''));
+    $act = (string) ($_POST['action'] ?? '');
+    $id = (int) ($_POST['user_id'] ?? 0);
+    $error = tt_admin_change_user_status($id, $act);
+    tt_flash($error ? 'Could not update user: ' . $error : 'User status updated.');
+    $query = http_build_query(array_filter([
+        'tab' => $_GET['tab'] ?? '',
+        'id' => $id ?: '',
+        'q' => $_GET['q'] ?? '',
+    ], static function ($value) { return $value !== ''; }));
+    header('Location: ' . $base_url . 'admin/user-management.php' . ($query ? '?' . $query : ''));
     exit;
 }
 
@@ -37,6 +44,7 @@ $reports = toptunity_admin_reports();
 $reports_received = $sel ? count(array_filter($reports, function ($r) use ($sel) { return $r['reported'] === $sel['name']; })) : 0;
 
 $page_title = "User Management";
+$flash = tt_flash();
 include '../includes/header.php';
 include '../includes/client-nav.php';
 
@@ -50,10 +58,12 @@ $status_class = ['Active' => 'released', 'Suspended' => 'past', 'Deactivated' =>
   </div>
 </div>
 
+<?php if ($flash): ?><div class="note-soft" role="status" style="margin-top:1rem;"><?= e($flash) ?></div><?php endif; ?>
+
 <div class="search-wide" style="margin-top:1.25rem;">
   <form method="get" action="user-management.php" role="search" style="display:flex; gap:0.6rem; width:100%;">
     <input type="hidden" name="tab" value="<?= e($tab) ?>">
-    <div style="position:relative; flex:1;">
+    <div class="search-wide__input">
       <?= icon('search', 16) ?>
       <input type="search" name="q" value="<?= e($q) ?>" placeholder="Search users by name or email…" aria-label="Search users">
     </div>
@@ -101,11 +111,13 @@ $status_class = ['Active' => 'released', 'Suspended' => 'past', 'Deactivated' =>
         <div class="kv"><span>Email</span><strong style="font-size:0.72rem;"><?= e($sel['email']) ?></strong></div>
         <div class="kv"><span>Projects</span><strong><?= $sel['role'] === 'client' ? 2 : 0 ?></strong></div>
         <div class="kv"><span>Reports received</span><strong style="color:var(--color-error-base);"><?= (int) $reports_received ?></strong></div>
+        <?php if (!empty($sel['warnings'])): ?><div class="kv"><span>Warnings issued</span><strong><?= (int) $sel['warnings'] ?></strong></div><?php endif; ?>
         <?php if ($sel['status'] === 'Suspended'): ?><div class="kv"><span>Suspended on</span><strong>Oct 02, 2026</strong></div><?php endif; ?>
       </div>
 
       <form method="post" action="user-management.php?tab=<?= e($tab) ?>&amp;id=<?= (int) $sel['id'] ?>" style="margin-top:0.9rem;">
-        <?php if ($sel['status'] === 'Suspended'): ?>
+        <input type="hidden" name="user_id" value="<?= (int) $sel['id'] ?>">
+        <?php if ($sel['status'] !== 'Active'): ?>
           <button type="submit" name="action" value="reactivate" class="btn btn--pale-green btn--block">Reactivate</button>
         <?php else: ?>
           <button type="submit" name="action" value="suspend" class="btn btn--pale-red btn--block">Suspend</button>

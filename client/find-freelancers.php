@@ -135,7 +135,7 @@ include '../includes/client-nav.php';
           $is_saved = in_array($fid, $saved, true);
         ?>
           <article class="freelancer-row">
-            <?= avatar($f['bg'], $f['hair'], $f['style'], 60) ?>
+            <?= tt_freelancer_avatar_html($f, 60, $base_url) ?>
             <div>
               <h3>
                 <a href="freelancer-profile.php?id=<?= (int) $fid ?>"><?= e($f['name']) ?></a>

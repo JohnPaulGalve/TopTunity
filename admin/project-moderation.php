@@ -1,7 +1,7 @@
 <?php
 /**
  * admin/project-moderation.php - Every project, filtered by status, with details (matches the Project Moderation design).
- * Close, remove and suspend are not saved to a database yet.
+ * Database-backed projects support moderation actions; sample records are read-only.
  */
 $user_role     = "admin";
 $base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
@@ -11,8 +11,18 @@ require_once __DIR__ . '/../includes/data.php';
 
 $all  = toptunity_admin_projects();
 $tabs = ['all' => 'All', 'open' => 'Open', 'past' => 'Past Deadline', 'ongoing' => 'Ongoing', 'overdue' => 'Overdue',
-         'completed' => 'Completed', 'closed' => 'Closed', 'cancelled' => 'Cancelled'];
+         'completed' => 'Completed', 'closed' => 'Closed', 'suspended' => 'Suspended', 'cancelled' => 'Cancelled'];
 $status = isset($_GET['status']) && isset($tabs[$_GET['status']]) ? $_GET['status'] : 'all';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = (string) ($_POST['moderation_action'] ?? '');
+    $sample_id = (string) ($_POST['sample_id'] ?? '');
+    $error = $sample_id !== ''
+        ? tt_admin_moderate_demo_project($sample_id, $action)
+        : tt_admin_moderate_project((int) ($_POST['site_id'] ?? 0), $action);
+    tt_flash($error ? 'Could not update project: ' . $error : 'Project moderation action completed.');
+    header('Location: ' . $base_url . 'admin/project-moderation.php?status=' . urlencode($status));
+    exit;
+}
 $rows = array_values(array_filter($all, function ($p) use ($status) { return $status === 'all' || $p['status'] === $status; }));
 
 $sel  = null;
@@ -21,6 +31,7 @@ foreach ($rows as $r) { if ($r['id'] === $want) { $sel = $r; } }
 if (!$sel && $rows) { $sel = $rows[0]; }
 
 $page_title = "Project Moderation";
+$flash = tt_flash();
 include '../includes/header.php';
 include '../includes/client-nav.php';
 ?>
@@ -31,6 +42,8 @@ include '../includes/client-nav.php';
     <p class="subtle">View all projects and moderate them.</p>
   </div>
 </div>
+
+<?php if ($flash): ?><div class="note-soft" role="status" style="margin-top:1rem;"><?= e($flash) ?></div><?php endif; ?>
 
 <div class="filter-row" style="margin-top:1.25rem;">
   <p class="section-tag" style="margin:0;">Filter by status</p>
@@ -90,11 +103,35 @@ include '../includes/client-nav.php';
       </div>
 
       <div style="display:flex; flex-direction:column; gap:0.5rem; margin-top:1rem;">
-        <button type="button" class="btn btn--block" style="background:var(--color-deep-slate); color:#FFFFFF;">Close Project</button>
-        <button type="button" class="btn btn--row-outline btn--block">Remove Project</button>
-        <button type="button" class="btn btn--pale-red btn--block">Suspend Project</button>
+        <?php if (!empty($sel['real']) || tt_is_demo_admin()): ?>
+          <?php
+          $moderation_controls = [
+              'close' => ['Close Project', 'btn btn--block', 'Close this project and notify its client?'],
+              'suspend' => ['Suspend Project', 'btn btn--pale-red btn--block', 'Suspend this project and notify its client?'],
+              'reopen' => ['Reopen Project', 'btn btn--row-outline btn--block', 'Reopen this project?'],
+              'remove' => ['Remove Project', 'btn btn--row-outline btn--block', 'Permanently remove this project and its proposals? This cannot be undone.'],
+          ];
+          foreach ($moderation_controls as $action => $control):
+              $no_contract = in_array($sel['contract_status'], ['none', 'declined'], true);
+              $eligible = ($action === 'close' && $sel['contract_status'] === 'none' && in_array($sel['status'], ['open', 'past', 'overdue'], true))
+                  || ($action === 'suspend' && $sel['contract_status'] === 'none' && in_array($sel['status'], ['open', 'past'], true))
+                  || ($action === 'reopen' && $sel['contract_status'] === 'none' && in_array($sel['status'], ['closed', 'suspended'], true))
+                  || ($action === 'remove' && $no_contract && in_array($sel['status'], ['open', 'past', 'closed', 'suspended', 'cancelled'], true));
+              if (!$eligible) { continue; }
+          ?>
+            <form method="post" action="project-moderation.php?status=<?= e($status) ?>&amp;id=<?= e($sel['id']) ?>"
+                  onsubmit="return confirm(<?= e(json_encode($control[2])) ?>);">
+              <input type="hidden" name="site_id" value="<?= (int) ($sel['site_id'] ?? 0) ?>">
+              <?php if (empty($sel['real'])): ?><input type="hidden" name="sample_id" value="<?= e($sel['id']) ?>"><?php endif; ?>
+              <input type="hidden" name="moderation_action" value="<?= e($action) ?>">
+              <button type="submit" class="<?= e($control[1]) ?>"><?= e($control[0]) ?></button>
+            </form>
+          <?php endforeach; ?>
+        <?php else: ?>
+          <p class="note-line">Actions are enabled for database-backed projects. Sample projects are read-only previews.</p>
+        <?php endif; ?>
       </div>
-      <p class="note-line" style="margin-top:0.7rem;">Close Project is for Past Deadline projects. The client is notified and every action is recorded in the project history.</p>
+      <p class="note-line" style="margin-top:0.7rem;">Live project actions update the database and notify the client. Demo project changes are session-only. Active contracts and projects with payment or dispute history are protected from removal.</p>
     <?php endif; ?>
   </aside>
 </div>

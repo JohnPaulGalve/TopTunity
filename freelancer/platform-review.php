@@ -4,7 +4,7 @@
  * Sending is not connected to a database yet.
  */
 $user_role     = "freelancer";
-$base_url      = "/TopTunity/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "";
 
 require_once __DIR__ . '/../includes/data.php';
@@ -12,12 +12,18 @@ require_once __DIR__ . '/../includes/data.php';
 $labels = [5 => 'Excellent', 4 => 'Very good', 3 => 'Good', 2 => 'Fair', 1 => 'Poor'];
 $rating = isset($_POST['rating']) ? max(1, min(5, (int) $_POST['rating'])) : 5;
 $text   = tt_is_demo_freelancer() ? 'Recommended Projects shows me jobs that actually match my PHP and MySQL skills. Contracts are clear and the 10% fee is shown upfront. Most of my repeat clients found me through TopTunity.' : '';
+$mine = tt_my_platform_review();
+if ($mine) { $rating = (int) $mine['rating']; $text = $mine['body']; }
 $errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $text = trim(isset($_POST['review']) ? $_POST['review'] : '');
     if (mb_strlen($text) < 20)      { $errors[] = 'Please write at least 20 characters.'; }
     if (mb_strlen($text) > 1000)    { $errors[] = 'Your review can be at most 1,000 characters.'; }
+    if (!$errors) {
+        $err = tt_save_platform_review($rating, $text);
+        if ($err) { $errors[] = $err; }
+    }
     if (!$errors) {
         tt_flash('Thank you! Your platform review was sent.');
         header('Location: ' . $base_url . 'freelancer/platform-review.php');
@@ -59,7 +65,7 @@ include '../includes/client-nav.php';
       <div class="field">
         <label for="review">Review</label>
         <textarea id="review" name="review" class="input" rows="5" minlength="20" maxlength="1000" style="height:auto; padding:0.8rem; line-height:1.6; font-size:0.82rem;"><?= e($text) ?></textarea>
-        <span class="char-count"><?= mb_strlen($text) ?> / 1,000 characters</span>
+        <span class="char-count"></span>
       </div>
       <div class="form-actions" style="justify-content:flex-end; margin-top:0.6rem;">
         <button type="submit" class="btn btn--primary"><?= icon('send', 14) ?> Submit Review</button>

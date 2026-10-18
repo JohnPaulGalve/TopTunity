@@ -3,12 +3,27 @@
  * freelancer/my-proposals.php - Matches the My Proposals design.
  */
 $user_role     = "freelancer";
-$base_url      = "/TopTunity/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "proposals";
 
 require_once __DIR__ . '/../includes/data.php';
 
-$all  = toptunity_freelancer_proposals();
+// Your real proposals first, then the demo proposals (demo accounts only)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'withdraw') {
+    $wk = (string) ($_POST['key'] ?? '');
+    if ($wk !== '' && $wk[0] === 'r') { tt_withdraw_real_proposal((int) substr($wk, 1)); }
+    elseif ($wk !== '') { $_SESSION[tt_demo_session_key()]['proposal_withdrawn'][$wk] = true; }
+    header('Location: ' . $base_url . 'freelancer/my-proposals.php');
+    exit;
+}
+$pw_sess = $_SESSION[tt_demo_session_key()]['proposal_withdrawn'] ?? [];
+$sample_props = array_map(function ($sp) use ($pw_sess) {
+    $sp['key'] = 'd' . $sp['id'];
+    $sp['real'] = false;
+    if (!empty($pw_sess[$sp['key']])) { $sp['status'] = 'withdrawn'; }
+    return $sp;
+}, toptunity_freelancer_proposals());
+$all = array_merge(tt_freelancer_db_proposal_rows(), $sample_props);
 $tabs = ['all' => 'All', 'pending' => 'Pending', 'selected' => 'Selected', 'not_selected' => 'Not Selected', 'withdrawn' => 'Withdrawn'];
 $status = isset($_GET['status']) && isset($tabs[$_GET['status']]) ? $_GET['status'] : 'all';
 $counts = ['all' => count($all)];
@@ -69,10 +84,10 @@ include '../includes/client-nav.php';
           <?php if ($selected): ?>
             <a href="my-projects.php#offer" class="btn btn--primary"><?= icon('arrow-right', 13) ?> Go to Project Offer</a>
           <?php elseif ($p['status'] === 'pending'): ?>
-            <a href="#" class="btn btn--row-outline"><?= icon('message', 13) ?> Message Client</a>
-            <a href="#" class="btn btn--danger-outline">Withdraw Proposal</a>
+            <a href="messages.php<?= !empty($p['client_id']) ? '?with=' . (int) $p['client_id'] : '' ?>" class="btn btn--row-outline"><?= icon('message', 13) ?> Message Client</a>
+            <form method="post" action="my-proposals.php" style="display:inline;"><input type="hidden" name="action" value="withdraw"><input type="hidden" name="key" value="<?= e($p['key']) ?>"><button type="submit" class="btn btn--danger-outline">Withdraw Proposal</button></form>
           <?php endif; ?>
-          <a href="<?= e($base_url) ?>pages/project-details.php?id=<?= (int) $p['project_id'] ?>" class="btn--row-dark">View Proposal</a>
+          <a href="<?= e($base_url) ?>freelancer/submit-proposal.php?id=<?= (int) $p['project_id'] ?>" class="btn--row-dark">View Proposal</a>
         </div>
       </article>
     <?php endforeach; ?>

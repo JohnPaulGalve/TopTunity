@@ -9,10 +9,9 @@ $active_client = "post";
 
 require_once __DIR__ . '/../includes/data.php';
 
-$categories = [
-    'Web Development', 'Mobile App Development', 'Graphic Design', 'UI/UX Design',
-    'Writing and Content', 'Digital Marketing', 'Video and Animation', 'Data Entry and Admin',
-];
+$categories = toptunity_category_catalog();
+$skill_catalog = toptunity_skill_catalog();
+$skill_names = array_keys($skill_catalog);
 
 /* Edit mode: only projects this client posted (saved ones) can be edited */
 $edit_id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
@@ -61,6 +60,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (mb_strlen($in['description']) > 3000)              { $errors[] = 'The description can be at most 3,000 characters.'; }
     if (!in_array($in['category'], $categories, true))     { $errors[] = 'Please choose a category.'; }
     if (!$in['skills'])                                    { $errors[] = 'Add at least one required skill.'; }
+    $allowed_skills = array_fill_keys(array_map('strtolower', array_merge($skill_names, $editing ? $editing['skills'] : [])), true);
+    foreach ($in['skills'] as $skill) {
+        if (!isset($allowed_skills[strtolower($skill)])) {
+            $errors[] = 'Choose required skills from the available skill list.';
+            break;
+        }
+    }
     if ($in['type'] === 'fixed') {
         if ($in['budget'] < 1)                             { $errors[] = 'Enter a budget for the Fixed Price project.'; }
     } else {
@@ -74,10 +80,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'The deadline must be today or later.';
     }
 
-    $uploads = tt_handle_uploads('attachments');
-    $errors  = array_merge($errors, $uploads['errors']);
-
     $form = $in + ['files' => $editing ? $editing['files'] : []];
+    $uploads = ['files' => [], 'errors' => []];
+    if (!$errors) {
+        $uploads = tt_handle_uploads('attachments');
+        $errors = array_merge($errors, $uploads['errors']);
+        if ($errors) { tt_discard_uploads($uploads['files']); }
+    }
 
     if (!$errors) {
         $record = [
@@ -107,6 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: ' . $base_url . 'client/my-projects.php');
             exit;
         } catch (Throwable $e) {
+            tt_discard_uploads($uploads['files']);
             // Show the real reason on the page instead of a blank "500" error
             $errors[] = 'The project could not be saved. Reason: ' . $e->getMessage();
         }
@@ -142,7 +152,7 @@ include '../includes/client-nav.php';
 
     <div class="field">
       <label for="title">Project Title <span class="req">*</span></label>
-      <input class="input" type="text" id="title" name="title" value="<?= e($form['title']) ?>" placeholder="e.g. Online ordering website for my café" required>
+      <input class="input" type="text" id="title" name="title" value="<?= e($form['title']) ?>" minlength="5" maxlength="120" placeholder="e.g. Online ordering website for my café" required>
     </div>
 
     <div class="field">
@@ -168,9 +178,14 @@ include '../includes/client-nav.php';
           <?php foreach ($form['skills'] as $skill): ?>
             <span class="chip--removable"><?= e($skill) ?><input type="hidden" name="skills[]" value="<?= e($skill) ?>"><button type="button" class="chip-x" aria-label="Remove <?= e($skill) ?>"><?= icon('x', 11) ?></button></span>
           <?php endforeach; ?>
-          <input class="skill-input" type="text" id="skill-input" placeholder="Add skill…" autocomplete="off">
+          <select class="skill-input" id="skill-input" aria-label="Choose a required skill">
+            <option value="">Choose a skill…</option>
+            <?php foreach ($skill_names as $skill): ?>
+              <option value="<?= e($skill) ?>"><?= e($skill) ?></option>
+            <?php endforeach; ?>
+          </select>
         </div>
-        <span class="hint"><?= icon('info', 13) ?> Press Enter to add a skill. Skills power the match percentage.</span>
+        <span class="hint"><?= icon('info', 13) ?> Choose skills from the list. They power the match percentage.</span>
       </div>
     </div>
 
@@ -203,7 +218,7 @@ include '../includes/client-nav.php';
             <label for="budget">Budget (₱) <span class="req">*</span></label>
             <div class="input-prefix">
               <span>₱</span>
-              <input class="input" type="number" id="budget" name="budget" min="1" step="1" value="<?= e($form['budget']) ?>" placeholder="0">
+              <input class="input" type="number" id="budget" name="budget" min="1" step="1" value="<?= e($form['budget']) ?>" placeholder="0" <?= $is_hourly ? 'disabled' : 'required' ?>>
             </div>
           </div>
 
@@ -213,12 +228,12 @@ include '../includes/client-nav.php';
                 <label for="hourly-rate">Hourly Rate (₱/hr) <span class="req">*</span></label>
                 <div class="input-prefix">
                   <span>₱</span>
-                  <input class="input" type="number" id="hourly-rate" name="rate" min="1" step="1" value="<?= e($form['rate']) ?>" placeholder="0">
+                  <input class="input" type="number" id="hourly-rate" name="rate" min="1" step="1" value="<?= e($form['rate']) ?>" placeholder="0" <?= $is_hourly ? 'required' : 'disabled' ?>>
                 </div>
               </div>
               <div class="field">
                 <label for="max-hours">Maximum Hours <span class="req">*</span></label>
-                <input class="input" type="number" id="max-hours" name="max_hours" min="1" step="1" value="<?= e($form['max_hours']) ?>" placeholder="0">
+                <input class="input" type="number" id="max-hours" name="max_hours" min="1" step="1" value="<?= e($form['max_hours']) ?>" placeholder="0" <?= $is_hourly ? 'required' : 'disabled' ?>>
               </div>
             </div>
             <p class="computed-total" id="hourly-total"></p>

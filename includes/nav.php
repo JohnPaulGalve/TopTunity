@@ -64,7 +64,9 @@ if (isset($nav_active)) {
 ?>
 <header class="navbar">
   <div class="container navbar__inner">
-    <a href="<?= e($base_url . tt_brand_home()) ?>" class="brand-logo" aria-label="TopTunity home">TopTunity<span class="logo-star" aria-hidden="true">&#10022;</span></a>
+    <a href="<?= e($base_url . tt_brand_home()) ?>" class="brand-logo" aria-label="TopTunity home">
+      <img src="<?= e(tt_image_url($base_url, 'images/Logo/logo-wordmark-dark.svg')) ?>" alt="TopTunity" class="brand-logo__image">
+    </a>
 
     <button class="nav-toggle" type="button" aria-controls="site-menu" aria-expanded="false" aria-label="Toggle navigation">
       <?= icon('menu', 24) ?>

@@ -4,13 +4,14 @@
  * Saving is not connected to a database yet.
  */
 $user_role     = "freelancer";
-$base_url      = "/TopTunity/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "";
 
 require_once __DIR__ . '/../includes/data.php';
 
 $catalog = toptunity_skill_catalog();
 $mine    = tt_is_demo_freelancer() ? toptunity_freelancer(1)['skills'] : [];
+if (tt_freelancer_saved_skills() !== null) { $mine = tt_freelancer_saved_skills(); }
 $errors  = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -20,6 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($bad)         { $errors[] = 'These skills are not in the list: ' . implode(', ', $bad) . '.'; }
     $mine = $chosen;
     if (!$errors) {
+        tt_save_freelancer_skills($chosen);
         tt_flash('Your skills were saved.');
         header('Location: ' . $base_url . 'freelancer/skills.php');
         exit;

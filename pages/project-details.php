@@ -92,14 +92,18 @@ function fmt_date($ymd)
           <h2>Attachments</h2>
           <div class="file-list">
             <?php foreach ($project['files'] as $file): ?>
-              <a href="#" class="file-card" download>
+              <?php if (!empty($file['id'])): ?>
+              <a href="../download.php?file=<?= (int) $file['id'] ?>" class="file-card">
+              <?php else: ?>
+              <div class="file-card" aria-label="Sample attachment">
+              <?php endif; ?>
                 <span class="file-card__icon file-card__icon--<?= e($file['type']) ?>"><?= icon('file', 16) ?></span>
                 <span>
                   <span class="file-card__name"><?= e($file['name']) ?></span>
                   <span class="file-card__size"><?= e($file['size']) ?></span>
                 </span>
-                <span class="file-card__dl"><?= icon('download', 15) ?></span>
-              </a>
+                <?php if (!empty($file['id'])): ?><span class="file-card__dl"><?= icon('download', 15) ?></span><?php endif; ?>
+              <?= !empty($file['id']) ? '</a>' : '</div>' ?>
             <?php endforeach; ?>
           </div>
         </section>

@@ -1,0 +1,2 @@
+-- Saves for the freelancer profile form (phone number). Run ONCE in phpMyAdmin (select the toptunity database, then Import).
+ALTER TABLE freelancer_profiles ADD COLUMN IF NOT EXISTS phone VARCHAR(40) NULL;

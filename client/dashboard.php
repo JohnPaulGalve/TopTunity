@@ -11,7 +11,7 @@ require_once __DIR__ . '/../includes/data.php';
 $me       = toptunity_current_client();
 $projects = toptunity_client_projects();
 $payments = toptunity_client_payments();
-$notes    = toptunity_client_notifications();
+$notes    = array_slice(toptunity_client_notifications_all(), 0, 4);
 $messages = toptunity_client_messages();
 
 $page_title = "Client Dashboard";
@@ -164,14 +164,14 @@ foreach ($projects as $p) {
       </div>
       <?php if (!$notes): ?><p class="muted">No notifications yet.</p><?php endif; ?>
       <?php foreach ($notes as $n): ?>
-        <div class="notif-item">
+        <a class="notif-item notif-item--link" href="notifications.php?open=<?= e(tt_notification_key($n)) ?>">
           <span class="icon-box icon-box--<?= e($n['tint']) ?>"><?= icon($n['icon'], 15) ?></span>
           <div class="notif-item__body">
             <strong><?= e($n['title']) ?><?php if ($n['new']): ?><span class="dot-new" aria-label="New"></span><?php endif; ?></strong>
             <p><?= e($n['text']) ?></p>
           </div>
           <time><?= e($n['time']) ?></time>
-        </div>
+        </a>
       <?php endforeach; ?>
     </section>
 

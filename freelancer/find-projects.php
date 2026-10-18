@@ -9,8 +9,7 @@ $active_client = "find";
 require_once __DIR__ . '/../includes/data.php';
 tt_handle_favourite();
 
-$categories = ['Web Development', 'Mobile App Development', 'Graphic Design', 'UI/UX Design',
-               'Writing and Content', 'Digital Marketing', 'Video and Animation', 'Data Entry and Admin'];
+$categories = toptunity_category_catalog();
 $skills     = tt_is_demo_freelancer() ? toptunity_freelancer(1)['skills'] : [];
 
 $q    = isset($_GET['q']) ? trim($_GET['q']) : '';
@@ -27,13 +26,6 @@ foreach (toptunity_listing() as $row) {
                       'desc' => $full ? $full['desc'] : $row['desc']];
 }
 
-foreach (tt_load_saved_projects() as $sp) {
-    if ($sp['status'] !== 'open') { continue; }
-    $rows[] = ['id' => $sp['id'], 'title' => $sp['title'], 'category' => $sp['category'], 'client' => 'Client',
-               'type' => $sp['type'], 'amount' => $sp['type'] === 'hourly' ? $sp['rate'] : $sp['budget'],
-               'deadline' => $sp['deadline'], 'proposals' => $sp['proposals'], 'status' => 'open', 'age_h' => 0,
-               'match' => tt_skill_match($sp['skills'], $skills), 'skills' => $sp['skills'], 'desc' => $sp['intro']];
-}
 
 $counts = array_fill_keys($categories, 0);
 foreach ($rows as $r) { $counts[$r['category']] = ($counts[$r['category']] ?? 0) + 1; }
@@ -127,7 +119,7 @@ include '../includes/client-nav.php';
                   <input type="hidden" name="favourite" value="project"><input type="hidden" name="item" value="<?= (int) $r['id'] ?>">
                   <button type="submit" class="btn btn--row-outline"><?= icon('bookmark', 13) ?> <?= in_array((int) $r['id'], toptunity_freelancer_saved_ids(), true) ? 'Saved' : 'Save Project' ?></button>
                 </form>
-                <a href="<?= e($base_url) ?>pages/project-details.php?id=<?= (int) $r['id'] ?>" class="btn--row-dark">View Details</a>
+                <a href="<?= e($base_url) ?>freelancer/submit-proposal.php?id=<?= (int) $r['id'] ?>" class="btn--row-dark">View Details</a>
               </div>
             </div>
           <?php endforeach; ?>
@@ -142,7 +134,9 @@ include '../includes/client-nav.php';
 
     <?php if (!$visible): ?>
       <div class="empty-state empty-state--design">
-        <div class="empty-art"><?= icon('search', 40) ?></div>
+        <div class="empty-art empty-art--illustration">
+          <img src="<?= e(tt_image_url($base_url, 'images/Illustrations/Empty State and Not found/empty.svg')) ?>" alt="">
+        </div>
         <h3>No projects found</h3>
         <p>Try another keyword or category.</p>
         <a href="find-projects.php" class="btn btn--dark">Clear Filter</a>
@@ -166,14 +160,14 @@ include '../includes/client-nav.php';
               <p class="listing-card__desc" style="margin:0.5rem 0;"><?= e($r['desc']) ?></p>
               <div class="chips"><?php foreach ($r['skills'] as $s): ?><span class="chip"><?= e($s) ?></span><?php endforeach; ?></div>
             </div>
-            <div class="project-row__actions" style="flex-direction:column; align-items:flex-end;">
+            <div class="project-row__actions project-row__actions--listing">
               <div style="font-family:var(--font-heading); font-weight:700; font-size:1.05rem;"><?= $r['type'] === 'hourly' ? '₱' . number_format($r['amount']) . '/hr' : '₱' . number_format($r['amount']) ?></div>
-              <div style="display:flex; gap:0.45rem;">
+              <div class="project-row__action-buttons">
                 <form method="post" action="find-projects.php" style="display:inline;">
                   <input type="hidden" name="favourite" value="project"><input type="hidden" name="item" value="<?= (int) $r['id'] ?>">
                   <button type="submit" class="btn btn--row-outline" aria-label="Save"><?= icon('bookmark', 13) ?></button>
                 </form>
-                <a href="<?= e($base_url) ?>pages/project-details.php?id=<?= (int) $r['id'] ?>" class="btn--row-dark">View Details</a>
+                <a href="<?= e($base_url) ?>freelancer/submit-proposal.php?id=<?= (int) $r['id'] ?>" class="btn--row-dark">View Details</a>
               </div>
             </div>
           </article>

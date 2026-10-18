@@ -1,15 +1,32 @@
 <?php
 /**
- * pages/contact.php - Public contact form. Submission is not wired to a backend yet.
+ * pages/contact.php - Public contact form.
  */
 $user_role = "public";
 $base_url  = "/TopTunity/";
+
+require_once __DIR__ . '/../includes/data.php';
 
 $page_title = "Contact Us";
 include '../includes/header.php';
 include '../includes/nav.php';
 
 $subjects = ['Account help', 'Projects and proposals', 'Payments and fees', 'Report a user', 'Technical issue', 'Other'];
+$errors = [];
+$form = ['name' => '', 'email' => '', 'subject' => '', 'message' => ''];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    foreach ($form as $key => $value) { $form[$key] = trim((string) ($_POST[$key] ?? '')); }
+    if (!in_array($form['subject'], $subjects, true)) { $errors[] = 'Choose a valid subject.'; }
+    if (!$errors) {
+        $error = tt_save_contact_inquiry($form['name'], $form['email'], $form['subject'], $form['message']);
+        if ($error) { $errors[] = $error; }
+    }
+    if (!$errors) {
+        tt_flash('Your inquiry was received. The administrator can review it in Contact Inquiries.');
+        header('Location: ' . $base_url . 'pages/contact.php');
+        exit;
+    }
+}
 ?>
 
 <main class="page-browse">
@@ -23,19 +40,20 @@ $subjects = ['Account help', 'Projects and proposals', 'Payments and fees', 'Rep
     <div class="contact-layout">
 
       <form class="contact-form" method="post" action="">
+        <?php if ($errors): ?><div class="form-alert" role="alert"><?= icon('alert', 15) ?><div><?php foreach ($errors as $error): ?><div><?= e($error) ?></div><?php endforeach; ?></div></div><?php endif; ?>
         <div class="form-grid2">
           <div class="field">
             <label for="c-name">Full Name</label>
             <div class="input-wrap">
               <?= icon('user', 16) ?>
-              <input type="text" id="c-name" name="name" placeholder="Your full name" autocomplete="name" required>
+              <input type="text" id="c-name" name="name" value="<?= e($form['name']) ?>" minlength="2" maxlength="120" placeholder="Your full name" autocomplete="name" required>
             </div>
           </div>
           <div class="field">
             <label for="c-email">Email Address</label>
             <div class="input-wrap">
               <?= icon('mail', 16) ?>
-              <input type="email" id="c-email" name="email" placeholder="you@example.com" autocomplete="email" required>
+              <input type="email" id="c-email" name="email" value="<?= e($form['email']) ?>" maxlength="190" placeholder="you@example.com" autocomplete="email" required>
             </div>
           </div>
         </div>
@@ -43,16 +61,17 @@ $subjects = ['Account help', 'Projects and proposals', 'Payments and fees', 'Rep
         <div class="field">
           <label for="c-subject">Subject</label>
           <select id="c-subject" name="subject" required>
-            <option value="" selected disabled>Choose a subject…</option>
+            <option value="" disabled <?= $form['subject'] === '' ? 'selected' : '' ?>>Choose a subject…</option>
             <?php foreach ($subjects as $s): ?>
-              <option value="<?= e($s) ?>"><?= e($s) ?></option>
+              <option value="<?= e($s) ?>" <?= $form['subject'] === $s ? 'selected' : '' ?>><?= e($s) ?></option>
             <?php endforeach; ?>
           </select>
         </div>
 
         <div class="field">
           <label for="c-message">Message</label>
-          <textarea id="c-message" name="message" placeholder="How can we help?" required></textarea>
+          <textarea id="c-message" name="message" minlength="10" maxlength="3000" placeholder="How can we help?" required><?= e($form['message']) ?></textarea>
+          <span class="char-count"></span>
         </div>
 
         <div class="contact-form__foot">
@@ -62,6 +81,7 @@ $subjects = ['Account help', 'Projects and proposals', 'Payments and fees', 'Rep
       </form>
 
       <aside class="contact-side">
+        <img src="<?= e(tt_image_url($base_url, 'images/Illustrations/Contact US/contact.svg')) ?>" alt="" class="page-illustration page-illustration--contact">
         <div class="contact-info">
           <span class="icon-box icon-box--teal"><?= icon('mail', 18) ?></span>
           <div><small>Email</small><strong>support@toptunity.ph</strong></div>

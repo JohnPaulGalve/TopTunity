@@ -2,7 +2,7 @@
 /**
  * freelancer/project-details.php - Matches the Project Details design (freelancer view).
  * Log hours, request-revision banner, submit completed work, status history, review client.
- * Saving is not connected to a database yet.
+ * Work logs and delivery reviews are persisted for database-backed projects.
  */
 $user_role     = "freelancer";
 $base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
@@ -26,19 +26,38 @@ if ($p && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['log_hours'])) {
     if (!$d || $d->format('Y-m-d') !== $log['date'])                          { $errors[] = 'Choose the date you worked.'; }
     if ($log['hours'] === '' || (float) $log['hours'] < 0.5 || (float) $log['hours'] > 12) { $errors[] = 'Enter between 0.5 and 12 hours.'; }
     if (mb_strlen($log['task']) < 5)                                          { $errors[] = 'Describe the task (at least 5 characters).'; }
+    if (!$errors && $id < 1000) {
+        $errors[] = 'Work logs are available for active projects in your account, not sample projects.';
+    }
     if (!$errors) {
-        tt_flash('Hours logged. The client will review them.');
-        header('Location: ' . $base_url . 'freelancer/project-details.php?id=' . $id);
-        exit;
+        $err = tt_db_log_hours($id, $log['date'], (float) $log['hours'], $log['task']);
+        if ($err) { $errors[] = $err; }
+        else {
+            tt_flash('Hours logged. The client will review them.');
+            header('Location: ' . $base_url . 'freelancer/project-details.php?id=' . $id);
+            exit;
+        }
     }
 }
 
 if ($p && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_work'])) {
     $up = tt_handle_uploads('deliverables');
-    if ($up['errors']) { tt_flash('Could not submit: ' . implode(' ', $up['errors'])); }
-    else {
+    $message = trim((string) ($_POST['message'] ?? ''));
+    if ($up['errors']) {
+        tt_flash('Could not submit: ' . implode(' ', $up['errors']));
+    } elseif ($id >= 1000) {
+        if (!$up['files'] && mb_strlen($message) < 20) {
+            tt_flash('Add at least one file or write a delivery message of at least 20 characters.');
+        } else {
+            $err = tt_db_submit_work($id, $message);
+            if (!$err && $up['files']) { tt_save_attachments('deliverable', $id, $up['files']); }
+            tt_flash($err ? 'Could not submit: ' . $err : 'Your work was submitted to the client.');
+        }
+    } elseif (!$up['files']) {
+        tt_flash('Add at least one file to submit your work.');
+    } else {
         tt_save_attachments('deliverable', $id, $up['files']);
-        tt_flash(count($up['files']) ? 'Your work was submitted to the client.' : 'Add at least one file to submit your work.');
+        tt_flash('Your work was submitted to the client.');
     }
     header('Location: ' . $_SERVER['REQUEST_URI']);
     exit;
@@ -84,12 +103,14 @@ include '../includes/client-nav.php';
 <section class="box" style="margin-top:1.25rem;">
   <div class="status-banner">Current Status: <strong><?= $p['status'] === 'completed' ? 'Completed' : ($p['status'] === 'overdue' ? 'Overdue' : 'Project Started') ?></strong>
     <span style="margin-left:auto; font-size:0.74rem;"><?= (int) $p['progress'] ?>% complete</span></div>
-  <ol class="tracking-steps">
-    <?php foreach ($steps as $i => $label): $n = $i + 1;
-      $cls = $n < $current ? 'is-done' : ($n === $current ? 'is-current' : ''); ?>
-      <li class="<?= $cls ?>"><span class="dot"><?= $n < $current ? icon('check', 12) : $n ?></span><small><?= e($label) ?></small></li>
-    <?php endforeach; ?>
-  </ol>
+  <div class="tracking-steps-scroll" role="region" aria-label="Project progress steps" tabindex="0">
+    <ol class="tracking-steps">
+      <?php foreach ($steps as $i => $label): $n = $i + 1;
+        $cls = $n < $current ? 'is-done' : ($n === $current ? 'is-current' : ''); ?>
+        <li class="<?= $cls ?>"><span class="dot"><?= $n < $current ? icon('check', 12) : $n ?></span><small><?= e($label) ?></small></li>
+      <?php endforeach; ?>
+    </ol>
+  </div>
   <?php if ($p['revision']): ?>
   <div class="revision-banner">
     <div>
@@ -113,11 +134,11 @@ include '../includes/client-nav.php';
 
       <form method="post" action="project-details.php?id=<?= (int) $id ?>" style="margin-top:0.6rem;">
         <input type="hidden" name="log_hours" value="1">
-        <div class="field-row" style="grid-template-columns: 1fr 110px 2fr auto; align-items:end;">
+        <div class="field-row" style="grid-template-columns: 1fr 100px 2.4fr auto; align-items:start;">
           <div class="field" style="margin-top:0;"><label for="log-date">Date</label><input class="input" type="date" id="log-date" name="date" value="<?= e($log['date']) ?>" required></div>
           <div class="field" style="margin-top:0;"><label for="log-hours">Hours</label><input class="input" type="number" id="log-hours" name="hours" min="0.5" max="12" step="0.5" value="<?= e($log['hours']) ?>" required></div>
-          <div class="field" style="margin-top:0;"><label for="log-task">Task</label><input class="input" type="text" id="log-task" name="task" value="<?= e($log['task']) ?>" placeholder="What did you work on?" required></div>
-          <button type="submit" class="btn btn--primary" style="height:42px;"><?= icon('plus', 14) ?> Log Hours</button>
+          <div class="field" style="margin-top:0;"><label for="log-task">Task</label><input class="input" type="text" id="log-task" name="task" value="<?= e($log['task']) ?>" minlength="5" placeholder="What did you do?" required></div>
+          <button type="submit" class="btn btn--primary" style="height:44px; margin-top:1.55rem;"><?= icon('plus', 14) ?> Log Hours</button>
         </div>
       </form>
 
@@ -153,21 +174,18 @@ include '../includes/client-nav.php';
         <form method="post" action="project-details.php?id=<?= (int) $id ?>" style="margin-top:0.6rem;" enctype="multipart/form-data">
           <div class="field" style="margin-top:0;">
             <label for="msg-client">Message to client</label>
-            <textarea id="msg-client" name="message" class="input" rows="3" style="height:auto; padding:0.7rem; font-size:0.8rem;" placeholder="Explain what you delivered and what to check."><?= $p['submitted'] ? e($p['submitted']['message']) : '' ?></textarea>
+            <textarea id="msg-client" name="message" class="input" rows="3" maxlength="2000" style="height:auto; padding:0.7rem; font-size:0.8rem;" placeholder="Explain what you delivered and what to check."><?= $p['submitted'] ? e($p['submitted']['message']) : '' ?></textarea>
           </div>
           <label class="dropzone" style="margin-top:0.8rem;">
             <?= icon('upload', 20) ?>
             <strong>Upload files or add links</strong>
-            <small>PDF, DOCX, PNG, ZIP up to 20 MB</small>
+            <small>PDF, JPG, PNG or DOCX up to 10 MB each</small>
             <input type="file" name="deliverables[]" multiple>
           </label>
-          <?php foreach (tt_attachments('deliverable', $id) as $f): ?>
-            <div class="file-row" style="margin-top:0.6rem;"><?= icon('file', 15) ?><?= tt_file_name_html($f, $base_url) ?><span class="file-row__size"><?= e($f['size']) ?></span></div>
-          <?php endforeach; ?>
           <?php foreach (($p['submitted']['files'] ?? []) as $f): ?>
             <div class="file-row" style="margin-top:0.6rem;"><?= icon('file', 15) ?><span><?= e($f['name']) ?></span><span class="file-row__size"><?= e($f['size']) ?></span></div>
           <?php endforeach; ?>
-          <div class="form-actions--plain"><button type="submit" name="submit_work" value="1" class="btn btn--primary"><?= icon('upload', 14) ?> Submit Completed Work</button></div>
+          <div class="form-actions--plain"><button type="submit" name="submit_work" value="1" class="btn btn--primary" <?= !empty($p['submitted']['status']) && $p['submitted']['status'] === 'pending' ? 'disabled' : '' ?>><?= icon('upload', 14) ?> Submit Completed Work</button></div>
         </form>
       <?php endif; ?>
     </section>
@@ -198,7 +216,7 @@ include '../includes/client-nav.php';
       <h2>Contract</h2>
       <div class="kv"><span>Status</span><span class="status status--ongoing">Active</span></div>
       <div class="kv"><span>Agreed on</span><strong><?= e(date('M d, Y', strtotime($p['start']))) ?></strong></div>
-      <a href="#" class="btn btn--row-outline" style="width:100%; margin-top:0.7rem;">View Contract →</a>
+      <a href="#contract-details" class="btn btn--row-outline" style="width:100%; margin-top:0.7rem;">View Contract →</a>
     </section>
     <?php if ($is_hourly): ?>
     <section class="box">
@@ -221,6 +239,21 @@ include '../includes/client-nav.php';
   </aside>
 </div>
 
+<section class="box" id="contract-details" style="margin-top:1rem;">
+  <h2>Contract Details</h2>
+  <div class="kv"><span>Project</span><strong><?= e($p['title']) ?></strong></div>
+  <div class="kv"><span>Client</span><strong><?= e($p['client']) ?><?= $p['client_company'] !== '' ? ' · ' . e($p['client_company']) : '' ?></strong></div>
+  <div class="kv"><span>Billing type</span><strong><?= $is_hourly ? 'Hourly' : 'Fixed Price' ?></strong></div>
+  <?php if ($is_hourly): ?>
+    <div class="kv"><span>Hourly rate</span><strong>₱<?= number_format($p['rate']) ?>/hr</strong></div>
+    <div class="kv"><span>Maximum hours</span><strong><?= (int) $p['max_hours'] ?> h</strong></div>
+  <?php endif; ?>
+  <div class="kv"><span>Agreed amount</span><strong>₱<?= number_format($p['budget']) ?></strong></div>
+  <div class="kv"><span>Start date</span><strong><?= e(date('M d, Y', strtotime($p['start']))) ?></strong></div>
+  <div class="kv"><span>End date</span><strong><?= e(date('M d, Y', strtotime($p['deadline']))) ?></strong></div>
+  <p class="note-line">The platform service fee is 10%. Payments are simulated and no real money is moved.</p>
+</section>
+
 <div class="modal-overlay" id="review-client" role="dialog" aria-modal="true" aria-labelledby="rc2-title">
   <div class="modal">
     <div class="modal__head"><h2 id="rc2-title">Review Client</h2><a href="#" class="modal__close" aria-label="Close"><?= icon('x', 18) ?></a></div>
@@ -234,7 +267,7 @@ include '../includes/client-nav.php';
         <?php endfor; ?>
       </div>
       <div class="field"><label for="rc2-text" style="font-size:0.78rem; font-weight:600;">Review</label>
-        <textarea id="rc2-text" name="review" class="input" rows="4" style="height:auto; padding:0.7rem; font-size:0.8rem;" placeholder="How did the client work with you?"></textarea></div>
+        <textarea id="rc2-text" name="review" class="input" rows="4" minlength="10" style="height:auto; padding:0.7rem; font-size:0.8rem;" placeholder="How did the client work with you?"></textarea></div>
       <p class="hint"><?= icon('info', 13) ?> Available once the client approves the work · once per project.</p>
       <div class="modal__foot"><a href="#" class="btn btn--outline">Cancel</a><button type="submit" class="btn btn--primary">Submit Review</button></div>
     </form>

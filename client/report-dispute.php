@@ -19,9 +19,13 @@ $tab = isset($_GET['tab']) && isset($tabs[$_GET['tab']]) ? $_GET['tab'] : 'repor
 
 /* Users you can report (freelancers, plus the one in the design) */
 $people = [];
-foreach (toptunity_freelancers() as $fid => $f) { $people[$fid] = $f['name'] . ' · Freelancer'; }
-$people[100] = 'Daniel Ocampo · Freelancer';
-$pre_user = isset($_GET['user']) && isset($people[(int) $_GET['user']]) ? (int) $_GET['user'] : 100;
+foreach (tt_contracted_freelancers_for_client() as $cf) { $people[5000 + (int) $cf['id']] = $cf['name'] . ' · Freelancer'; }
+foreach (toptunity_client_threads() as $thread_id => $thread) {
+    if (empty($thread['real'])) { $people['sample-' . $thread_id] = $thread['name'] . ' · Freelancer'; }
+}
+if (tt_is_demo_account()) { $people['sample-daniel'] = 'Daniel Ocampo · Freelancer'; }
+$pre_user = (string) ($_GET['user'] ?? '');
+if (!isset($people[$pre_user])) { $pre_user = ''; }
 
 $reported_types = ['User', 'Project', 'Message'];
 $reasons_report = ['Abusive or inappropriate messages', 'Fake or misleading profile', 'Spam or off-platform payment request', 'Other'];
@@ -30,12 +34,15 @@ $reasons_dispute = ['Work not delivered', 'Work does not match the requirements'
 $open_projects = array_filter(toptunity_client_projects(), function ($p) {
     return in_array($p['status'], ['ongoing', 'overdue'], true);
 });
-$pre_project = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+$pre_project = 0;
 
-$submissions = [
-    ['type' => 'Report', 'about' => 'Daniel Ocampo · Freelancer', 'reason' => 'Abusive or inappropriate messages', 'date' => 'Sep 28, 2026', 'status' => 'pending'],
-    ['type' => 'Dispute', 'about' => 'Menu Board and Cup Sleeve Design', 'reason' => 'Freelancer stopped responding', 'date' => 'Sep 12, 2026', 'status' => 'released'],
-];
+$submissions = tt_my_submissions();
+if (tt_is_demo_account()) {
+    $submissions = array_merge($submissions, [
+        ['type' => 'Report', 'about' => 'Daniel Ocampo · Freelancer', 'reason' => 'Abusive or inappropriate messages', 'date' => 'Sep 28, 2026', 'status' => 'pending'],
+        ['type' => 'Dispute', 'about' => 'Menu Board and Cup Sleeve Design', 'reason' => 'Freelancer stopped responding', 'date' => 'Sep 12, 2026', 'status' => 'released'],
+    ]);
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $up  = tt_handle_uploads('attachments');
@@ -43,7 +50,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($err) {
         // files were rejected: nothing is saved
     } elseif ($tab === 'report') {
-        $err = tt_db_report($_POST['type'] ?? 'User', $_POST['reason'] ?? '', $_POST['details'] ?? '');
+        $selected = (string) ($_POST['user_id'] ?? '');
+        $selected_site_id = ctype_digit($selected) ? (int) $selected : 0;
+        $reported_id = $selected_site_id >= 5000 ? $selected_site_id - 5000 : 0;
+        $err = tt_db_report($_POST['type'] ?? 'User', $_POST['reason'] ?? '', $_POST['details'] ?? '', $reported_id);
+        if (!$err && strtolower($_POST['type'] ?? 'User') === 'user' && isset($people[$selected]) && $reported_id === 0) {
+            db()->prepare('UPDATE reports SET details = CONCAT(?, "\\n", details) WHERE id = ? AND reporter_id = ?')
+                ->execute(['Reported user: ' . $people[$selected], (int) $GLOBALS['tt_last']['id'], (int) tt_current_user()['id']]);
+        }
         $ok  = 'Your report was sent to the administrator.';
     } else {
         $pid   = (int) ($_POST['project_id'] ?? 0);
@@ -51,7 +65,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $err   = tt_db_dispute($pid, $title, $_POST['reason'] ?? '', $_POST['details'] ?? '');
         $ok    = 'Your dispute was filed. The administrator will review it.';
     }
-    if (!$err) { tt_save_attachments($GLOBALS['tt_last']['type'], $GLOBALS['tt_last']['id'], $up['files']); }
+    if (!$err) {
+        tt_save_attachments($GLOBALS['tt_last']['type'], $GLOBALS['tt_last']['id'], $up['files']);
+    } else {
+        tt_discard_uploads($up['files']);
+    }
     tt_flash($err ? 'Could not save: ' . $err : $ok);
     header('Location: ' . $_SERVER['REQUEST_URI']);
     exit;
@@ -117,7 +135,7 @@ include '../includes/client-nav.php';
           <label for="rep-user">Reported user</label>
           <select class="input" id="rep-user" name="user_id">
             <?php foreach ($people as $pid => $label): ?>
-              <option value="<?= (int) $pid ?>" <?= $pid === $pre_user ? 'selected' : '' ?>><?= e($label) ?></option>
+              <option value="<?= e($pid) ?>" <?= (string) $pid === $pre_user ? 'selected' : '' ?>><?= e($label) ?></option>
             <?php endforeach; ?>
           </select>
         </div>
@@ -140,17 +158,12 @@ include '../includes/client-nav.php';
 
       <div class="field">
         <label for="details">Details</label>
-        <textarea id="details" name="details" class="input" rows="4" style="height:auto; padding:0.8rem; line-height:1.6; font-size:0.82rem;" required><?= $tab === 'report' && tt_is_demo_account() ? 'After I chose another freelancer, this user sent me several rude messages and demanded I cancel my project. Screenshots attached.' : '' ?></textarea>
+        <textarea id="details" name="details" class="input" rows="4" minlength="10" style="height:auto; padding:0.8rem; line-height:1.6; font-size:0.82rem;" required><?= $tab === 'report' && tt_is_demo_account() ? 'After I chose another freelancer, this user sent me several rude messages and demanded I cancel my project. Screenshots attached.' : '' ?></textarea>
       </div>
 
       <div class="field">
         <label>Attachments</label>
-        <?php if ($tab === 'report'): ?>
-          <div class="file-row" style="max-width:340px;">
-            <?= icon('file', 15) ?><span>conversation-screenshot.png</span><span class="file-row__size">380 KB</span>
-            <button type="button" class="file-row__remove" aria-label="Remove file"><?= icon('x', 13) ?></button>
-          </div>
-        <?php endif; ?>
+
         <label class="dropzone" style="margin-top:0.6rem;">
           <?= icon('upload', 20) ?>
           <strong>Drag files here or <a>browse</a></strong>

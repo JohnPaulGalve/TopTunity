@@ -76,7 +76,7 @@ include '../includes/client-nav.php';
         <table class="data-table">
           <thead><tr><th>Project</th><th>Status</th><th class="num">Offer</th><th class="num">Submitted</th><th></th></tr></thead>
           <tbody>
-            <?php foreach (array_slice($proposals, 0, 4) as $p): ?>
+            <?php foreach (array_slice(array_merge(tt_freelancer_db_proposal_rows(), $proposals), 0, 4) as $p): ?>
               <tr>
                 <td><strong><?= e($p['title']) ?></strong><small><?= e($p['client']) ?> · <?= $p['type'] === 'hourly' ? 'Hourly' : 'Fixed Price' ?></small></td>
                 <td><span class="status status--<?= $p['status'] === 'pending' ? 'pending' : ($p['status'] === 'selected' ? 'released' : 'cancelled') ?>"><?= e(str_replace('_', ' ', ucfirst($p['status']))) ?></span></td>
@@ -92,7 +92,7 @@ include '../includes/client-nav.php';
 
     <section class="panel">
       <div class="panel__head"><h2>Ongoing Projects</h2><a href="my-projects.php" class="panel__link">My Projects →</a></div>
-      <?php foreach ($ongoing as $p): ?>
+      <?php foreach (array_merge(tt_freelancer_db_ongoing_rows(), $ongoing) as $p): ?>
         <div class="stat-line" style="padding:0.75rem 0; border-bottom:1px solid var(--color-border-gray);">
           <div style="flex:1; min-width:0;">
             <strong style="font-size:0.8rem;"><?= e($p['title']) ?></strong>
@@ -109,11 +109,11 @@ include '../includes/client-nav.php';
     <section class="panel">
       <div class="panel__head"><h2>Recent Notifications</h2><a href="notifications.php" class="panel__link">All</a></div>
       <?php foreach ($notes as $n): ?>
-        <div class="notif-item">
+        <a class="notif-item notif-item--link" href="notifications.php?open=<?= e(tt_notification_key($n)) ?>">
           <span class="icon-box icon-box--<?= e($n['tint']) ?>"><?= icon($n['icon'] === 'bank' ? 'wallet' : $n['icon'], 15) ?></span>
           <div class="notif-item__body"><strong><?= e($n['title']) ?><?php if ($n['new']): ?><span class="dot-new"></span><?php endif; ?></strong><p><?= e($n['text']) ?></p></div>
           <time><?= e($n['time']) ?></time>
-        </div>
+        </a>
       <?php endforeach; ?>
     </section>
 

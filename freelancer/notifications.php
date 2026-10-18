@@ -7,9 +7,14 @@ $base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "";
 
 require_once __DIR__ . '/../includes/data.php';
+
+if (isset($_GET['open'])) {
+    $target = tt_open_notification((string) $_GET['open'], 'freelancer');
+    if ($target) { header('Location: ' . $target); exit; }
+}
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mark_all'])) {
     tt_mark_all_read();
-    tt_flash('All notifications were marked as read.');
+    tt_mark_demo_notifications_read();
     header('Location: ' . $_SERVER['REQUEST_URI']);
     exit;
 }
@@ -59,7 +64,7 @@ include '../includes/client-nav.php';
     </div>
   <?php endif; ?>
   <?php foreach ($rows as $n): ?>
-    <div class="notif-row <?= $n['new'] ? 'notif-row--unread' : '' ?>">
+    <div class="notif-row <?= $n['new'] ? 'notif-row--unread' : '' ?>"<?php if (tt_notification_link('freelancer', $n['cat'])): ?> data-href="<?= e('notifications.php?open=' . tt_notification_key($n)) ?>"<?php endif; ?>>
       <span class="icon-box icon-box--<?= e($n['tint']) ?>"><?= icon($n['icon'], 16) ?></span>
       <div class="notif-row__body">
         <strong><?= e($n['title']) ?></strong>

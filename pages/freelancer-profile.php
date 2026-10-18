@@ -53,7 +53,7 @@ include '../includes/nav.php';
     <div class="profile-banner" aria-hidden="true"></div>
     <div class="profile-head">
       <div class="profile-id">
-        <?= avatar($freelancer['bg'], $freelancer['hair'], $freelancer['style'], 96) ?>
+        <?= tt_freelancer_avatar_html($freelancer, 96, $base_url) ?>
         <div class="profile-id__text">
           <h1>
             <?= e($freelancer['name']) ?>
@@ -96,9 +96,11 @@ include '../includes/nav.php';
           <div class="portfolio-grid" style="margin-top:1rem;">
             <?php foreach ($freelancer['portfolio'] as $item): ?>
               <div class="portfolio-item">
-                <div class="portfolio-thumb" style="--thumb: <?= e($item['tint']) ?>">
-                  <span></span><span></span><span></span>
-                </div>
+                <?php if (!empty($item['image']) && !empty($item['id'])): ?>
+                  <div class="portfolio-thumb" style="padding:0; overflow:hidden;"><img src="<?= e($base_url) ?>download.php?file=<?= (int) $item['id'] ?>" alt="<?= e($item['title']) ?>" loading="lazy" style="width:100%; height:100%; object-fit:cover; display:block;"></div>
+                <?php else: ?>
+                  <div class="portfolio-thumb" style="--thumb: <?= e($item['tint']) ?>"><span></span><span></span><span></span></div>
+                <?php endif; ?>
                 <h4><?= e($item['title']) ?></h4>
                 <p><?= e($item['category']) ?></p>
               </div>

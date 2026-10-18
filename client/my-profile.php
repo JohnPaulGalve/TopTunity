@@ -16,6 +16,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_photo'])) {
     exit;
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['choose_avatar'])) {
+    $err = tt_set_user_avatar((string) ($_POST['avatar'] ?? ''));
+    tt_flash($err ? 'Could not update avatar: ' . $err : 'Your avatar was updated.');
+    header('Location: ' . $_SERVER['REQUEST_URI']);
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['photo'])) {
     $err = tt_save_photo();
     tt_flash($err ? 'Could not save: ' . $err : 'Your profile photo was updated.');
@@ -64,7 +71,7 @@ include '../includes/client-nav.php';
 <div class="two-col" style="margin-top:1.25rem;">
   <div class="stack">
     <section class="profile-card">
-      <?php $my_photo = tt_user_photo((int) tt_current_user()['id'], 'client'); ?><?php if ($my_photo): ?><img src="<?= e($base_url) ?>download.php?photo=<?= (int) tt_current_user()['id'] ?>" alt="Profile photo" style="width:96px; height:96px; border-radius:50%; object-fit:cover;"><?php else: ?><?= avatar($me['bg'], $me['hair'], $me['style'], 96) ?><?php endif; ?>
+      <?php $my_photo = tt_user_photo((int) tt_current_user()['id'], 'client'); ?><?= tt_avatar_html($me, 96, $base_url) ?>
       <h2><?= e($me['name']) ?></h2>
       <p>Owner, <?= e($me['company']) ?></p>
       <form method="post" enctype="multipart/form-data" style="display:inline;">
@@ -73,6 +80,21 @@ include '../includes/client-nav.php';
       <?php if (!empty($my_photo)): ?>
       <form method="post" style="margin-top:0.5rem;"><button type="submit" name="remove_photo" value="1" class="btn btn--row-outline btn--sm">Remove Photo</button></form>
       <?php endif; ?>
+      <details class="avatar-picker-details">
+        <summary>Choose an illustrated avatar</summary>
+        <form method="post" class="avatar-picker-form">
+          <div class="avatar-picker">
+            <?php foreach (tt_avatar_assets() as $asset): ?>
+              <label class="avatar-choice">
+                <input type="radio" name="avatar" value="<?= e($asset) ?>" aria-label="<?= e(ucwords(str_replace('-', ' ', pathinfo($asset, PATHINFO_FILENAME)))) ?>" <?= $asset === ($me['avatar'] ?? '') ? 'checked' : '' ?> required>
+                <?= tt_avatar_image_html($asset, 48, $base_url) ?>
+              </label>
+            <?php endforeach; ?>
+          </div>
+          <button type="submit" name="choose_avatar" value="1" class="btn btn--primary btn--sm">Use Selected Avatar</button>
+          <?php if ($my_photo): ?><small class="muted">Choosing an avatar will replace your uploaded profile photo.</small><?php endif; ?>
+        </form>
+      </details>
       <div class="rating-box">
         <div><?= stars($avg) ?></div>
         <strong><?= e($avg) ?></strong>

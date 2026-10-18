@@ -41,6 +41,7 @@ function faq_url($cat, $q)
   <div class="container">
 
     <header class="center-block">
+      <img src="<?= e(tt_image_url($base_url, 'images/Illustrations/FAQs/help.svg')) ?>" alt="" class="page-illustration page-illustration--faq">
       <h1 style="font-size:2rem; font-weight:700;">FAQs</h1>
       <p style="margin-top:0.35rem; font-size:0.85rem; color:var(--color-muted-gray);">Answers to common questions from visitors, clients and freelancers.</p>
     </header>

@@ -24,9 +24,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$settings_file = tt_settings_file();
+$settings_file = tt_is_demo_admin() ? null : tt_settings_file();
 $since = 'January 15, 2026';
-if (file_exists($settings_file)) {
+if ($settings_file && file_exists($settings_file)) {
     $d = json_decode((string) file_get_contents($settings_file), true);
     if (!empty($d['since'])) { $since = date('F j, Y', strtotime($d['since'])); }
 }

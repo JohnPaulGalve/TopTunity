@@ -53,8 +53,8 @@ include '../includes/client-nav.php';
 
       <div class="field">
         <label for="review">Review</label>
-        <textarea id="review" name="review" class="input" rows="5" maxlength="<?= $max ?>" style="height:auto; padding:0.8rem; line-height:1.6; font-size:0.82rem;"><?= e($text) ?></textarea>
-        <span class="char-count"><?= strlen($text) ?> / <?= number_format($max) ?> characters</span>
+        <textarea id="review" name="review" class="input" rows="5" minlength="20" maxlength="<?= $max ?>" style="height:auto; padding:0.8rem; line-height:1.6; font-size:0.82rem;"><?= e($text) ?></textarea>
+        <span class="char-count"></span>
       </div>
 
       <div class="form-actions" style="justify-content:flex-end; margin-top:0.6rem;">

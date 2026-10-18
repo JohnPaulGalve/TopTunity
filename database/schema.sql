@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
   email         VARCHAR(190) NOT NULL UNIQUE,
   password_hash VARCHAR(255) NOT NULL,
   role          ENUM('client','freelancer','admin') NOT NULL,
+  avatar        VARCHAR(80) NULL,
   status        ENUM('active','suspended','deactivated') NOT NULL DEFAULT 'active',
   created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -62,7 +63,7 @@ CREATE TABLE IF NOT EXISTS projects (
   hourly_rate  INT UNSIGNED NOT NULL DEFAULT 0,
   max_hours    INT UNSIGNED NOT NULL DEFAULT 0,
   deadline     DATE NOT NULL,
-  status       ENUM('open','ongoing','overdue','completed','past','closed','cancelled') NOT NULL DEFAULT 'open',
+  status       ENUM('open','ongoing','overdue','completed','past','closed','suspended','cancelled') NOT NULL DEFAULT 'open',
   created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL

@@ -4,7 +4,7 @@
  * Saving is not connected to a database yet.
  */
 $user_role     = "freelancer";
-$base_url      = "/TopTunity/";
+$base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "";
 
 require_once __DIR__ . '/../includes/data.php';
@@ -18,6 +18,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (($_POST['confirm'] ?? '') !== $_POST['new'])                     { $errors[] = 'The new passwords do not match.'; }
     }
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) { $errors[] = 'Please enter a valid email address.'; }
+    if (!$errors && isset($_POST['new']) && $_POST['new'] !== '') {
+        $err = tt_change_password($_POST['current'] ?? '', $_POST['new'], $_POST['confirm'] ?? '');
+        if ($err) { $errors[] = $err; }
+    }
+    if (!$errors && isset($_POST['name'])) {
+        $err = tt_update_account($_POST['name'], $_POST['email'] ?? '');
+        if ($err) { $errors[] = $err; }
+    }
     if (!$errors) {
         tt_flash('Your account settings were saved.');
         header('Location: ' . $base_url . 'freelancer/account-settings.php');

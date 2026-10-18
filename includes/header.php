@@ -42,6 +42,7 @@ if (in_array($user_role, ['client', 'freelancer', 'admin'], true)) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="<?= e($meta_description) ?>">
   <title><?= e($page_title) ?> | TopTunity</title>
+  <link rel="icon" type="image/svg+xml" href="<?= e(tt_image_url($base_url, 'images/Logo/favicon.svg')) ?>">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

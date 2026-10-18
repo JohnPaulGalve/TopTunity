@@ -35,8 +35,7 @@ $avg_rating  = count($freelancers) ? round(array_sum(array_column($freelancers, 
       </div>
 
       <div class="about-art" aria-hidden="true">
-        <?= avatar('#CCFBF1', '#1E293B', 'long', 150) ?>
-        <?= avatar('#FFEDD5', '#1E293B', 'short', 150) ?>
+        <img src="<?= e(tt_image_url($base_url, 'images/Illustrations/About US/about-team.svg')) ?>" alt="" class="page-illustration page-illustration--about">
       </div>
     </section>
 

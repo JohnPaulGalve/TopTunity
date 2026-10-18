@@ -13,19 +13,35 @@ $email = tt_current_user() ? tt_current_user()['email'] : '';
 $errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['new']) && $_POST['new'] !== '') {
-        if (strlen($_POST['new']) < 8 || !preg_match('/\d/', $_POST['new'])) { $errors[] = 'The new password must be at least 8 characters and include a number.'; }
-        if (($_POST['confirm'] ?? '') !== $_POST['new'])                     { $errors[] = 'The new passwords do not match.'; }
-    }
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) { $errors[] = 'Please enter a valid email address.'; }
-    if (!$errors) {
-        tt_flash('Your account settings were saved.');
-        header('Location: ' . $base_url . 'admin/account-settings.php');
-        exit;
+    if (isset($_POST['current']) || isset($_POST['new']) || isset($_POST['confirm'])) {
+        $error = tt_change_password(
+            (string) ($_POST['current'] ?? ''),
+            (string) ($_POST['new'] ?? ''),
+            (string) ($_POST['confirm'] ?? '')
+        );
+        if ($error) {
+            $errors[] = $error;
+        } else {
+            unset($_SESSION['admin_password_change_required']);
+            $_SESSION['admin_password_verified'] = true;
+            tt_flash('Your password was updated.');
+            header('Location: ' . $base_url . 'admin/account-settings.php');
+            exit;
+        }
+    } else {
+        $error = tt_update_account((string) ($_POST['name'] ?? ''), (string) ($_POST['email'] ?? ''));
+        if ($error) {
+            $errors[] = $error;
+        } else {
+            tt_flash('Your account settings were saved.');
+            header('Location: ' . $base_url . 'admin/account-settings.php');
+            exit;
+        }
     }
 }
 
 $page_title = "Account Settings";
+$flash = tt_flash();
 include '../includes/header.php';
 include '../includes/client-nav.php';
 ?>
@@ -34,8 +50,13 @@ include '../includes/client-nav.php';
   <div>
     <h1>Account Settings</h1>
     <p class="subtle">Update your account information and password.</p>
+    <?php if (!empty($_SESSION['admin_password_change_required'])): ?>
+      <p class="note-soft" role="status" style="margin-top:0.8rem;">For account security, replace the real administrator's previous demo password before continuing.</p>
+    <?php endif; ?>
   </div>
 </div>
+
+<?php if ($flash): ?><div class="note-soft" role="status" style="margin-top:1rem;"><?= e($flash) ?></div><?php endif; ?>
 
 <?php if ($errors): ?>
   <div class="form-alert" role="alert" style="margin-top:1.25rem;"><?= icon('alert', 15) ?><div><?php foreach ($errors as $err): ?><div><?= e($err) ?></div><?php endforeach; ?></div></div>

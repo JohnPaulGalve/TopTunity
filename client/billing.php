@@ -9,11 +9,14 @@ $base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "billing";
 
 require_once __DIR__ . '/../includes/data.php';
+tt_settle_due_hourly_projects();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $site = (int) ($_POST['project'] ?? 0);
     $act  = $_POST['action'] ?? '';
     if ($act === 'sample') {
+        // demo deposit: kept for this session only, not saved
+        $_SESSION[tt_demo_session_key()]['billing']['deposited'] = true;
         header('Location: ' . $base_url . 'client/billing.php');
         exit;
     }
@@ -25,6 +28,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $projects = toptunity_client_projects();           // demo projects plus real ones
 $payments = toptunity_client_payments();           // demo rows plus real deposits and releases
+$demo = tt_is_demo_account();
+$demo_deposited = $demo && !empty($_SESSION[tt_demo_session_key()]['billing']['deposited']);
+if ($demo_deposited) {
+    // the demo deposit moves the Monthly Social Media payment into Held (this session only)
+    foreach ($payments as $i => $x) {
+        if (!empty($x['sample']) && $x['project'] === 'Monthly Social Media Content Calendar' && $x['status'] === 'pending') {
+            $payments[$i]['status'] = 'held';
+        }
+    }
+}
 $hourly   = toptunity_client_hourly_billing();     // demo hourly table (empty for real accounts)
 $real_projects = tt_client_billing_projects();
 
@@ -35,14 +48,17 @@ $sum = function ($statuses) use ($payments) {
 };
 $demo = tt_is_demo_account();
 $held_total   = $sum(['held']);
-$real_paid    = 0; $real_refunds = 0;
-foreach (tt_client_payment_history() as $h) { if ($h['status'] === 'released') { $real_paid += (int) $h['amount']; } }
+$real_paid = 0; $real_refunds = 0; $real_refund_count = 0;
+foreach (tt_client_payment_history() as $h) {
+    if ($h['status'] === 'released') { $real_paid += (int) $h['amount']; }
+    if ($h['status'] === 'refunded') { $real_refunds += (int) $h['amount']; $real_refund_count++; }
+}
 $paid_total   = ($demo ? 61400 : 0) + $real_paid;      // design lifetime total for the demo, plus real releases
 $refund_total = ($demo ? 6250 : 0) + $real_refunds;
-$refund_count = ($demo ? 2 : 0);
+$refund_count = ($demo ? 2 : 0) + $real_refund_count;
 
 /* Demo pending deposit: Monthly Social Media Content Calendar (hourly), sample only */
-$pending     = isset($projects[3]) && $demo ? $projects[3] : null;
+$pending     = isset($projects[3]) && $demo && !$demo_deposited ? $projects[3] : null;
 $pending_amt = $pending ? $pending['budget'] : 0;
 $waiting     = isset($projects[1]) && $demo ? $projects[1] : null;
 
@@ -161,10 +177,14 @@ include '../includes/client-nav.php';
               <span class="pay-item__amount">₱<?= number_format($p['escrow_amount']) ?></span>
             </div>
             <div class="pay-item__action">
-              <form method="post" action="billing.php" onsubmit="return confirm('Release this payment? This cannot be undone.');">
-                <input type="hidden" name="action" value="release"><input type="hidden" name="project" value="<?= (int) ($p['id'] + 1000) ?>">
-                <button type="submit" class="btn btn--primary"><?= icon('check-circle', 13) ?> Approve and Release</button>
-              </form>
+              <?php if ($p['billing_type'] === 'hourly'): ?>
+                <small class="muted">Hourly billing is settled on the End Date using approved hours; unused funds are refunded.</small>
+              <?php else: ?>
+                <form method="post" action="billing.php" onsubmit="return confirm('Release this payment? This cannot be undone.');">
+                  <input type="hidden" name="action" value="release"><input type="hidden" name="project" value="<?= (int) ($p['id'] + 1000) ?>">
+                  <button type="submit" class="btn btn--primary"><?= icon('check-circle', 13) ?> Approve and Release</button>
+                </form>
+              <?php endif; ?>
             </div>
           </div>
         </div>
@@ -247,7 +267,13 @@ include '../includes/client-nav.php';
                 <td><strong><?= e($x['project']) ?></strong><small><?= e($x['type']) ?><?= !empty($x['sample']) ? ' · Sample' : '' ?></small></td>
                 <td class="num">₱<?= number_format($x['amount']) ?></td>
                 <td><span class="status status--<?= e($x['status']) ?>"><?= e(ucfirst($x['status'])) ?></span></td>
-                <td><a href="#" class="view" aria-label="Download receipt"><?= icon('file', 15) ?></a></td>
+                <td>
+                  <?php if (empty($x['sample']) && !empty($x['id'])): ?>
+                    <a href="receipt.php?id=<?= (int) $x['id'] ?>" class="view" aria-label="Download receipt"><?= icon('file', 15) ?></a>
+                  <?php else: ?>
+                    <span class="view" aria-label="Sample receipt is not downloadable" title="Sample receipt"><?= icon('file', 15) ?></span>
+                  <?php endif; ?>
+                </td>
               </tr>
             <?php endforeach; ?>
           </tbody>

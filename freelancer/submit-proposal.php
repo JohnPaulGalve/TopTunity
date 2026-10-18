@@ -8,6 +8,7 @@ $base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "find";
 
 require_once __DIR__ . '/../includes/data.php';
+tt_handle_favourite();
 
 $id      = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $project = null;
@@ -37,18 +38,23 @@ if ($db_project) {
     foreach (toptunity_freelancer_proposals() as $pr) { if ($project && (int) $pr['project_id'] === $id) { $sent = true; } }
 }
 $deadline_passed = $project && $project['deadline'] < date('Y-m-d');
+$project_saved = in_array($id, toptunity_freelancer_saved_ids(), true);
 
 $errors = [];
 $form   = ['offer' => '', 'days' => '', 'letter' => ''];
 
 if ($project && !$sent && !$deadline_passed && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (empty($_POST['confirm'])) {
+        header('Location: ' . $base_url . 'freelancer/submit-proposal.php?id=' . (int) $id);
+        exit;
+    }
+
     $form['offer']  = isset($_POST['offer']) ? (int) $_POST['offer'] : '';
     $form['days']   = isset($_POST['days']) ? (int) $_POST['days'] : '';
     $form['letter'] = trim(isset($_POST['letter']) ? $_POST['letter'] : '');
     if ($form['offer'] === '' || $form['offer'] < 1)  { $errors[] = $project['type'] === 'hourly' ? 'Enter your hourly rate.' : 'Enter your total price.'; }
     if ($form['days'] === '' || $form['days'] < 1)    { $errors[] = 'Enter how many days you need to finish.'; }
     if (mb_strlen($form['letter']) < 50)              { $errors[] = 'Your cover letter should be at least 50 characters.'; }
-    if (empty($_POST['confirm']))                     { $errors[] = 'Please confirm that you can deliver this project.'; }
     if (!$errors && $db_project) {
         $err = tt_db_submit_proposal($id, $form['offer'], $form['days'], $form['letter']);
         if ($err) { $errors[] = $err; }
@@ -85,8 +91,12 @@ include '../includes/client-nav.php';
     </div>
   </div>
   <div class="head-actions">
-    <a href="#" class="btn btn--row-outline"><?= icon('bookmark', 13) ?> Save Project</a>
-    <a href="#" class="btn btn--row-outline"><?= icon('flag', 13) ?> Report Content</a>
+    <form method="post" action="submit-proposal.php?id=<?= (int) $id ?>">
+      <input type="hidden" name="favourite" value="project">
+      <input type="hidden" name="item" value="<?= (int) $id ?>">
+      <button type="submit" class="btn btn--row-outline"><?= icon('bookmark', 13) ?> <?= $project_saved ? 'Remove Saved Project' : 'Save Project' ?></button>
+    </form>
+    <a href="report-dispute.php?tab=report" class="btn btn--row-outline"><?= icon('flag', 13) ?> Report Content</a>
   </div>
 </div>
 
@@ -138,7 +148,7 @@ include '../includes/client-nav.php';
       <?php elseif ($deadline_passed): ?>
         <p class="muted">The deadline for this project has passed, so proposals are closed.</p>
       <?php else: ?>
-        <form method="post" action="submit-proposal.php?id=<?= (int) $id ?>">
+        <form method="post" action="submit-proposal.php?id=<?= (int) $id ?>" data-requires-checkbox="confirm">
           <div class="field-row">
             <div class="field" style="margin-top:0;">
               <label for="offer"><?= $project['type'] === 'hourly' ? 'Offer (₱/hr)' : 'Offer (₱)' ?> <span class="req">*</span></label>
@@ -153,16 +163,16 @@ include '../includes/client-nav.php';
           <div class="field">
             <label for="letter">Cover letter <span class="req">*</span></label>
             <textarea id="letter" name="letter" class="input" rows="6" minlength="50" maxlength="2000" style="height:auto; padding:0.8rem; line-height:1.6; font-size:0.82rem;" placeholder="Tell the client why you are the right freelancer, how you will do the work and when you can start." required><?= e($form['letter']) ?></textarea>
-            <span class="char-count"><?= mb_strlen($form['letter']) ?> / 2,000 characters</span>
+            <span class="char-count"></span>
           </div>
           <?php $est = (int) ($form['offer'] ?: ($project['amount'] ?: 0)); ?>
           <div class="note-box" style="margin-top:0;">
             <?= icon('dollar', 14) ?> At ₱<?= number_format($est ?: $project['amount']) ?><?= $project['type'] === 'hourly' ? '/hr' : '' ?> you receive ₱<?= number_format(round(($est ?: $project['amount']) * 0.9)) ?><?= $project['type'] === 'hourly' ? '/hr' : '' ?> after the 10% platform service fee.
           </div>
-          <label class="check-label" style="margin-top:0.9rem;"><input type="checkbox" name="confirm" value="1" required> I confirm that I can deliver this project within the time I offered.</label>
+          <label class="check-label" style="margin-top:0.9rem;"><input type="checkbox" name="confirm" value="1"> I confirm that I can deliver this project within the time I offered.</label>
           <div class="form-actions" style="justify-content:space-between;">
             <small>One proposal per project. Not allowed after the deadline.</small>
-            <button type="submit" class="btn btn--primary"><?= icon('send', 14) ?> Submit Proposal</button>
+            <button type="submit" class="btn btn--primary" disabled><?= icon('send', 14) ?> Submit Proposal</button>
           </div>
         </form>
       <?php endif; ?>
@@ -179,7 +189,7 @@ include '../includes/client-nav.php';
       <div class="kv"><span>Projects posted</span><strong>7</strong></div>
       <div class="kv"><span>Location</span><strong>Mandaluyong City</strong></div>
       <p class="muted" style="margin-top:0.6rem; font-style:italic;">“Clear requirements and pays on time. Very approachable.” — Bea Lim</p>
-      <a href="#" class="btn btn--row-outline" style="width:100%; margin-top:0.7rem;"><?= icon('flag', 13) ?> Report User</a>
+      <a href="report-dispute.php?tab=report<?= $db_project ? '&amp;user=' . (int) $db_project['client_id'] : '' ?>" class="btn btn--row-outline" style="width:100%; margin-top:0.7rem;"><?= icon('flag', 13) ?> Report User</a>
     </section>
     <?php if ($project['type'] === 'hourly'): ?>
     <div class="info-callout">

@@ -16,7 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $form['amount']  = isset($_POST['amount']) ? $_POST['amount'] : '';
     $form['method']  = isset($_POST['method']) && isset($methods[$_POST['method']]) ? $_POST['method'] : 'gcash';
     $form['account'] = trim(isset($_POST['account']) ? $_POST['account'] : '');
-    $err = tt_db_withdraw((int) $form['amount'], $form['method'], $form['account']);
+    $bank = isset($_POST['bank']) ? trim($_POST['bank']) : '';
+    $composed = $form['method'] === 'bank' ? $bank . ' · ' . preg_replace('/\s+/', '', $form['account']) : preg_replace('/\s+/', '', $form['account']);
+    $err = tt_check_withdrawal_account($form['method'], $composed) ?: tt_db_withdraw((int) $form['amount'], $form['method'], $composed);
     if ($err) { $errors[] = $err; }
     else {
         tt_flash('Withdrawal of ₱' . number_format((int) $form['amount']) . ' was requested. It is held until it is processed.');
@@ -61,8 +63,27 @@ include '../includes/client-nav.php';
         <select class="input" id="wd-method" name="method"><?php foreach ($methods as $k => $l): ?><option value="<?= e($k) ?>" <?= $form['method'] === $k ? 'selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?></select>
       </div>
       <div class="field">
-        <label for="wd-account">Account number</label>
-        <input class="input" id="wd-account" name="account" value="<?= e($form['account']) ?>" placeholder="e.g. 0917 000 0000">
+        <div id="wd-bank-wrap">
+          <label for="wd-bank">Bank</label>
+          <select class="input" id="wd-bank" name="bank"><?php foreach (['BDO', 'BPI', 'Metrobank', 'Landbank', 'UnionBank', 'Security Bank', 'RCBC', 'PNB'] as $bk): ?><option value="<?= e($bk) ?>"><?= e($bk) ?></option><?php endforeach; ?></select>
+        </div>
+        <label for="wd-account" id="wd-account-label">GCash number</label>
+        <input class="input" id="wd-account" name="account" value="<?= e($form['account']) ?>" placeholder="09XX XXX XXXX" inputmode="numeric">
+        <p class="hint" id="wd-hint">GCash: 11 digits starting with 09.</p>
+        <script>
+        (function () {
+          var m = document.getElementById('wd-method'), a = document.getElementById('wd-account'), b = document.getElementById('wd-bank-wrap'),
+              l = document.getElementById('wd-account-label'), h = document.getElementById('wd-hint');
+          function sync() {
+            var bank = m.value === 'bank';
+            b.style.display = bank ? '' : 'none';
+            l.textContent = bank ? 'Bank account number' : 'GCash number';
+            a.placeholder = bank ? 'Account number (10 to 16 digits)' : '09XX XXX XXXX';
+            h.textContent = bank ? 'Bank account: 10 to 16 digits.' : 'GCash: 11 digits starting with 09.';
+          }
+          m.addEventListener('change', sync); sync();
+        })();
+        </script>
       </div>
       <button type="submit" class="btn btn--primary" style="margin-top:1rem;" <?= $real['available'] < 500 ? 'disabled' : '' ?>>Request Withdrawal</button>
     </form>

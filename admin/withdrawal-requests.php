@@ -9,23 +9,32 @@ $active_client = "withdraw";
 require_once __DIR__ . '/../includes/data.php';
 
 $all  = toptunity_admin_withdrawals();   // real requests first, then demo rows
-$want = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+$want = isset($_GET['id']) ? (string) $_GET['id'] : '';
 $sel  = null;
-foreach ($all as $w) { if ((int) $w['id'] === $want && empty($w['sample'])) { $sel = $w; } }
-if (!$sel) { foreach ($all as $w) { if (empty($w['sample'])) { $sel = $w; break; } } }
+foreach ($all as $w) {
+    if ((string) $w['id'] === $want && (empty($w['sample']) || tt_is_demo_admin())) { $sel = $w; break; }
+}
+if (!$sel) {
+    foreach ($all as $w) {
+        if (empty($w['sample']) || tt_is_demo_admin()) { $sel = $w; break; }
+    }
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $sel) {
     $action = $_POST['action'] ?? '';
     $reason = trim($_POST['reason'] ?? '');
-    $err = in_array($action, ['process', 'reject'], true) ? tt_db_process_withdrawal((int) $sel['id'], $action, $reason) : 'Choose an action.';
+    $err = !empty($sel['sample'])
+        ? tt_admin_process_demo_withdrawal((string) $sel['id'], (string) $action, $reason)
+        : tt_db_process_withdrawal((int) $sel['id'], (string) $action, $reason);
     tt_flash($err ? 'Could not continue: ' . $err : ($action === 'process' ? 'Marked as processed.' : 'Rejected. The amount returns to the freelancer\'s balance.'));
-    header('Location: ' . $base_url . 'admin/withdrawal-requests.php?id=' . (int) $sel['id']);
+    header('Location: ' . $base_url . 'admin/withdrawal-requests.php?id=' . urlencode((string) $sel['id']));
     exit;
 }
 
 $cls = ['pending' => 'pending', 'processed' => 'released', 'rejected' => 'past'];
 $money_label = function ($m) { return $m; };
 $page_title = "Withdrawal Requests";
+$flash = tt_flash();
 include '../includes/header.php';
 include '../includes/client-nav.php';
 ?>
@@ -37,6 +46,8 @@ include '../includes/client-nav.php';
   </div>
 </div>
 
+<?php if ($flash): ?><div class="note-soft" role="status" style="margin-top:1rem;"><?= e($flash) ?></div><?php endif; ?>
+
 <div class="admin-layout" style="margin-top:1.25rem;">
   <section class="admin-list">
     <div style="overflow-x:auto;">
@@ -45,9 +56,9 @@ include '../includes/client-nav.php';
         <tbody>
           <?php if (!$all): ?><tr><td colspan="5" class="muted" style="text-align:center; padding:1.2rem;">No withdrawal requests yet.</td></tr><?php endif; ?>
           <?php foreach ($all as $w): ?>
-            <tr class="<?= $sel && $w['id'] === $sel['id'] ? 'is-selected' : '' ?>">
+            <tr class="<?= $sel && (string) $w['id'] === (string) $sel['id'] ? 'is-selected' : '' ?>">
               <td><?= e($w['date']) ?></td>
-              <td><?php if (empty($w['sample'])): ?><a href="withdrawal-requests.php?id=<?= (int) $w['id'] ?>"><strong><?= e($w['freelancer']) ?></strong></a><?php else: ?><strong><?= e($w['freelancer']) ?></strong><small>Sample</small><?php endif; ?></td>
+              <td><a href="withdrawal-requests.php?id=<?= urlencode((string) $w['id']) ?>"><strong><?= e($w['freelancer']) ?></strong></a><?php if (!empty($w['sample'])): ?><small>Sample</small><?php endif; ?></td>
               <td><?= e($w['method']) ?></td>
               <td class="num">₱<?= number_format($w['amount']) ?></td>
               <td><span class="status status--<?= e($cls[$w['status']]) ?>"><?= e(ucfirst($w['status'])) ?></span></td>
@@ -72,7 +83,7 @@ include '../includes/client-nav.php';
       <?php if ($sel['status'] === 'pending'): ?>
         <form method="post" action="withdrawal-requests.php?id=<?= (int) $sel['id'] ?>" style="margin-top:0.9rem;">
           <button type="submit" name="action" value="process" class="btn btn--green btn--block">✓ Mark as Processed</button>
-          <input class="input" name="reason" placeholder="Reason, if rejecting (10+ characters)" style="margin-top:0.6rem; height:38px;">
+          <input class="input" name="reason" minlength="10" placeholder="Reason, if rejecting (10+ characters)" style="margin-top:0.6rem; height:38px;">
           <button type="submit" name="action" value="reject" class="btn btn--block" style="margin-top:0.5rem; background:#FFFFFF; border:1px solid var(--color-error-base); color:var(--color-error-base);">Mark as Rejected</button>
         </form>
         <p class="note-line" style="margin-top:0.7rem;">The freelancer is notified. Rejected amounts return to their balance.</p>

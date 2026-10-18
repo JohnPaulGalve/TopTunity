@@ -23,7 +23,9 @@ $side_links = [
 <div class="app-shell">
 
   <aside class="app-sidebar" aria-label="Client navigation">
-    <a href="<?= e($base_url) ?>client/dashboard.php" class="brand-logo brand-logo--light app-brand">TopTunity<span class="logo-star" aria-hidden="true">&#10022;</span></a>
+    <a href="<?= e($base_url) ?>client/dashboard.php" class="brand-logo brand-logo--light app-brand" aria-label="TopTunity home">
+      <img src="<?= e(tt_image_url($base_url, 'images/Logo/logo-wordmark-white.svg')) ?>" alt="TopTunity" class="brand-logo__image">
+    </a>
 
     <nav class="side-nav">
       <?php foreach ($side_links as $key => $link): ?>

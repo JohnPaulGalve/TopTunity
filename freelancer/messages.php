@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message'])) {
     $t = $threads[$open] ?? null;
     if ($t && !empty($t['real'])) {
         $err = tt_send_message($t['with'], $_POST['message']);
-        tt_flash($err ? 'Could not send: ' . $err : 'Message sent.');
+        if ($err) { tt_flash('Could not send: ' . $err); }
         header('Location: ' . $base_url . 'freelancer/messages.php?with=' . (int) $t['with']);
     } else {
         $dk = 'demo_' . (int) tt_current_user()['id'];
@@ -33,6 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message'])) {
     exit;
 }
 if (!empty($threads[$open]['real'])) { tt_mark_thread_read($threads[$open]['with']); }
+elseif (!empty($threads[$open])) { tt_mark_demo_thread_read($threads[$open]); $threads = toptunity_freelancer_threads(); }
 
 $thread  = $threads ? $threads[$open] : null;
 if ($thread && empty($thread['real'])) {
@@ -114,7 +115,7 @@ include '../includes/client-nav.php';
         <?php endforeach; ?>
       </div>
       <form class="composer" method="post" action="">
-        <textarea name="message" placeholder="Write a message…" rows="1" aria-label="Write a message"></textarea>
+        <textarea name="message" maxlength="2000" placeholder="Write a message…" rows="1" aria-label="Write a message"></textarea>
         <button type="submit" class="btn btn--primary"><?= icon('send', 14) ?> Send</button>
       </form>
       <p class="msg-foot"><?= icon('lock', 11) ?> Messages are saved securely. The administrator can only view them when they are part of a report or dispute.</p>

@@ -1,7 +1,7 @@
 <?php
 /**
  * admin/dispute-management.php - Review disputes and record a decision (matches the Dispute Management design).
- * The decision is not saved to a database yet.
+ * Decisions are persisted to live dispute records or isolated demo session state.
  */
 $user_role     = "admin";
 $base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
@@ -13,26 +13,27 @@ $all  = toptunity_admin_disputes();
 $sel  = null;
 $want = isset($_GET['id']) ? $_GET['id'] : '';
 foreach ($all as $d) { if ($d['id'] === $want) { $sel = $d; } }
-if (!$sel) { $sel = $all[0]; }
+if (!$sel && $all) { $sel = $all[0]; }
 
 $errors = [];
 $decision_val = isset($_POST['decision']) ? $_POST['decision'] : '';
-$to_fl = isset($_POST['to_freelancer']) ? (int) $_POST['to_freelancer'] : (int) floor($sel['held'] / 2);
-$to_cl = isset($_POST['to_client']) ? (int) $_POST['to_client'] : (int) ceil($sel['held'] / 2);
+$to_fl = isset($_POST['to_freelancer']) ? (int) $_POST['to_freelancer'] : (int) floor(($sel['held'] ?? 0) / 2);
+$to_cl = isset($_POST['to_client']) ? (int) $_POST['to_client'] : (int) ceil(($sel['held'] ?? 0) / 2);
 $notes = trim(isset($_POST['notes']) ? $_POST['notes'] : '');
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!in_array($decision_val, ['release', 'refund', 'split'], true)) { $errors[] = 'Choose a decision.'; }
-    if ($decision_val === 'split' && ($to_fl + $to_cl) !== (int) $sel['held']) { $errors[] = 'The two amounts must add up to ₱' . number_format($sel['held']) . '.'; }
-    if (mb_strlen($notes) < 20) { $errors[] = 'Write the decision notes (at least 20 characters).'; }
-    if (!$errors) {
-        tt_flash('Decision recorded for ' . $sel['id'] . ' (simulated).');
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $sel) {
+    $error = tt_admin_resolve_dispute((string) $sel['id'], (string) $decision_val, $to_fl, $to_cl, $notes);
+    if ($error) {
+        $errors[] = $error;
+    } else {
+        tt_flash('Decision recorded for ' . $sel['id'] . '.');
         header('Location: ' . $base_url . 'admin/dispute-management.php?id=' . urlencode($sel['id']));
         exit;
     }
 }
 
 $page_title = "Dispute Management";
+$flash = tt_flash();
 include '../includes/header.php';
 include '../includes/client-nav.php';
 ?>
@@ -44,13 +45,16 @@ include '../includes/client-nav.php';
   </div>
 </div>
 
+<?php if ($flash): ?><div class="note-soft" role="status" style="margin-top:1rem;"><?= e($flash) ?></div><?php endif; ?>
+
 <section class="admin-list" style="margin-top:1.25rem;">
   <div style="overflow-x:auto;">
     <table class="data-table">
       <thead><tr><th>Date</th><th>Project</th><th>Billing type</th><th>Filed by</th><th>Reason</th><th>Status</th><th></th></tr></thead>
       <tbody>
+        <?php if (!$all): ?><tr><td colspan="7" class="muted" style="text-align:center; padding:1.2rem;">No disputes are available.</td></tr><?php endif; ?>
         <?php foreach ($all as $d): ?>
-          <tr class="<?= $d['id'] === $sel['id'] ? 'is-selected' : '' ?>">
+          <tr class="<?= $sel && $d['id'] === $sel['id'] ? 'is-selected' : '' ?>">
             <td><?= e($d['date']) ?></td>
             <td><strong><?= e($d['project']) ?></strong></td>
             <td><?= e($d['billing']) ?></td>
@@ -65,6 +69,7 @@ include '../includes/client-nav.php';
   </div>
 </section>
 
+<?php if ($sel): ?>
 <section class="box" style="margin-top:1rem;">
   <div class="box-head">
     <h2>Dispute Details · <?= e($sel['project']) ?></h2>
@@ -100,7 +105,7 @@ include '../includes/client-nav.php';
       <div class="kv"><span>Status</span><span class="status status--ongoing">Active</span></div>
       <div class="kv"><span>Billing</span><strong><?= e($sel['contract']) ?></strong></div>
       <div class="kv"><span>Dates</span><strong><?= e($sel['dates']) ?></strong></div>
-      <a href="#" class="view" style="font-size:0.74rem;">View full contract →</a>
+      <p class="note-line">The available contract summary is shown above.</p>
     </div>
     <div class="chart-card" style="box-shadow:none;">
       <p class="section-tag" style="margin-bottom:0.5rem;">Conversation history <small class="muted">(read-only)</small></p>
@@ -109,7 +114,7 @@ include '../includes/client-nav.php';
           <div class="<?= $m['from'] === $sel['freelancer'] || $m['from'] === explode(' ', $sel['freelancer'])[0] ? 'me' : '' ?>"><strong><?= e($m['from']) ?>:</strong> <?= e($m['text']) ?></div>
         <?php endforeach; ?>
       </div>
-      <a href="#" class="view" style="font-size:0.74rem; display:inline-block; margin-top:0.5rem;">Open full conversation →</a>
+      <p class="note-line" style="margin-top:0.5rem;">The available conversation history is shown above.</p>
     </div>
   </div>
 
@@ -127,11 +132,11 @@ include '../includes/client-nav.php';
     <div class="split-grid">
       <div class="field" style="margin-top:0;"><label for="tf">To freelancer</label><div class="input-prefix"><span>₱</span><input class="input" id="tf" type="number" name="to_freelancer" value="<?= (int) $to_fl ?>" min="0"></div></div>
       <div class="field" style="margin-top:0;"><label for="tc">To client</label><div class="input-prefix"><span>₱</span><input class="input" id="tc" type="number" name="to_client" value="<?= (int) $to_cl ?>" min="0"></div></div>
-      <div class="field" style="margin-top:0;"><label for="nt">Decision notes <span class="req">*</span></label><input class="input" id="nt" name="notes" value="<?= e($notes) ?>" placeholder="Explain the decision"></div>
+      <div class="field" style="margin-top:0;"><label for="nt">Decision notes <span class="req">*</span></label><input class="input" id="nt" name="notes" value="<?= e($notes) ?>" minlength="20" placeholder="Explain the decision"></div>
     </div>
 
     <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-top:1rem; flex-wrap:wrap;">
-      <p class="note-line" style="max-width:520px;">The decision is added to the project history. Payments are simulated and only update the records.</p>
+      <p class="note-line" style="max-width:520px;">The decision and notes are saved to the dispute record. This does not initiate a transfer or refund.</p>
       <button type="submit" class="btn btn--primary">Record Decision</button>
     </div>
   </form>
@@ -139,6 +144,9 @@ include '../includes/client-nav.php';
     <p class="muted" style="margin-top:1rem;">This dispute is resolved. <?= e($sel['history'][count($sel['history']) - 1]) ?></p>
   <?php endif; ?>
 </section>
+<?php else: ?>
+<section class="box" style="margin-top:1rem;"><h2>Dispute Details</h2><p class="muted">There are no disputes to review.</p></section>
+<?php endif; ?>
 
 </main>
 

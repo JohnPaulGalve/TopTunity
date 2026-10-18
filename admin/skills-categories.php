@@ -1,7 +1,6 @@
 <?php
 /**
  * admin/skills-categories.php - Manage the skills freelancers can add and the project categories (matches the design).
- * Adding, editing and removing are not saved to a database yet.
  */
 $user_role     = "admin";
 $base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
@@ -10,32 +9,32 @@ $active_client = "skills";
 require_once __DIR__ . '/../includes/data.php';
 
 $catalog = toptunity_skill_catalog();
-$freelancers = toptunity_freelancers();
-$design_counts = ['PHP' => 214, 'MySQL' => 198, 'JavaScript' => 305, 'Laravel' => 96, 'Figma' => 122, 'Flutter' => 87, 'Copywriting' => 173];
-$skill_rows = [];
-foreach ($catalog as $name => $cat) {
-    $n = 0;
-    foreach ($freelancers as $f) { if (in_array($name, $f['skills'], true)) { $n++; } }
-    $skill_rows[] = ['name' => $name, 'count' => isset($design_counts[$name]) ? $design_counts[$name] : $n];
+if (tt_is_demo_admin()) {
+    $demo_catalog = tt_demo_admin_catalog_state();
+    $skill_rows = array_map(static function ($name) {
+        return ['name' => $name, 'count' => 0];
+    }, array_keys($demo_catalog['skills']));
+    $categories = array_map(static function ($name) {
+        return ['name' => $name, 'count' => 0];
+    }, $demo_catalog['categories']);
+} else {
+    $skill_rows = db()->query('SELECT s.name, COUNT(DISTINCT fs.freelancer_id) AS count
+                               FROM skills s LEFT JOIN freelancer_skills fs ON fs.skill_id = s.id
+                               GROUP BY s.id, s.name ORDER BY s.name')->fetchAll();
+    $categories = db()->query('SELECT c.name, COUNT(DISTINCT p.id) AS count
+                               FROM categories c LEFT JOIN projects p ON p.category_id = c.id
+                               GROUP BY c.id, c.name ORDER BY c.name')->fetchAll();
 }
-$skill_rows = array_slice($skill_rows, 0, 7);
-
-$categories = [
-    ['Web Development', 'code', 'teal'], ['Mobile App Development', 'smartphone', 'teal'], ['Graphic Design', 'pen-tool', 'teal'],
-    ['UI/UX Design', 'frame', 'teal'], ['Writing and Content', 'clipboard', 'teal'], ['Digital Marketing', 'megaphone', 'teal'],
-    ['Video and Animation', 'video', 'teal'],
-];
-$public = toptunity_listing();
-$cat_counts = [];
-foreach ($public as $p) { $cat_counts[$p['category']] = ($cat_counts[$p['category']] ?? 0) + 1; }
 
 $errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $what = isset($_POST['what']) && $_POST['what'] === 'category' ? 'category' : 'skill';
-    $name = trim(isset($_POST['name']) ? $_POST['name'] : '');
-    if (mb_strlen($name) < 2 || mb_strlen($name) > 40) { $errors[] = 'Enter a ' . $what . ' name between 2 and 40 characters.'; }
-    if (!$errors) {
-        tt_flash(ucfirst($what) . ' "' . $name . '" was added (simulated).');
+    $action = (string) ($_POST['catalog_action'] ?? 'add');
+    $kind = (string) ($_POST['kind'] ?? 'skill');
+    $name = trim((string) ($_POST['name'] ?? ''));
+    $error = tt_admin_catalog_change($action, $kind, $name, (string) ($_POST['new_name'] ?? ''));
+    if ($error) { $errors[] = $error; }
+    else {
+        tt_flash(ucfirst($kind) . ' ' . ($action === 'remove' ? 'removed.' : ($action === 'rename' ? 'renamed.' : 'added.')));
         header('Location: ' . $base_url . 'admin/skills-categories.php');
         exit;
     }
@@ -57,43 +56,90 @@ include '../includes/client-nav.php';
   <div class="form-alert" role="alert" style="margin-top:1.25rem;"><?= icon('alert', 15) ?><div><?php foreach ($errors as $err): ?><div><?= e($err) ?></div><?php endforeach; ?></div></div>
 <?php endif; ?>
 
-<div class="two-col" style="margin-top:1.25rem; grid-template-columns:1fr 1fr;">
-  <section class="box" style="margin-top:0;">
+<div class="catalog-grid">
+  <section class="box catalog-panel">
     <div class="box-head"><h2>Skills</h2><span class="muted"><?= count($skill_rows) ?> shown</span></div>
-    <form method="post" action="skills-categories.php" style="display:flex; gap:0.5rem; margin-bottom:0.8rem;">
-      <input type="hidden" name="what" value="skill">
-      <input class="input" name="name" placeholder="New skill name" style="flex:1; height:40px;">
-      <button type="submit" class="btn btn--primary" style="height:40px;"><?= icon('plus', 14) ?> Add Skill</button>
-    </form>
-    <?php foreach ($skill_rows as $s): ?>
-      <div class="kv" style="align-items:center;">
-        <span><span class="chip" style="background:var(--color-teal-tint); color:var(--color-teal-dark); border-color:#CDEBE7;"><?= e($s['name']) ?></span></span>
-        <span style="display:flex; gap:0.7rem; align-items:center;">
-          <small class="muted"><?= (int) $s['count'] ?> freelancers</small>
-          <a href="#" class="view" style="font-size:0.72rem;"><?= icon('edit', 12) ?> Edit</a>
-          <a href="#" style="color:var(--color-error-base); font-size:0.72rem; font-weight:600;"><?= icon('x-circle', 12) ?> Remove</a>
-        </span>
+    <form method="post" action="skills-categories.php" class="catalog-add">
+      <input type="hidden" name="catalog_action" value="add">
+      <input type="hidden" name="kind" value="skill">
+      <div class="field catalog-add__field">
+        <input class="input" name="name" minlength="2" maxlength="80" placeholder="New skill name" aria-label="New skill name">
       </div>
-    <?php endforeach; ?>
+      <button type="submit" class="btn btn--primary"><?= icon('plus', 14) ?> Add Skill</button>
+    </form>
+    <div class="catalog-list">
+      <?php foreach ($skill_rows as $s): ?>
+        <div class="catalog-row">
+          <div class="catalog-row__main">
+            <span class="chip catalog-skill-chip"><?= e($s['name']) ?></span>
+            <small class="muted"><?= (int) $s['count'] ?> freelancers</small>
+          </div>
+          <div class="catalog-row__actions">
+            <details class="catalog-edit">
+              <summary><?= icon('edit', 12) ?> Edit</summary>
+              <form method="post" action="skills-categories.php" class="catalog-edit__form">
+                <input type="hidden" name="catalog_action" value="rename">
+                <input type="hidden" name="kind" value="skill">
+                <input type="hidden" name="name" value="<?= e($s['name']) ?>">
+                <div class="field">
+                  <input class="input" name="new_name" value="<?= e($s['name']) ?>" minlength="2" maxlength="80" aria-label="Rename skill <?= e($s['name']) ?>">
+                </div>
+                <button type="submit" class="catalog-save">Save</button>
+              </form>
+            </details>
+            <form method="post" action="skills-categories.php" onsubmit="return confirm('Remove this skill and its freelancer/project associations?');">
+              <input type="hidden" name="catalog_action" value="remove">
+              <input type="hidden" name="kind" value="skill">
+              <input type="hidden" name="name" value="<?= e($s['name']) ?>">
+              <button type="submit" class="catalog-remove"><?= icon('x-circle', 12) ?> Remove</button>
+            </form>
+          </div>
+        </div>
+      <?php endforeach; ?>
+    </div>
   </section>
 
-  <section class="box" style="margin-top:0;">
+  <section class="box catalog-panel">
     <div class="box-head"><h2>Categories</h2><span class="muted"><?= count($categories) ?> shown</span></div>
-    <form method="post" action="skills-categories.php" style="display:flex; gap:0.5rem; margin-bottom:0.8rem;">
-      <input type="hidden" name="what" value="category">
-      <input class="input" name="name" placeholder="New category name" style="flex:1; height:40px;">
-      <button type="submit" class="btn btn--primary" style="height:40px;"><?= icon('plus', 14) ?> Add Category</button>
-    </form>
-    <?php foreach ($categories as $c): $n = $cat_counts[$c[0]] ?? 0; ?>
-      <div class="kv" style="align-items:center;">
-        <span style="display:flex; align-items:center; gap:0.6rem;"><span class="icon-box icon-box--teal" style="width:28px; height:28px;"><?= icon($c[1], 14) ?></span><strong style="font-size:0.8rem; color:var(--color-deep-slate);"><?= e($c[0]) ?></strong></span>
-        <span style="display:flex; gap:0.7rem; align-items:center;">
-          <small class="muted"><?= (int) $n ?> projects</small>
-          <a href="#" class="view" style="font-size:0.72rem;"><?= icon('edit', 12) ?> Edit</a>
-          <a href="#" style="color:var(--color-error-base); font-size:0.72rem; font-weight:600;"><?= icon('x-circle', 12) ?> Remove</a>
-        </span>
+    <form method="post" action="skills-categories.php" class="catalog-add">
+      <input type="hidden" name="catalog_action" value="add">
+      <input type="hidden" name="kind" value="category">
+      <div class="field catalog-add__field">
+        <input class="input" name="name" minlength="2" maxlength="120" placeholder="New category name" aria-label="New category name">
       </div>
-    <?php endforeach; ?>
+      <button type="submit" class="btn btn--primary"><?= icon('plus', 14) ?> Add Category</button>
+    </form>
+    <div class="catalog-list">
+      <?php foreach ($categories as $c): $category_icons = ['Web Development' => 'code', 'Mobile App Development' => 'smartphone', 'Graphic Design' => 'pen-tool', 'UI/UX Design' => 'frame', 'Writing and Content' => 'clipboard', 'Digital Marketing' => 'megaphone', 'Video and Animation' => 'video']; $category_icon = $category_icons[$c['name']] ?? 'code'; ?>
+        <div class="catalog-row">
+          <div class="catalog-row__main catalog-row__main--category">
+            <span class="icon-box icon-box--teal catalog-category-icon"><?= icon($category_icon, 14) ?></span>
+            <strong><?= e($c['name']) ?></strong>
+            <small class="muted"><?= (int) $c['count'] ?> projects</small>
+          </div>
+          <div class="catalog-row__actions">
+            <details class="catalog-edit">
+              <summary><?= icon('edit', 12) ?> Edit</summary>
+              <form method="post" action="skills-categories.php" class="catalog-edit__form">
+                <input type="hidden" name="catalog_action" value="rename">
+                <input type="hidden" name="kind" value="category">
+                <input type="hidden" name="name" value="<?= e($c['name']) ?>">
+                <div class="field">
+                  <input class="input" name="new_name" value="<?= e($c['name']) ?>" minlength="2" maxlength="120" aria-label="Rename category <?= e($c['name']) ?>">
+                </div>
+                <button type="submit" class="catalog-save">Save</button>
+              </form>
+            </details>
+            <form method="post" action="skills-categories.php" onsubmit="return confirm('Remove this category? Projects and skills using it will become uncategorized.');">
+              <input type="hidden" name="catalog_action" value="remove">
+              <input type="hidden" name="kind" value="category">
+              <input type="hidden" name="name" value="<?= e($c['name']) ?>">
+              <button type="submit" class="catalog-remove"><?= icon('x-circle', 12) ?> Remove</button>
+            </form>
+          </div>
+        </div>
+      <?php endforeach; ?>
+    </div>
   </section>
 </div>
 

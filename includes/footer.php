@@ -5,16 +5,13 @@
  */
 $base_url = isset($base_url) ? $base_url : (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 ?>
-<?php if (!empty($app_shell)): ?>
-</div><!-- /app-main -->
-</div><!-- /app-shell -->
-<?php endif; ?>
-
 <footer class="footer">
   <div class="container">
     <div class="footer__grid">
       <div>
-        <a href="<?= e($base_url . tt_brand_home()) ?>" class="brand-logo brand-logo--light" aria-label="TopTunity home">TopTunity<span class="logo-star" aria-hidden="true">&#10022;</span></a>
+        <a href="<?= e($base_url . tt_brand_home()) ?>" class="brand-logo brand-logo--light" aria-label="TopTunity home">
+          <img src="<?= e(tt_image_url($base_url, 'images/Logo/logo-wordmark-white.svg')) ?>" alt="TopTunity" class="brand-logo__image">
+        </a>
         <p class="footer__tagline">Top Talents. Best Opportunities.</p>
         <p class="footer__about">The freelance project and service marketplace that connects clients who need projects done with skilled Filipino freelancers.</p>
       </div>
@@ -45,6 +42,11 @@ $base_url = isset($base_url) ? $base_url : (rtrim(dirname(dirname($_SERVER['SCRI
     </div>
   </div>
 </footer>
+
+<?php if (!empty($app_shell)): ?>
+</div><!-- /app-main -->
+</div><!-- /app-shell -->
+<?php endif; ?>
 
 <script src="<?= e($base_url) ?>js/main.js?v=<?= @filemtime(__DIR__ . '/../js/main.js') ?>"></script>
 </body>

@@ -1,7 +1,7 @@
 <?php
 /**
  * admin/reported-content.php - Reports from users, with details and actions (matches the Reported Content design).
- * Dismiss, warn, remove and suspend are not saved to a database yet.
+ * Report actions update the live report records or the demo session fixture state.
  */
 $user_role     = "admin";
 $base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
@@ -10,9 +10,15 @@ $active_client = "reported";
 require_once __DIR__ . '/../includes/data.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $act = isset($_POST['action']) ? $_POST['action'] : '';
-    $labels = ['dismiss' => 'Report dismissed', 'warn' => 'User warned', 'remove' => 'Content removed', 'suspend' => 'Account suspended'];
-    header('Location: ' . $base_url . 'admin/reported-content.php' . (isset($_GET['tab']) ? '?tab=' . urlencode($_GET['tab']) : ''));
+    $report_id = (string) ($_POST['report_id'] ?? '');
+    $act = (string) ($_POST['action'] ?? '');
+    $error = tt_admin_review_report($report_id, $act);
+    tt_flash($error ? 'Could not update report: ' . $error : 'Report action completed.');
+    $query = http_build_query(array_filter([
+        'tab' => $_GET['tab'] ?? '',
+        'id' => $report_id,
+    ], static function ($value) { return $value !== ''; }));
+    header('Location: ' . $base_url . 'admin/reported-content.php?' . $query);
     exit;
 }
 
@@ -28,6 +34,7 @@ foreach ($rows as $r) { if ($r['id'] === $want) { $sel = $r; } }
 if (!$sel && $rows) { $sel = $rows[0]; }
 
 $page_title = "Reported Content";
+$flash = tt_flash();
 include '../includes/header.php';
 include '../includes/client-nav.php';
 
@@ -40,6 +47,8 @@ $status_class = ['pending' => 'pending', 'resolved' => 'released', 'dismissed' =
     <p class="subtle">Review content and users reported by clients and freelancers.</p>
   </div>
 </div>
+
+<?php if ($flash): ?><div class="note-soft" role="status" style="margin-top:1rem;"><?= e($flash) ?></div><?php endif; ?>
 
 <div class="admin-layout">
   <section class="admin-list">
@@ -83,10 +92,22 @@ $status_class = ['pending' => 'pending', 'resolved' => 'released', 'dismissed' =
 
       <?php if ($sel['status'] === 'pending'): ?>
         <div style="display:flex; flex-direction:column; gap:0.5rem; margin-top:1rem;">
-          <form method="post" action="reported-content.php?tab=<?= e($tab) ?>&amp;id=<?= e($sel['id']) ?>"><button type="submit" name="action" value="dismiss" class="btn btn--row-outline btn--block">Dismiss Report</button></form>
-          <form method="post" action="reported-content.php?tab=<?= e($tab) ?>&amp;id=<?= e($sel['id']) ?>"><button type="submit" name="action" value="warn" class="btn btn--amber btn--block">⚠ Warn User</button></form>
-          <form method="post" action="reported-content.php?tab=<?= e($tab) ?>&amp;id=<?= e($sel['id']) ?>"><button type="submit" name="action" value="remove" class="btn btn--row-outline btn--block">Remove Content</button></form>
-          <form method="post" action="reported-content.php?tab=<?= e($tab) ?>&amp;id=<?= e($sel['id']) ?>"><button type="submit" name="action" value="suspend" class="btn btn--red btn--block">⊘ Suspend Account</button></form>
+          <?php foreach (['dismiss' => 'Dismiss Report', 'remove' => 'Resolve Report'] as $action => $label): ?>
+            <form method="post" action="reported-content.php?tab=<?= e($tab) ?>&amp;id=<?= e($sel['id']) ?>">
+              <input type="hidden" name="report_id" value="<?= e($sel['id']) ?>">
+              <button type="submit" name="action" value="<?= e($action) ?>" class="btn btn--row-outline btn--block"><?= e($label) ?></button>
+            </form>
+          <?php endforeach; ?>
+          <?php if (strcasecmp($sel['type'], 'User') === 0 && (tt_is_demo_admin() || !empty($sel['reported_user_id']))): ?>
+            <form method="post" action="reported-content.php?tab=<?= e($tab) ?>&amp;id=<?= e($sel['id']) ?>">
+              <input type="hidden" name="report_id" value="<?= e($sel['id']) ?>">
+              <button type="submit" name="action" value="warn" class="btn btn--amber btn--block">⚠ Warn User</button>
+            </form>
+            <form method="post" action="reported-content.php?tab=<?= e($tab) ?>&amp;id=<?= e($sel['id']) ?>">
+              <input type="hidden" name="report_id" value="<?= e($sel['id']) ?>">
+              <button type="submit" name="action" value="suspend" class="btn btn--red btn--block">⊘ Suspend Account</button>
+            </form>
+          <?php endif; ?>
         </div>
       <?php endif; ?>
     <?php endif; ?>

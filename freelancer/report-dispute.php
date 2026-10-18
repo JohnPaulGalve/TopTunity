@@ -16,10 +16,17 @@ $tabs = [
 ];
 $tab = isset($_GET['tab']) && isset($tabs[$_GET['tab']]) ? $_GET['tab'] : 'report';
 
-$people = [
-    'Rico Manalastas · Client', 'Andrea Santos · Client', 'Grace Aquino · Client',
-    'Mark Francisco · Client', 'Ramon Villanueva · Client', 'Joy Bautista · Client',
-];
+$people = [];
+foreach (tt_contracted_clients_for_freelancer() as $client) {
+    $people[(int) $client['id']] = $client['name'] . ' · Client';
+}
+if (tt_is_demo_freelancer()) {
+    foreach (['Rico Manalastas', 'Andrea Santos', 'Grace Aquino', 'Mark Francisco', 'Ramon Villanueva', 'Joy Bautista'] as $sample_name) {
+        $people['sample-' . count($people)] = $sample_name . ' · Client';
+    }
+}
+$pre_user = (int) ($_GET['user'] ?? 0);
+if (!isset($people[$pre_user])) { $pre_user = 0; }
 $reasons_report  = ['Fake or misleading project posting', 'Abusive or inappropriate messages', 'Asked for payment outside TopTunity', 'Other'];
 $reasons_dispute = ['Client did not approve or pay for work', 'Scope changed without agreement', 'Payment or release problem', 'Client stopped responding', 'Other'];
 $projects = array_filter(toptunity_freelancer_projects(), function ($p) { return $p['status'] === 'ongoing'; });
@@ -34,8 +41,11 @@ $errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $details = trim(isset($_POST['details']) ? $_POST['details'] : '');
     if (mb_strlen($details) < 20) { $errors[] = 'Describe what happened (at least 20 characters).'; }
-    $up = tt_handle_uploads('attachments');
-    $errors = array_merge($errors, $up['errors']);
+    $up = ['files' => [], 'errors' => []];
+    if (!$errors) {
+        $up = tt_handle_uploads('attachments');
+        $errors = array_merge($errors, $up['errors']);
+    }
     if (!$errors) {
         if ($tab === 'dispute') {
             $pid   = (int) ($_POST['project'] ?? 0);
@@ -43,7 +53,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             foreach ($projects as $pp) { if ((int) $pp['id'] === $pid) { $title = $pp['title']; } }
             $e2 = tt_db_dispute($pid, $title, $_POST['reason'] ?? '', $details);
         } else {
-            $e2 = tt_db_report($_POST['type'] ?? 'User', $_POST['reason'] ?? '', $details);
+            $selected_user = $_POST['user'] ?? '';
+            $reported_id = ctype_digit((string) $selected_user) && isset($people[(int) $selected_user])
+                ? (int) $selected_user : 0;
+            if (strtolower($_POST['type'] ?? 'User') === 'user'
+                && $selected_user !== ''
+                && strncmp((string) $selected_user, 'sample-', 7) === 0
+                && isset($people[$selected_user])) {
+                $details = 'Reported user: ' . $people[$selected_user] . "\n" . $details;
+            }
+            $e2 = tt_db_report($_POST['type'] ?? 'User', $_POST['reason'] ?? '', $details, $reported_id);
         }
         if ($e2) { $errors[] = $e2; }
     }
@@ -53,12 +72,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: ' . $base_url . 'freelancer/report-dispute.php?tab=submissions');
         exit;
     }
+    tt_discard_uploads($up['files']);
 }
 
-$submissions = [
-    ['type' => 'Report', 'about' => 'Rico Manalastas · Client', 'reason' => 'Fake or misleading project posting', 'date' => 'Oct 02, 2026', 'status' => 'pending'],
-    ['type' => 'Dispute', 'about' => 'Tuition Payment Tracker', 'reason' => 'Payment or release problem', 'date' => 'Sep 12, 2026', 'status' => 'released'],
-];
+$submissions = tt_my_submissions();
+if (tt_is_demo_freelancer()) {
+    $submissions = array_merge($submissions, [
+        ['type' => 'Report', 'about' => 'Rico Manalastas · Client', 'reason' => 'Fake or misleading project posting', 'date' => 'Oct 02, 2026', 'status' => 'pending'],
+        ['type' => 'Dispute', 'about' => 'Tuition Payment Tracker', 'reason' => 'Payment or release problem', 'date' => 'Sep 12, 2026', 'status' => 'released'],
+    ]);
+}
 
 $page_title = "Report and Dispute";
 include '../includes/header.php';
@@ -120,7 +143,11 @@ include '../includes/client-nav.php';
         </div>
         <div class="field">
           <label for="rep-user">Reported user</label>
-          <select class="input" id="rep-user" name="user"><?php foreach ($people as $p): ?><option><?= e($p) ?></option><?php endforeach; ?></select>
+          <select class="input" id="rep-user" name="user">
+            <?php foreach ($people as $person_id => $person_name): ?>
+              <option value="<?= e($person_id) ?>" <?= (string) $person_id === (string) $pre_user ? 'selected' : '' ?>><?= e($person_name) ?></option>
+            <?php endforeach; ?>
+          </select>
         </div>
       <?php else: ?>
         <div class="two-col" style="margin-top:0; grid-template-columns:1fr 1fr; gap:1rem;">
@@ -139,7 +166,7 @@ include '../includes/client-nav.php';
 
       <div class="field">
         <label for="details">Details <span class="req">*</span></label>
-        <textarea id="details" name="details" class="input" rows="4" minlength="20" style="height:auto; padding:0.8rem; line-height:1.6; font-size:0.82rem;" required><?= $tab === 'report' ? 'The client asked me to pay a "registration fee" through GCash before sending the contract. This looks like a scam.' : '' ?></textarea>
+        <textarea id="details" name="details" class="input" rows="4" minlength="20" style="height:auto; padding:0.8rem; line-height:1.6; font-size:0.82rem;" required><?= $tab === 'report' && tt_is_demo_freelancer() ? 'The client asked me to pay a "registration fee" through GCash before sending the contract. This looks like a scam.' : '' ?></textarea>
       </div>
 
       <div class="field">

@@ -8,7 +8,7 @@
  *   $page_title, $base_url
  * Pages must set $app_shell = true (footer.php closes the shell using it).
  */
-$base_url      = isset($base_url) ? $base_url : '/Webdev/';
+$base_url      = isset($base_url) ? $base_url : '/TopTunity/';
 $active_client = isset($active_client) ? $active_client : '';
 $role          = (isset($user_role) && in_array($user_role, ['freelancer', 'admin'], true)) ? $user_role : 'client';
 $app_shell     = true;
@@ -18,7 +18,9 @@ require_once __DIR__ . '/data.php';
 $me = $role === 'freelancer' ? toptunity_current_freelancer()
     : ($role === 'admin' ? toptunity_current_admin() : toptunity_current_client());
 $msg_unread = $role === 'client'
-    ? count(array_filter(toptunity_client_threads(), function ($t) { return !empty($t['unread']); })) : 0;
+    ? count(array_filter(toptunity_client_threads(), function ($t) { return !empty($t['unread']); }))
+    : ($role === 'freelancer'
+        ? count(array_filter(toptunity_freelancer_threads(), function ($t) { return !empty($t['unread']); })) : 0);
 $note_new = $role === 'client'
     ? count(array_filter(toptunity_client_notifications_all(), function ($n) { return !empty($n['new']); }))
     : count(array_filter(toptunity_freelancer_notifications(), function ($n) { return !empty($n['new']); }));
@@ -99,7 +101,9 @@ if ($role === 'admin') {
 <div class="app-shell">
 
   <aside class="app-sidebar" aria-label="<?= e(ucfirst($area)) ?> navigation">
-    <a href="<?= e($home_link) ?>" class="brand-logo brand-logo--light app-brand">TopTunity<span class="logo-star" aria-hidden="true">&#10022;</span></a>
+    <a href="<?= e($home_link) ?>" class="brand-logo brand-logo--light app-brand" aria-label="TopTunity home">
+      <img src="<?= e(tt_image_url($base_url, 'images/Logo/logo-wordmark-white.svg')) ?>" alt="TopTunity" class="brand-logo__image">
+    </a>
 
     <?php if ($role === 'admin'): ?>
       <nav class="side-nav side-nav--admin">
@@ -109,11 +113,19 @@ if ($role === 'admin') {
               <a href="<?= e($base_url . $link[0]) ?>" class="<?= $active_client === $key ? 'is-active' : '' ?>" <?= $active_client === $key ? 'aria-current="page"' : '' ?>><?= icon($link[2], 17) ?> <?= e($link[1]) ?></a>
             <?php endforeach; ?>
           <?php else: ?>
-            <div class="side-group">
-              <p class="side-group__label"><?= icon($group['icon'], 15) ?> <?= e($group['label']) ?></p>
-              <?php foreach ($group['links'] as $key => $link): ?>
-                <a href="<?= e($base_url . $link[0]) ?>" class="side-sub <?= $active_client === $key ? 'is-active' : '' ?>" <?= $active_client === $key ? 'aria-current="page"' : '' ?>><?= e($link[1]) ?></a>
-              <?php endforeach; ?>
+            <?php
+              $group_id = 'admin-nav-' . strtolower(preg_replace('/[^a-z0-9]+/i', '-', $group['label']));
+              $group_active = in_array($active_client, array_keys($group['links']), true);
+            ?>
+            <div class="side-group<?= $group_active ? ' is-open' : '' ?>">
+              <button type="button" class="side-group__toggle" aria-expanded="<?= $group_active ? 'true' : 'false' ?>" aria-controls="<?= e($group_id) ?>">
+                <?= icon($group['icon'], 15) ?><span><?= e($group['label']) ?></span><?= icon('chevron-down', 14) ?>
+              </button>
+              <div class="side-group__items" id="<?= e($group_id) ?>"<?= $group_active ? '' : ' hidden' ?>>
+                <?php foreach ($group['links'] as $key => $link): ?>
+                  <a href="<?= e($base_url . $link[0]) ?>" class="side-sub <?= $active_client === $key ? 'is-active' : '' ?>" <?= $active_client === $key ? 'aria-current="page"' : '' ?>><?= e($link[1]) ?></a>
+                <?php endforeach; ?>
+              </div>
             </div>
           <?php endif; ?>
         <?php endforeach; ?>
@@ -130,7 +142,7 @@ if ($role === 'admin') {
     <?php endif; ?>
 
     <div class="side-user">
-      <?= avatar($me['bg'], $me['hair'], $me['style'], 34) ?>
+      <?= tt_avatar_html($me, 34, $base_url) ?>
       <div>
         <strong><?= e($me['name']) ?></strong>
         <small><?= $role === 'admin' ? 'Signed in as Administrator' : 'Signed in as ' . e(ucfirst($area)) ?></small>
@@ -154,14 +166,14 @@ if ($role === 'admin') {
 
         <details class="profile-menu">
           <summary class="profile-trigger">
-            <?= avatar($me['bg'], $me['hair'], $me['style'], 26) ?>
+            <?= tt_avatar_html($me, 26, $base_url) ?>
             <?= $role === 'admin' ? 'Account Settings' : 'My Profile' ?> <?= icon('chevron-down', 13) ?>
           </summary>
           <div class="profile-dropdown">
             <?php foreach ($menu as $item): ?>
               <a href="<?= e($base_url . $item[0]) ?>"><?= icon($item[2], 15) ?> <?= e($item[1]) ?></a>
             <?php endforeach; ?>
-            <a href="<?= e($base_url) ?>pages/login.php?action=logout" class="is-danger"><?= icon('logout', 15) ?> Logout</a>
+            <a href="<?= e($base_url . ($role === 'admin' ? 'admin/login.php' : 'pages/login.php')) ?>?action=logout" class="is-danger"><?= icon('logout', 15) ?> Logout</a>
           </div>
         </details>
       </div>

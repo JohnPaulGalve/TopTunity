@@ -35,7 +35,7 @@ include '../includes/client-nav.php';
   <div class="saved-grid">
     <?php foreach ($saved as $fid => $f): ?>
       <article class="saved-card">
-        <?= avatar($f['bg'], $f['hair'], $f['style'], 60) ?>
+        <?= tt_freelancer_avatar_html($f, 60, $base_url) ?>
         <h3><?= e($f['name']) ?></h3>
         <p class="saved-card__role"><?= e($f['title']) ?></p>
         <div class="stars"><?= stars($f['rating']) ?> <strong><?= e($f['rating']) ?></strong></div>

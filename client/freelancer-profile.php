@@ -30,9 +30,9 @@ include '../includes/client-nav.php';
 </nav>
 
 <div class="profile-banner" aria-hidden="true"></div>
-<div class="profile-head">
+<div class="profile-head profile-head--actions">
   <div class="profile-id">
-    <?= avatar($f['bg'], $f['hair'], $f['style'], 96) ?>
+    <?= tt_freelancer_avatar_html($f, 96, $base_url) ?>
     <div class="profile-id__text">
       <h1>
         <?= e($f['name']) ?>
@@ -42,16 +42,17 @@ include '../includes/client-nav.php';
       <div class="profile-id__meta"><?= stars($f['rating']) ?> <strong><?= e($f['rating']) ?></strong> (<?= (int) $f['reviews'] ?> reviews)</div>
     </div>
   </div>
-
-  <div class="profile-actions" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+</div>
+<div class="profile-actionbar">
+  <div class="profile-actions">
     <a href="hire-freelancer.php?freelancer=<?= (int) $id ?>" class="btn btn--hire"><?= icon('user-plus', 15) ?> Hire</a>
     <a href="messages.php" class="btn btn--row-outline"><?= icon('message', 13) ?> Message Freelancer</a>
     <form method="post" action="freelancer-profile.php?id=<?= (int) $id ?>" style="display:inline;">
       <input type="hidden" name="favourite" value="freelancer"><input type="hidden" name="item" value="<?= (int) $id ?>">
       <button type="submit" class="btn btn--row-outline" style="<?= $saved ? 'color:var(--color-error-base);' : '' ?>"><?= icon('heart', 13) ?> <?= $saved ? 'Saved' : 'Save Freelancer' ?></button>
     </form>
-    <a href="report-dispute.php?user=<?= (int) $id ?>" class="btn btn--row-outline"><?= icon('flag', 13) ?> Report User</a>
   </div>
+  <a href="report-dispute.php?user=<?= (int) $id ?>" class="btn btn--row-outline profile-report"><?= icon('flag', 13) ?> Report User</a>
 </div>
 
 <div class="detail-layout" style="margin-top:1rem;">
@@ -66,10 +67,14 @@ include '../includes/client-nav.php';
         <h2 style="margin:0;">Portfolio</h2>
         <small><?= count($f['portfolio']) ?> work samples</small>
       </div>
-      <div class="portfolio-grid" style="margin-top:1rem;">
+      <div class="portfolio-grid" style="margin-top:1rem; grid-template-columns:repeat(3, minmax(0, 1fr));">
         <?php foreach ($f['portfolio'] as $item): ?>
           <div class="portfolio-item">
-            <div class="portfolio-thumb" style="--thumb: <?= e($item['tint']) ?>"><span></span><span></span><span></span></div>
+            <?php if (!empty($item['image']) && !empty($item['id'])): ?>
+              <div class="portfolio-thumb" style="padding:0; overflow:hidden;"><img src="<?= e($base_url) ?>download.php?file=<?= (int) $item['id'] ?>" alt="<?= e($item['title']) ?>" loading="lazy" style="width:100%; height:100%; object-fit:cover; display:block;"></div>
+            <?php else: ?>
+              <div class="portfolio-thumb" style="--thumb: <?= e($item['tint']) ?>"><span></span><span></span><span></span></div>
+            <?php endif; ?>
             <h4><?= e($item['title']) ?></h4>
             <p><?= e($item['category']) ?></p>
           </div>
@@ -77,24 +82,6 @@ include '../includes/client-nav.php';
       </div>
     </section>
 
-    <section class="detail-card">
-      <div class="reviews-summary">
-        <h2 style="margin:0;">Reviews</h2>
-        <span><?= stars($f['rating']) ?> <strong><?= e($f['rating']) ?></strong> · <small><?= (int) $f['reviews'] ?> reviews</small></span>
-      </div>
-      <?php foreach ($f['feedback'] as $r): ?>
-        <div class="review-item">
-          <div class="review-head">
-            <div class="review-by">
-              <?= avatar($r['bg'], '#1E293B', $r['style'], 32) ?>
-              <div><strong><?= e($r['by']) ?></strong><small><?= e($r['project']) ?></small></div>
-            </div>
-            <div class="review-meta"><?= stars($r['stars']) ?><?= e(date('M d, Y', strtotime($r['date']))) ?></div>
-          </div>
-          <p><?= e($r['text']) ?></p>
-        </div>
-      <?php endforeach; ?>
-    </section>
   </div>
 
   <aside class="detail-side">

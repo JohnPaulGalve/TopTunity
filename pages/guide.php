@@ -36,7 +36,7 @@ $freelancer_steps = [
   <div class="container">
 
     <header class="guide-hero">
-      <div class="guide-hero__art" aria-hidden="true"><?= icon('briefcase', 40) ?></div>
+      <div class="guide-hero__art" aria-hidden="true"><img src="<?= e(tt_image_url($base_url, 'images/Illustrations/Guide/guide.svg')) ?>" alt=""></div>
       <h1>Guide</h1>
       <p>How to use TopTunity, from posting a project to completing it.</p>
       <nav class="seg" aria-label="Jump to section">

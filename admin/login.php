@@ -29,10 +29,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = tt_find_user_by_email($email);
     if (!$user || !password_verify($password, $user['password'])) {
         $error = 'The email or password is incorrect.';
+    } elseif ($user['status'] !== 'active') {
+        $error = 'This administrator account is not active.';
     } elseif ($user['role'] !== 'admin') {
         $error = 'This sign-in is for administrators only.';
     } else {
         tt_login($user);
+        if (strtolower($user['email']) === 'admin@toptunity.ph') {
+            if ($password === 'admin123') {
+                $_SESSION['admin_password_change_required'] = true;
+                header('Location: ' . $base_url . 'admin/account-settings.php');
+                exit;
+            }
+            $_SESSION['admin_password_verified'] = true;
+        }
         header('Location: ' . $base_url . 'admin/dashboard.php');
         exit;
     }
@@ -40,14 +50,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $page_title = "Admin Login";
 include '../includes/header.php';
-include '../includes/nav.php';
 ?>
 
 <main class="page-browse" style="padding:3rem 0 4rem;">
   <div class="container" style="max-width:420px;">
     <div style="padding:2.2rem 2rem; background:#FFFFFF; border:1px solid var(--color-border-gray); border-radius:var(--radius-lg); box-shadow:0 10px 30px rgba(15,23,42,0.06);">
       <div style="text-align:center;">
-        <a href="<?= e($base_url) ?>pages/index.php" class="brand-logo" style="justify-content:center; font-size:1.7rem;">TopTunity<span class="logo-star" aria-hidden="true">&#10022;</span></a>
+        <a href="<?= e($base_url) ?>pages/index.php" class="brand-logo" style="justify-content:center;" aria-label="TopTunity home">
+          <img src="<?= e(tt_image_url($base_url, 'images/Logo/logo-wordmark-dark.svg')) ?>" alt="TopTunity" class="brand-logo__image">
+        </a>
         <h1 style="font-size:1.4rem; font-weight:700; margin-top:1rem;">Admin Login</h1>
         <p style="font-size:0.78rem; color:var(--color-muted-gray); margin-top:0.25rem;">For the platform administrator only.</p>
       </div>
@@ -56,21 +67,21 @@ include '../includes/nav.php';
         <div class="form-alert" role="alert"><?= icon('alert', 15) ?> <?= e($error) ?></div>
       <?php endif; ?>
 
-      <form method="post" action="login.php" style="margin-top:1.2rem;">
+      <form method="post" action="login.php" autocomplete="off" style="margin-top:1.2rem;">
         <div class="field" style="margin-top:0;">
           <label for="email">Email Address</label>
-          <div class="input-wrap"><?= icon('mail', 16) ?><input type="email" id="email" name="email" value="<?= e($email) ?>" required></div>
+          <div class="input-wrap"><?= icon('mail', 16) ?><input type="email" id="email" name="email" value="" autocomplete="off" required></div>
         </div>
         <div class="field">
           <label for="password">Password</label>
-          <div class="input-wrap"><?= icon('lock', 16) ?><input type="password" id="password" name="password" required></div>
+          <div class="input-wrap"><?= icon('lock', 16) ?><input type="password" id="password" name="password" value="" autocomplete="new-password" required></div>
         </div>
         <button type="submit" class="btn" style="width:100%; height:44px; margin-top:1.2rem; background:var(--color-deep-slate); color:#FFFFFF; border-radius:8px;"><?= icon('shield', 15) ?> Login</button>
       </form>
 
       <div class="info-callout" style="margin-top:1.2rem;">
         <?= icon('info', 15) ?>
-        <span>This page is not linked from public pages. The single admin account is set up directly in the database.</span>
+        <span>Demo Admin: demo.admin@toptunity.ph / admin123 (isolated sample data). Real Admin: admin@toptunity.ph (live platform data). Both accounts use the same admin tools.</span>
       </div>
     </div>
   </div>

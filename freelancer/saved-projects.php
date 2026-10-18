@@ -33,7 +33,9 @@ include '../includes/client-nav.php';
 
 <?php if (!$ids): ?>
   <div class="empty-state empty-state--design" style="margin-top:1.5rem;">
-    <div class="empty-art"><?= icon('heart', 40) ?></div>
+    <div class="empty-art empty-art--illustration">
+      <img src="<?= e(tt_image_url($base_url, 'images/Illustrations/Empty State and Not found/empty.svg')) ?>" alt="">
+    </div>
     <h3>No saved projects yet</h3>
     <p>Save projects from Find Projects to keep them here.</p>
     <a href="find-projects.php" class="btn btn--dark">Find Projects</a>

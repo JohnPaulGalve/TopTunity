@@ -19,6 +19,11 @@ $errors = [];
 $form   = ['name' => '', 'email' => ''];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (empty($_POST['terms'])) {
+        header('Location: ' . $base_url . 'pages/register.php?role=' . urlencode($role));
+        exit;
+    }
+
     $form['name']  = trim(isset($_POST['name']) ? $_POST['name'] : '');
     $form['email'] = trim(isset($_POST['email']) ? $_POST['email'] : '');
     $password      = isset($_POST['password']) ? $_POST['password'] : '';
@@ -26,7 +31,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($form['name'] === '')                                   { $errors[] = 'Please enter your full name.'; }
     if (!filter_var($form['email'], FILTER_VALIDATE_EMAIL))     { $errors[] = 'Please enter a valid email address.'; }
     if (strlen($password) < 8 || !preg_match('/\d/', $password)) { $errors[] = 'Your password must be at least 8 characters and include a number.'; }
-    if (empty($_POST['terms']))                                 { $errors[] = 'Please agree to the Terms and Privacy Policy.'; }
 
     if (!$errors) {
         $result = tt_register_user($form['name'], $form['email'], $password, $role);
@@ -60,6 +64,7 @@ include '../includes/nav.php';
             <li><?= icon('check-circle', 16) ?> Contracts agreed before work starts</li>
             <li><?= icon('check-circle', 16) ?> Payments held until the work is approved</li>
           </ul>
+          <img src="<?= e(tt_image_url($base_url, 'images/Illustrations/Register/register.svg')) ?>" alt="" class="auth-art__illustration">
         </div>
       </div>
 
@@ -74,7 +79,7 @@ include '../includes/nav.php';
           </div>
         <?php endif; ?>
 
-        <form method="post" action="register.php">
+        <form method="post" action="register.php" data-requires-checkbox="terms">
           <input type="hidden" name="next" value="<?= e($next) ?>">
 
           <div class="field">
@@ -125,11 +130,11 @@ include '../includes/nav.php';
           </div>
 
           <label class="check-label" style="margin-top:1rem;">
-            <input type="checkbox" name="terms" value="1" required>
+            <input type="checkbox" name="terms" value="1">
             I agree to the <a href="terms.php" class="link-teal">Terms and Privacy Policy</a>
           </label>
 
-          <button type="submit" class="btn btn--primary btn--full">Register</button>
+          <button type="submit" class="btn btn--primary btn--full" disabled>Register</button>
         </form>
 
         <p class="auth-foot" style="margin-top:1.2rem;">Already have an account? <a href="login.php" class="link-teal">Login</a></p>

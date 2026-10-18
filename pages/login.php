@@ -31,6 +31,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = tt_find_user_by_email($email);
     if (!$user || !password_verify($password, $user['password'])) {
         $error = 'The email or password is incorrect.';
+    } elseif ($user['role'] !== 'admin' && $user['status'] !== 'active') {
+        $error = $user['status'] === 'suspended'
+            ? 'This account is suspended. Contact support for help.'
+            : 'This account is deactivated. Contact support for help.';
     } elseif ($user['role'] === 'admin') {
         // Administrators sign in only on the admin page
         $error = 'Administrator accounts sign in at the admin page only.';
@@ -55,6 +59,7 @@ include '../includes/nav.php';
         <div class="auth-art__content">
           <p class="auth-art__eyebrow">Welcome back</p>
           <h2>Your next project is waiting for you.</h2>
+          <img src="<?= e(tt_image_url($base_url, 'images/Illustrations/Login/login.svg')) ?>" alt="" class="auth-art__illustration">
         </div>
       </div>
 
@@ -95,8 +100,6 @@ include '../includes/nav.php';
 
         <div class="or-divider">New to TopTunity?</div>
         <p class="auth-foot">Don't have an account? <a href="register.php" class="link-teal">Register</a></p>
-
-        <p class="hint" style="margin-top:1.2rem;">Demo: andrea.santos@kapelokal.ph / password123 (client)</p>
       </div>
 
     </div>
