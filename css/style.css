@@ -3119,3 +3119,34 @@ input[type="submit"]:disabled {
 
 /* 37. MORE SPACE ABOVE THE FOOTER ON THE SIGNED-IN PAGES */
 .app-main > .footer { margin-top: 6rem; }
+/* 39. RESPONSIVE LAYOUT: every panel can shrink to the screen, grids stack on small screens */
+.dash-grid > *, .dash-col > *, .dash-col, .box, .stat-card, .portfolio-item, .panel, .app-main, .field { min-width: 0; }
+.box-head { flex-wrap: wrap; }
+.stat-card__top { flex-wrap: wrap; gap: 0.4rem; }
+@media (max-width: 1100px) { .dash-grid { grid-template-columns: minmax(0, 1fr) 280px; } }
+@media (max-width: 900px) {
+  .dash-grid { grid-template-columns: minmax(0, 1fr); }
+  .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .portfolio-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 680px) {
+  .stat-grid, .portfolio-grid { grid-template-columns: minmax(0, 1fr); }
+  .box { padding: 1rem; }
+  input, select, textarea { max-width: 100%; }
+  .box input, .box select, .box textarea, .field input, .field select, .field textarea { width: 100%; }
+}
+@media (max-width: 680px) {
+  .stat-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  form, .tab-nav, .filter-tabs { max-width: 100%; }
+}
+img, video, iframe, table { max-width: 100%; }
+.app-main { overflow-x: clip; }
+.sr-only { left: 0; top: 0; }
+
+/* 40. PHONES: the signed-in sidebar becomes a panel that opens over the page */
+@media (max-width: 900px) {
+  .app-shell { grid-template-columns: minmax(0, 1fr) !important; }
+  .app-sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: min(82vw, 300px); height: 100vh; z-index: 60; overflow-y: auto; box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25); }
+  .app-shell--collapsed .app-sidebar { display: none; }
+  .side-nav { flex-direction: column !important; flex-wrap: nowrap !important; }
+}

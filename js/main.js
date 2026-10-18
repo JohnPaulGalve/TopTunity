@@ -365,3 +365,11 @@ document.addEventListener('click', function (e) {
     });
   });
 })();
+/* Phones: the signed-in sidebar starts closed and opens over the page from the menu button */
+(function () {
+  var shell = document.querySelector('.app-shell');
+  var menuBtn = document.querySelector('.app-menu-btn');
+  if (!shell || !menuBtn || !window.matchMedia('(max-width: 900px)').matches) { return; }
+  shell.classList.add('app-shell--collapsed');
+  menuBtn.setAttribute('aria-expanded', 'false');
+})();
