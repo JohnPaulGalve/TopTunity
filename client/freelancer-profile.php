@@ -97,7 +97,7 @@ include '../includes/client-nav.php';
         <div class="fact-row">Hourly rate <strong>₱<?= number_format($f['rate']) ?>/hr</strong></div>
         <div class="fact-row">Projects completed <strong><?= (int) $f['completed'] ?></strong></div>
         <div class="fact-row">On-time delivery <strong><?= e($f['ontime']) ?></strong></div>
-        <div class="fact-row">Languages <strong><?= e($f['languages']) ?></strong></div>
+        <div class="fact-row">Languages <strong><?= e($f['languages'] ?? '') ?></strong></div>
         <div class="fact-row">Member since <strong><?= e($f['since']) ?></strong></div>
       </div>
     </div>

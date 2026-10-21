@@ -73,6 +73,7 @@ function tt_login($user)
 
 function tt_logout()
 {
+    if (tt_current_user()) { tt_audit('sign out'); }
     tt_reset_demo_data();
     $_SESSION = [];
     if (ini_get('session.use_cookies')) {
@@ -336,4 +337,19 @@ function tt_reset_demo_data()
     $pdo->exec("DELETE FROM freelancer_profiles WHERE user_id IN ($in)");
     $pdo->exec("DELETE FROM settings WHERE name LIKE 'sample_project_%'");
     $pdo->commit();
+}
+/* ==========================================================================
+   ACTIVITY / AUDIT LOG. Records who did what and when. A logging failure
+   never stops the action itself.
+   ========================================================================== */
+function tt_audit($action, $target = null, $user_id = null)
+{
+    try {
+        $uid = $user_id ?? (tt_current_user()['id'] ?? null);
+        db()->prepare('INSERT INTO audit_logs (user_id, action, target) VALUES (?, ?, ?)')
+            ->execute([$uid ? (int) $uid : null, mb_substr((string) $action, 0, 160),
+                       $target === null ? null : mb_substr((string) $target, 0, 160)]);
+    } catch (Throwable $e) {
+        error_log('TopTunity audit log: ' . $e->getMessage());
+    }
 }

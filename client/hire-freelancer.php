@@ -15,6 +15,7 @@ if (!$f) {
     $fid = 1;
     $f = toptunity_freelancer(1);
 }
+$f = array_merge(['name' => 'Freelancer', 'title' => '', 'rating' => '', 'skills' => [], 'languages' => ''], $f ?: []);
 
 $projects = toptunity_client_projects();
 foreach ($projects as $id => &$project_data) {

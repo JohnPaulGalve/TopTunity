@@ -38,6 +38,7 @@ if ($role === 'admin') {
         ['label' => 'Users', 'icon' => 'users', 'links' => [
             'users'    => ['admin/user-management.php', 'User Management', null],
             'reported' => ['admin/reported-content.php', 'Reported Content', null],
+            'activity' => ['admin/activity-log.php', 'Activity Log', null],
         ]],
         ['label' => 'Projects', 'icon' => 'folder', 'links' => [
             'projects' => ['admin/project-moderation.php', 'Project Management and Moderation', null],

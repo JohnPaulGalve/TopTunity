@@ -38,6 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors[] = $result;
         } else {
             tt_login($result);
+            tt_audit('register', $result['email'], $result['id']);
             tt_flash('Welcome to TopTunity, ' . $result['name'] . '!');
             tt_redirect_after_login($result, $next, $base_url);
         }

@@ -35,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'This sign-in is for administrators only.';
     } else {
         tt_login($user);
+        tt_audit('admin sign in', $user['email'], $user['id']);
         if (strtolower($user['email']) === 'admin@toptunity.ph') {
             if ($password === 'admin123') {
                 $_SESSION['admin_password_change_required'] = true;

@@ -43,9 +43,9 @@ include '../includes/client-nav.php';
 </div>
 
 <div class="stat-grid" style="grid-template-columns: repeat(3, 1fr); margin-top:1.25rem;">
-  <div class="stat-card"><div class="stat-card__top"><span class="stat-card__label">Available balance</span><span class="icon-box icon-box--teal"><?= icon('wallet', 16) ?></span></div><span class="stat-card__value">₱<?= number_format($money['available']) ?></span><span class="muted">Ready to withdraw</span></div>
-  <div class="stat-card"><div class="stat-card__top"><span class="stat-card__label">Total earned</span><span class="icon-box icon-box--blue"><?= icon('check-circle', 16) ?></span></div><span class="stat-card__value">₱<?= number_format($money['earned']) ?></span><span class="muted">After the service fee</span></div>
-  <div class="stat-card"><div class="stat-card__top"><span class="stat-card__label">Held by clients</span><span class="icon-box icon-box--orange"><?= icon('lock', 16) ?></span></div><span class="stat-card__value">₱<?= number_format($money['on_hold']) ?></span><span class="muted">Released when work is approved</span></div>
+  <div class="stat-card"><div class="stat-card__top"><span class="stat-card__label">Available balance</span><span class="icon-box icon-box--teal"><?= icon('wallet', 16) ?></span></div><span class="stat-card__value">₱<?= number_format(($money['available'] ?? 0)) ?></span><span class="muted">Ready to withdraw</span></div>
+  <div class="stat-card"><div class="stat-card__top"><span class="stat-card__label">Total earned</span><span class="icon-box icon-box--blue"><?= icon('check-circle', 16) ?></span></div><span class="stat-card__value">₱<?= number_format(($money['earned'] ?? 0)) ?></span><span class="muted">After the service fee</span></div>
+  <div class="stat-card"><div class="stat-card__top"><span class="stat-card__label">Held by clients</span><span class="icon-box icon-box--orange"><?= icon('lock', 16) ?></span></div><span class="stat-card__value">₱<?= number_format(($money['on_hold'] ?? 0)) ?></span><span class="muted">Released when work is approved</span></div>
 </div>
 
 <div class="two-col" style="grid-template-columns: 1fr 1fr; margin-top:1.25rem;">

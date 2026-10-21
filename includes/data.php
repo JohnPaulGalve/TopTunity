@@ -2145,6 +2145,7 @@ function tt_add_saved_project($fields)
     $id = (int) $pdo->lastInsertId();
     tt_write_project_details($id, $fields);
     $pdo->commit();
+    tt_audit('post project', (string) ($fields['title'] ?? ''));
     return 1000 + $id;
 }
 
@@ -2276,6 +2277,7 @@ function tt_db_submit_work($site_id, $message)
     db()->prepare('INSERT INTO project_submissions (project_id, freelancer_id, message) VALUES (?, ?, ?)')
         ->execute([(int) $site_id, (int) $user['id'], $message]);
     tt_notify((int) $project['client_id'], 'work', 'Work submitted', $user['name'] . ' submitted work for ' . $project['title'] . '.');
+    tt_audit('submit work', 'project #' . $site_id);
     return null;
 }
 
@@ -2369,6 +2371,7 @@ function tt_db_submit_proposal($site_id, $offer, $days, $letter)
     }
     tt_notify($project['client_id'], 'proposals', 'New proposal',
               $user['name'] . ' sent a proposal for ' . $project['title'] . '.');
+    tt_audit('submit proposal', 'project #' . $site_id . ' ₱' . number_format((int) $offer));
     return null;
 }
 
@@ -2400,6 +2403,7 @@ function tt_db_select_freelancer($site_id, $proposal_id)
     $pdo->commit();
     tt_notify($prop['freelancer_id'], 'responses', 'You were selected',
               $user['name'] . ' selected you for ' . $project['title'] . '. Waiting for the contract.');
+    tt_audit('select freelancer', 'project #' . ($project['id'] ?? $site_id) . ' proposal #' . $proposal_id);
     return null;
 }
 
@@ -2484,6 +2488,7 @@ function tt_db_send_contract($site_id, $agreed_amount)
     if (!$stmt->rowCount()) { return 'This project is no longer accepting contracts.'; }
     tt_notify($project['freelancer_id'], 'offers', 'Project offer',
               $user['name'] . ' sent you a contract for ' . $project['title'] . '.');
+    tt_audit('send contract', 'project #' . $project['id'] . ' ₱' . number_format((int) $agreed_amount));
     return null;
 }
 
@@ -2517,6 +2522,7 @@ function tt_db_respond_contract($site_id, $accept)
                   $user['name'] . ' declined the contract for ' . $project['title'] . '. The project is open again.');
     }
     $pdo->commit();
+    tt_audit($accept ? 'accept contract' : 'decline contract', 'project #' . $site_id);
     return null;
 }
 
@@ -2660,18 +2666,30 @@ function tt_client_billing_projects()
 function tt_db_deposit($site_id)
 {
     $u = tt_current_user();
-    $project = tt_db_project($site_id);
-    if (!$project || (int) $project['client_id'] !== (int) $u['id']) { return 'This project is not yours.'; }
-    if ($project['contract_status'] !== 'active')                    { return 'The contract must be accepted before you deposit.'; }
-    $stmt = db()->prepare("SELECT COUNT(*) FROM payments WHERE project_id = ? AND type = 'escrow'");
-    $stmt->execute([(int) $project['id']]);
-    if ((int) $stmt->fetchColumn() > 0)                              { return 'This project has already been deposited.'; }
-    $amount = (int) $project['agreed_amount'];
-    if ($amount < 1) { return 'The contract amount is invalid.'; }
-    db()->prepare("INSERT INTO payments (project_id, type, amount, service_fee, status) VALUES (?, 'escrow', ?, ?, 'held')")
-        ->execute([(int) $project['id'], $amount, tt_fee_for($amount)]);
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        // lock the project row so two deposits cannot run at the same time
+        $lock = $pdo->prepare("SELECT * FROM projects WHERE id = ? FOR UPDATE");
+        $lock->execute([(int) (tt_db_project($site_id)['id'] ?? 0)]);
+        $project = $lock->fetch();
+        if (!$project || (int) $project['client_id'] !== (int) $u['id']) { $pdo->rollBack(); return 'This project is not yours.'; }
+        if ($project['contract_status'] !== 'active')                    { $pdo->rollBack(); return 'The contract must be accepted before you deposit.'; }
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM payments WHERE project_id = ? AND type = 'escrow'");
+        $stmt->execute([(int) $project['id']]);
+        if ((int) $stmt->fetchColumn() > 0)                              { $pdo->rollBack(); return 'This project has already been deposited.'; }
+        $amount = (int) $project['agreed_amount'];
+        if ($amount < 1) { $pdo->rollBack(); return 'The contract amount is invalid.'; }
+        $pdo->prepare("INSERT INTO payments (project_id, type, amount, service_fee, status) VALUES (?, 'escrow', ?, ?, 'held')")
+            ->execute([(int) $project['id'], $amount, tt_fee_for($amount)]);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) { $pdo->rollBack(); }
+        return 'The deposit could not be saved. Please try again.';
+    }
     tt_notify($project['freelancer_id'], 'payments', 'Payment held',
               '₱' . number_format($amount) . ' was deposited for ' . $project['title'] . '. It is released when the client approves the work.');
+    tt_audit('deposit', 'project #' . $project['id'] . ' ₱' . number_format($amount), $u['id']);
     return null;
 }
 
@@ -2684,18 +2702,25 @@ function tt_db_release($site_id)
     if ($project['billing_type'] === 'hourly') {
         return 'Hourly projects are settled on the End Date using approved hours; the unused deposit is refunded.';
     }
-    $stmt = db()->prepare("SELECT * FROM payments WHERE project_id = ? AND type = 'escrow' AND status = 'held' ORDER BY id DESC LIMIT 1");
-    $stmt->execute([(int) $project['id']]);
-    $escrow = $stmt->fetch();
-    if (!$escrow) { return 'There is no held payment to release.'; }
     $pdo = db();
     $pdo->beginTransaction();
-    $pdo->prepare("UPDATE payments SET status = 'released' WHERE id = ?")->execute([(int) $escrow['id']]);
-    $pdo->prepare("UPDATE projects SET status = 'completed', contract_status = 'completed' WHERE id = ?")->execute([(int) $project['id']]);
-    $pdo->commit();
+    try {
+        // lock the held payment so it can only be released once
+        $stmt = $pdo->prepare("SELECT * FROM payments WHERE project_id = ? AND type = 'escrow' AND status = 'held' ORDER BY id DESC LIMIT 1 FOR UPDATE");
+        $stmt->execute([(int) $project['id']]);
+        $escrow = $stmt->fetch();
+        if (!$escrow) { $pdo->rollBack(); return 'There is no held payment to release.'; }
+        $pdo->prepare("UPDATE payments SET status = 'released' WHERE id = ?")->execute([(int) $escrow['id']]);
+        $pdo->prepare("UPDATE projects SET status = 'completed', contract_status = 'completed' WHERE id = ?")->execute([(int) $project['id']]);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) { $pdo->rollBack(); }
+        return 'The payment could not be released. Please try again.';
+    }
     $net = (int) $escrow['amount'] - (int) $escrow['service_fee'];
     tt_notify($project['freelancer_id'], 'payments', 'Payment released',
               '₱' . number_format($net) . ' was released to you for ' . $project['title'] . ' (after the service fee).');
+    tt_audit('release payment', 'project #' . $project['id'] . ' ₱' . number_format($net), $u['id']);
     return null;
 }
 
@@ -2822,13 +2847,27 @@ function tt_freelancer_money()
 function tt_db_withdraw($amount, $method, $account)
 {
     $u = tt_current_user();
-    $money = tt_freelancer_money();
-    if ((int) $amount < 500)                        { return 'The minimum withdrawal is ₱500.'; }
-    if ((int) $amount > $money['available'])        { return 'You can withdraw at most ₱' . number_format($money['available']) . '.'; }
+    if ((int) $amount < 500)                         { return 'The minimum withdrawal is ₱500.'; }
     if (!in_array($method, ['gcash', 'bank'], true)) { return 'Choose a withdrawal method.'; }
-    if (trim($account) === '')                      { return 'Enter the account number.'; }
-    db()->prepare('INSERT INTO withdrawals (freelancer_id, method, account, amount) VALUES (?, ?, ?, ?)')
-        ->execute([(int) $u['id'], $method, trim($account), (int) $amount]);
+    if (trim($account) === '')                       { return 'Enter the account number.'; }
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        // lock the freelancer's row, then check the balance, so two requests cannot both spend the same money
+        $pdo->prepare('SELECT id FROM users WHERE id = ? FOR UPDATE')->execute([(int) $u['id']]);
+        $money = tt_freelancer_money();
+        if ((int) $amount > $money['available']) {
+            $pdo->rollBack();
+            return 'You can withdraw at most ₱' . number_format($money['available']) . '.';
+        }
+        $pdo->prepare('INSERT INTO withdrawals (freelancer_id, method, account, amount) VALUES (?, ?, ?, ?)')
+            ->execute([(int) $u['id'], $method, trim($account), (int) $amount]);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) { $pdo->rollBack(); }
+        return 'The withdrawal could not be saved. Please try again.';
+    }
+    tt_audit('withdrawal requested', '₱' . number_format((int) $amount) . ' via ' . $method, $u['id']);
     return null;
 }
 
@@ -2849,20 +2888,30 @@ function tt_admin_withdrawals_db()
 /** Admin marks a withdrawal processed or rejected. Returns null or an error. */
 function tt_db_process_withdrawal($id, $action, $reason = '')
 {
-    $stmt = db()->prepare("SELECT * FROM withdrawals WHERE id = ?");
-    $stmt->execute([(int) $id]);
-    $w = $stmt->fetch();
-    if (!$w)                            { return 'That request was not found.'; }
-    if (tt_is_demo_admin() && !in_array((int) $w['freelancer_id'], tt_demo_ids(), true)) {
-        return 'The demo administrator can only process withdrawals for demo accounts.';
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM withdrawals WHERE id = ? FOR UPDATE");
+        $stmt->execute([(int) $id]);
+        $w = $stmt->fetch();
+        if (!$w)                            { $pdo->rollBack(); return 'That request was not found.'; }
+        if (tt_is_demo_admin() && !in_array((int) $w['freelancer_id'], tt_demo_ids(), true)) {
+            $pdo->rollBack();
+            return 'The demo administrator can only process withdrawals for demo accounts.';
+        }
+        if ($w['status'] !== 'pending')     { $pdo->rollBack(); return 'This request has already been handled.'; }
+        if ($action === 'reject' && mb_strlen(trim($reason)) < 10) { $pdo->rollBack(); return 'Give a reason for rejecting (at least 10 characters).'; }
+        $new = $action === 'process' ? 'processed' : 'rejected';
+        $pdo->prepare('UPDATE withdrawals SET status = ? WHERE id = ?')->execute([$new, (int) $w['id']]);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) { $pdo->rollBack(); }
+        return 'The request could not be updated. Please try again.';
     }
-    if ($w['status'] !== 'pending')     { return 'This request has already been handled.'; }
-    if ($action === 'reject' && mb_strlen(trim($reason)) < 10) { return 'Give a reason for rejecting (at least 10 characters).'; }
-    $new = $action === 'process' ? 'processed' : 'rejected';
-    db()->prepare('UPDATE withdrawals SET status = ? WHERE id = ?')->execute([$new, (int) $w['id']]);
     tt_notify($w['freelancer_id'], 'payments', $new === 'processed' ? 'Withdrawal sent' : 'Withdrawal rejected',
               $new === 'processed' ? '₱' . number_format($w['amount']) . ' was sent to your ' . $w['method'] . ' account.'
                                    : '₱' . number_format($w['amount']) . ' was returned to your balance. Reason: ' . $reason);
+    tt_audit('withdrawal ' . $new, 'request #' . $w['id'] . ' ₱' . number_format($w['amount']));
     return null;
 }
 
@@ -3873,6 +3922,7 @@ function tt_avatar_html($me, $size, $base)
 /** A freelancer's uploaded photo or illustrated avatar for profile and listing views. */
 function tt_freelancer_avatar_html($freelancer, $size, $base)
 {
+    $freelancer = array_merge(['bg' => '#E0E7FF', 'hair' => '#1E293B', 'style' => 'short', 'name' => ''], (array) $freelancer);
     if (!empty($freelancer['real']) && !empty($freelancer['photo']) && !empty($freelancer['user_id'])) {
         return '<img src="' . e($base) . 'download.php?photo=' . (int) $freelancer['user_id']
             . '&amp;v=' . rawurlencode((string) $freelancer['photo'])

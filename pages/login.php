@@ -30,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $user = tt_find_user_by_email($email);
     if (!$user || !password_verify($password, $user['password'])) {
+        tt_audit('failed sign-in', substr((string) $email, 0, 120), $user['id'] ?? null);
         $error = 'The email or password is incorrect.';
     } elseif ($user['role'] !== 'admin' && $user['status'] !== 'active') {
         $error = $user['status'] === 'suspended'
@@ -40,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Administrator accounts sign in at the admin page only.';
     } else {
         tt_login($user);
+        tt_audit('sign in', $user['email'], $user['id']);
         tt_redirect_after_login($user, $next, $base_url);
     }
 }
