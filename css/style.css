@@ -3150,3 +3150,11 @@ img, video, iframe, table { max-width: 100%; }
   .app-shell--collapsed .app-sidebar { display: none; }
   .side-nav { flex-direction: column !important; flex-wrap: nowrap !important; }
 }
+
+/* 41. ALIGNMENT: search icon centred in its box; filter buttons the same height as their inputs */
+.search-wide__input { position: relative; }
+.search-wide__input svg { position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%); color: var(--color-muted-gray); pointer-events: none; }
+.search-wide .btn--dark-sm { height: 42px; display: inline-flex; align-items: center; justify-content: center; padding: 0 1.3rem; border: 0; flex: 0 0 auto; }
+.filter-bar { align-items: flex-end; }
+.filter-bar .input { height: 44px; }
+.filter-bar .btn { height: 44px; min-width: 110px; display: inline-flex; align-items: center; justify-content: center; padding: 0 1.2rem; margin: 0; }

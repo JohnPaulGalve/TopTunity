@@ -44,13 +44,11 @@ if (in_array($user_role, ['client', 'freelancer', 'admin'], true)) {
   <title><?= e($page_title) ?> | TopTunity</title>
   <link rel="icon" type="image/svg+xml" href="<?= e(tt_image_url($base_url, 'images/Logo/favicon.svg')) ?>">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@800&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 
   <!-- variables.css MUST load before style.css -->
   <link rel="stylesheet" href="<?= e($base_url) ?>css/variables.css">
   <link rel="stylesheet" href="<?= e($base_url) ?>css/style.css?v=<?= @filemtime(__DIR__ . '/../css/style.css') ?>">
+  <link rel="stylesheet" href="<?= e($base_url) ?>css/fonts.css">
 </head>
 <body>
 <?php if ($user_role === 'public' && ($flash = tt_flash())): ?>
