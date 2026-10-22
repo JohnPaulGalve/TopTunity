@@ -3158,3 +3158,6 @@ img, video, iframe, table { max-width: 100%; }
 .filter-bar { align-items: flex-end; }
 .filter-bar .input { height: 44px; }
 .filter-bar .btn { height: 44px; min-width: 110px; display: inline-flex; align-items: center; justify-content: center; padding: 0 1.2rem; margin: 0; }
+
+/* 42. ONE BACKGROUND: no white strip between a page's content and the footer */
+main.page-browse + .footer { margin-top: 0; }

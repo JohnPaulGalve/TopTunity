@@ -80,10 +80,6 @@ include '../includes/header.php';
         <button type="submit" class="btn" style="width:100%; height:44px; margin-top:1.2rem; background:var(--color-deep-slate); color:#FFFFFF; border-radius:8px;"><?= icon('shield', 15) ?> Login</button>
       </form>
 
-      <div class="info-callout" style="margin-top:1.2rem;">
-        <?= icon('info', 15) ?>
-        <span>Demo Admin: demo.admin@toptunity.ph / admin123 (isolated sample data). Real Admin: admin@toptunity.ph (live platform data). Both accounts use the same admin tools.</span>
-      </div>
     </div>
   </div>
 </main>
