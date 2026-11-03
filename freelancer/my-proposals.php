@@ -27,11 +27,11 @@ $all = array_merge(tt_freelancer_db_proposal_rows(), $sample_props);
 $tabs = ['all' => 'All', 'pending' => 'Pending', 'selected' => 'Selected', 'not_selected' => 'Not Selected', 'withdrawn' => 'Withdrawn'];
 $status = isset($_GET['status']) && isset($tabs[$_GET['status']]) ? $_GET['status'] : 'all';
 $counts = ['all' => count($all)];
-foreach ($all as $p) { $counts[$p['status']] = ($counts[$p['status']] ?? 0) + 1; }
-$rows = array_values(array_filter($all, function ($p) use ($status) { return $status === 'all' || $p['status'] === $status; }));
+foreach ($all as $p) { $bucket = in_array($p['status'], ['offer', 'selected'], true) ? 'selected' : $p['status']; $counts[$bucket] = ($counts[$bucket] ?? 0) + 1; }
+$rows = array_values(array_filter($all, function ($p) use ($status) { return $status === 'all' || (in_array($p['status'], ['offer', 'selected'], true) ? 'selected' : $p['status']) === $status; }));
 
-$label = ['pending' => 'Pending', 'selected' => 'Selected', 'not_selected' => 'Not Selected', 'withdrawn' => 'Withdrawn'];
-$cls   = ['pending' => 'pending', 'selected' => 'released', 'not_selected' => 'cancelled', 'withdrawn' => 'cancelled'];
+$label = ['pending' => 'Pending', 'selected' => 'Selected', 'offer' => 'Offer sent', 'ongoing' => 'Ongoing', 'completed' => 'Completed', 'not_selected' => 'Not Selected', 'withdrawn' => 'Withdrawn', 'accepted' => 'Accepted'];
+$cls   = ['pending' => 'pending', 'selected' => 'released', 'offer' => 'pending', 'ongoing' => 'ongoing', 'completed' => 'released', 'not_selected' => 'cancelled', 'withdrawn' => 'cancelled', 'accepted' => 'ongoing'];
 
 $page_title = "My Proposals";
 include '../includes/header.php';
@@ -50,7 +50,7 @@ include '../includes/client-nav.php';
   <nav class="filter-tabs" aria-label="Filter by status">
     <?php foreach ($tabs as $key => $t): ?>
       <a href="my-proposals.php<?= $key === 'all' ? '' : '?status=' . e($key) ?>" class="filter-tab <?= $status === $key ? 'is-active' : '' ?>">
-        <?= e($t) ?><?= $key === 'all' ? '' : ' · ' ?><?= $key === 'all' ? ' <small>' . (int) $counts['all'] . '</small>' : (isset($counts[$key]) ? (int) $counts[$key] : 0) ?>
+        <?= e($t) ?> · <?= $key === 'all' ? (int) $counts['all'] : (isset($counts[$key]) ? (int) $counts[$key] : 0) ?>
       </a>
     <?php endforeach; ?>
   </nav>
@@ -65,8 +65,9 @@ include '../includes/client-nav.php';
   </div>
 <?php else: ?>
   <div class="project-list" style="margin-top:1.25rem;">
-    <?php foreach ($rows as $p): $selected = $p['status'] === 'selected'; ?>
-      <article class="project-row" style="grid-template-columns: 1fr auto; <?= $selected ? 'border-color:#99F6E4; background:#F4FBFA;' : '' ?>">
+    <?php foreach ($rows as $p): $selected = in_array($p['status'], ['selected', 'offer', 'ongoing', 'completed'], true); ?>
+      <article class="project-row" style="grid-template-columns: auto 1fr auto; <?= $selected ? 'border-color:#99F6E4; background:#F4FBFA;' : '' ?>">
+        <div style="flex-shrink:0;"><?php $client_avatar = !empty($p['client_id']) ? tt_user_avatar_asset((int) $p['client_id']) : null; ?><?= $client_avatar ? tt_avatar_image_html($client_avatar, 44, $base_url, $p['client'] ?? 'Client') : avatar('#E0F2F1', '#1E293B', 'short', 44) ?></div>
         <div>
           <div class="project-row__title">
             <h3><?= e($p['title']) ?></h3>
@@ -77,12 +78,16 @@ include '../includes/client-nav.php';
             <span>Client <strong><?= e($p['client']) ?></strong></span>
             <span>Offer <strong>₱<?= number_format($p['offer']) ?><?= $p['type'] === 'hourly' ? '/hr' : '' ?></strong></span>
             <span>Estimated <strong><?= (int) $p['days'] ?> days</strong></span>
-            <span>Submitted <strong><?= e(date('M d, Y', strtotime($p['sent']))) ?></strong></span>
           </div>
+          <div class="project-row__meta" style="margin-top:0.35rem;"><span>Submitted <strong><?= e(date('M d, Y', strtotime($p['sent']))) ?></strong></span></div>
         </div>
         <div class="project-row__actions">
-          <?php if ($selected): ?>
+          <?php if ($p['status'] === 'offer'): ?>
             <a href="my-projects.php#offer" class="btn btn--primary"><?= icon('arrow-right', 13) ?> Go to Project Offer</a>
+          <?php elseif (in_array($p['status'], ['ongoing', 'completed'], true)): ?>
+            <a href="project-details.php?id=<?= (int) $p['project_id'] ?>" class="btn btn--row-outline"><?= icon('refresh', 13) ?> View Project</a>
+          <?php elseif ($p['status'] === 'accepted'): ?>
+            <a href="my-projects.php" class="btn btn--row-outline"><?= icon('refresh', 13) ?> View Project</a>
           <?php elseif ($p['status'] === 'pending'): ?>
             <a href="messages.php<?= !empty($p['client_id']) ? '?with=' . (int) $p['client_id'] : '' ?>" class="btn btn--row-outline"><?= icon('message', 13) ?> Message Client</a>
             <form method="post" action="my-proposals.php" style="display:inline;"><input type="hidden" name="action" value="withdraw"><input type="hidden" name="key" value="<?= e($p['key']) ?>"><button type="submit" class="btn btn--danger-outline">Withdraw Proposal</button></form>

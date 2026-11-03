@@ -13,7 +13,6 @@ if (isset($_GET['open'])) {
     if ($target) { header('Location: ' . $target); exit; }
 }
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mark_all'])) {
-    tt_mark_demo_notifications_read();
     tt_mark_all_read();
     tt_flash('All notifications marked as read.');
     header('Location: ' . $base_url . 'admin/notifications.php');
@@ -22,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mark_all'])) {
 
 $all  = toptunity_admin_notifications();
 $tabs = ['all' => 'All', 'past' => 'Projects Past Deadline', 'reports' => 'New Reports', 'disputes' => 'Disputes',
-         'withdrawals' => 'Withdrawal Requests', 'inquiries' => 'Inquiries', 'reviews' => 'New Platform Reviews'];
+         'withdrawals' => 'Withdrawal Requests', 'inquiries' => 'Inquiries', 'reviews' => 'New Platform Reviews', 'alert' => 'Risk Alerts'];
 $cat  = isset($_GET['cat']) && isset($tabs[$_GET['cat']]) ? $_GET['cat'] : 'all';
 $rows = array_values(array_filter($all, function ($n) use ($cat) { return $cat === 'all' || $n['cat'] === $cat; }));
 $unread = count(array_filter($all, function ($n) { return $n['new']; }));

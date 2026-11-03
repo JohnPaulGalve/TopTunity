@@ -1,7 +1,7 @@
 <?php
 /**
  * admin/user-management.php - Client and freelancer lists with user details (matches the User Management design).
- * User status changes are saved for live accounts and isolated per demo-admin session.
+ * User status changes are saved for live accounts .
  */
 $user_role     = "admin";
 $base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
@@ -37,7 +37,7 @@ $rows = array_values(array_filter($all, function ($u) use ($role, $q) {
 
 $sel = null;
 $want = isset($_GET['id']) ? (int) $_GET['id'] : 0;
-foreach ($rows as $r) { if ($r['id'] === $want) { $sel = $r; } }
+foreach ($rows as $r) { if ((string) $r['id'] === (string) $want) { $sel = $r; } }
 if (!$sel && $rows) { $sel = $rows[0]; }
 
 $reports = toptunity_admin_reports();
@@ -112,7 +112,7 @@ $status_class = ['Active' => 'released', 'Suspended' => 'past', 'Deactivated' =>
         <div class="kv"><span>Projects</span><strong><?= $sel['role'] === 'client' ? 2 : 0 ?></strong></div>
         <div class="kv"><span>Reports received</span><strong style="color:var(--color-error-base);"><?= (int) $reports_received ?></strong></div>
         <?php if (!empty($sel['warnings'])): ?><div class="kv"><span>Warnings issued</span><strong><?= (int) $sel['warnings'] ?></strong></div><?php endif; ?>
-        <?php if ($sel['status'] === 'Suspended'): ?><div class="kv"><span>Suspended on</span><strong>Oct 02, 2026</strong></div><?php endif; ?>
+        <?php if ($sel['status'] === 'Suspended'): ?><div class="kv"><span>Suspended on</span><strong><?= e($sel['suspended_on'] ?: '—') ?></strong></div><?php endif; ?>
       </div>
 
       <form method="post" action="user-management.php?tab=<?= e($tab) ?>&amp;id=<?= (int) $sel['id'] ?>" style="margin-top:0.9rem;">

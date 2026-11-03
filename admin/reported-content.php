@@ -1,7 +1,7 @@
 <?php
 /**
  * admin/reported-content.php - Reports from users, with details and actions (matches the Reported Content design).
- * Report actions update the live report records or the demo session fixture state.
+ * Report actions update the live report records .
  */
 $user_role     = "admin";
 $base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
@@ -30,7 +30,7 @@ $rows = array_values(array_filter($all, function ($r) use ($tab) { return $tab =
 
 $sel  = null;
 $want = isset($_GET['id']) ? $_GET['id'] : '';
-foreach ($rows as $r) { if ($r['id'] === $want) { $sel = $r; } }
+foreach ($rows as $r) { if ((string) $r['id'] === (string) $want) { $sel = $r; } }
 if (!$sel && $rows) { $sel = $rows[0]; }
 
 $page_title = "Reported Content";
@@ -98,7 +98,7 @@ $status_class = ['pending' => 'pending', 'resolved' => 'released', 'dismissed' =
               <button type="submit" name="action" value="<?= e($action) ?>" class="btn btn--row-outline btn--block"><?= e($label) ?></button>
             </form>
           <?php endforeach; ?>
-          <?php if (strcasecmp($sel['type'], 'User') === 0 && (tt_is_demo_admin() || !empty($sel['reported_user_id']))): ?>
+          <?php if (strcasecmp($sel['type'], 'User') === 0 && !empty($sel['reported_user_id'])): ?>
             <form method="post" action="reported-content.php?tab=<?= e($tab) ?>&amp;id=<?= e($sel['id']) ?>">
               <input type="hidden" name="report_id" value="<?= e($sel['id']) ?>">
               <button type="submit" name="action" value="warn" class="btn btn--amber btn--block">⚠ Warn User</button>

@@ -15,7 +15,6 @@ if (isset($_GET['open'])) {
 }
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mark_all'])) {
     tt_mark_all_read();
-    tt_mark_demo_notifications_read();
     header('Location: ' . $_SERVER['REQUEST_URI']);
     exit;
 }

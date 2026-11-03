@@ -9,6 +9,7 @@ $base_url      = "/TopTunity/";
 $active_client = "projects";
 
 require_once __DIR__ . '/../includes/data.php';
+tt_refresh_project_statuses();   // keeps Overdue in step with the deadline
 
 $projects = toptunity_client_projects();
 
@@ -125,7 +126,7 @@ include '../includes/client-nav.php';
         <div>
           <div class="project-row__title">
             <h3><?= e($p['title']) ?></h3>
-            <span class="status status--<?= e($p['status']) ?>"><?= e(toptunity_status_label($p['status'])) ?></span>
+            <?php [$sl, $sc] = tt_project_status_view($p['status'], $p['contract_status'] ?? 'none', !empty($p['freelancer_id'])); ?><span class="status status--<?= e($sc) ?>"><?= e($sl) ?></span>
             <span class="pill pill--cat"><?= e($p['category']) ?></span>
           </div>
           <div class="project-row__meta">
@@ -148,8 +149,11 @@ include '../includes/client-nav.php';
         <div class="project-row__actions">
           <?php if ($p['status'] === 'open'): ?>
             <a href="<?= e($base_url) ?>client/post-project.php?id=<?= (int) $id ?>" class="btn--row-outline"><?= icon('edit', 13) ?> Edit Project</a>
-            <a href="<?= e($base_url) ?>client/project-tracking.php?id=<?= (int) $id ?>&amp;action=cancel" class="btn btn--danger-outline"><?= icon('x-circle', 13) ?> Cancel Project</a>
-          <?php elseif ($p['status'] === 'completed'): ?>
+            <form method="post" action="<?= e($base_url) ?>client/project-tracking.php?id=<?= (int) $id ?>" style="display:inline;" data-confirm="Cancel this project? Any held deposit is refunded to you. This cannot be undone.">
+              <input type="hidden" name="action" value="cancel_project">
+              <button type="submit" class="btn btn--danger-outline"><?= icon('x-circle', 13) ?> Cancel Project</button>
+            </form>
+          <?php elseif ($p['status'] === 'completed' && !tt_review_done($id, tt_current_user()['id'])): ?>
             <a href="<?= e($base_url) ?>client/project-tracking.php?id=<?= (int) $id ?>#review" class="btn btn--review"><?= icon('star', 13) ?> Review Freelancer</a>
           <?php endif; ?>
           <a href="<?= e($base_url) ?>client/project-tracking.php?id=<?= (int) $id ?>" class="btn--row-dark">View Details</a>

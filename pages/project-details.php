@@ -125,7 +125,7 @@ function fmt_date($ymd)
             <div class="fact-row">Proposals <strong><?= (int) $project['proposals'] ?></strong></div>
           </div>
 
-          <a href="login.php?next=<?= urlencode('project-details.php?id=' . $id) ?>" class="btn btn--primary btn--submit">
+          <a href="login.php?notice=login&amp;next=<?= urlencode('project-details.php?id=' . $id) ?>" class="btn btn--primary btn--submit">
             <?= icon('send', 16) ?> Submit a Proposal
           </a>
           <p class="submit-note">You'll be asked to log in or register as a freelancer first.</p>

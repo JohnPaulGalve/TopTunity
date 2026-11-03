@@ -27,21 +27,6 @@ if ($session_user && in_array($session_user['role'], ['client', 'freelancer'], t
     }
 }
 
-if (isset($_SESSION['user'])
-    && $_SESSION['user']['role'] === 'admin'
-    && strtolower($_SESSION['user']['email']) === 'admin@toptunity.ph'
-    && empty($_SESSION['admin_password_verified'])) {
-    $_SESSION['admin_password_change_required'] = true;
-}
-if (!empty($_SESSION['admin_password_change_required'])
-    && basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) !== 'account-settings.php'
-    && !(basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) === 'login.php'
-        && (string) ($_GET['action'] ?? '') === 'logout')) {
-    $base = rtrim(dirname(dirname((string) ($_SERVER['SCRIPT_NAME'] ?? '/'))), '/') . '/';
-    header('Location: ' . $base . 'admin/account-settings.php');
-    exit;
-}
-
 /* Fallbacks so the site works even when PHP's mbstring extension is not installed. */
 if (!function_exists('mb_strlen')) {
     function mb_strlen($str, $encoding = null)
@@ -68,7 +53,7 @@ function tt_login($user)
 {
     session_regenerate_id(true);
     $_SESSION['user'] = ['id' => $user['id'], 'name' => $user['name'], 'email' => $user['email'], 'role' => $user['role']];
-    if (tt_is_demo_user($user)) { tt_reset_demo_data(); }   // demo accounts start clean each time
+    if (false) { tt_reset_demo_data(); }   // demo accounts start clean each time
 }
 
 function tt_logout()
@@ -168,24 +153,13 @@ function tt_brand_home()
 /** The demo accounts. They are added to the database the first time they are needed. */
 function tt_demo_accounts()
 {
-    return [
-        ['name' => 'Andrea Santos',   'email' => 'andrea.santos@kapelokal.ph', 'role' => 'client',     'password' => 'password123'],
-        ['name' => 'Miguel Reyes',    'email' => 'miguel.reyes@example.com',   'role' => 'freelancer', 'password' => 'password123'],
-        ['name' => 'Demo Administrator', 'email' => 'demo.admin@toptunity.ph', 'role' => 'admin',      'password' => 'admin123'],
-    ];
+    return [];
 }
 
 /** Adds any missing demo account (existing accounts are left alone). */
 function tt_ensure_demo_accounts()
 {
-    static $done = false;
-    if ($done) { return; }
-    $done = true;
-    $stmt = db()->prepare('INSERT IGNORE INTO users (name, email, password_hash, role, avatar) VALUES (?, ?, ?, ?, ?)');
-    foreach (tt_demo_accounts() as $d) {
-        $avatar = tt_avatar_asset_for_name($d['name']) ?: tt_random_avatar_asset();
-        $stmt->execute([$d['name'], $d['email'], password_hash($d['password'], PASSWORD_DEFAULT), $d['role'], $avatar]);
-    }
+    return;
 }
 
 /** Every account (id, name, email, role, password hash). */
@@ -286,57 +260,14 @@ function tt_complete_password_reset($token, $password, $confirm)
 /** The ids of the demo client and demo freelancer accounts. */
 function tt_demo_ids()
 {
-    $emails = ['andrea.santos@kapelokal.ph', 'miguel.reyes@example.com'];
-    $ids = [];
-    foreach ($emails as $e) {
-        $stmt = db()->prepare('SELECT id FROM users WHERE email = ?');
-        $stmt->execute([$e]);
-        if ($id = $stmt->fetchColumn()) { $ids[] = (int) $id; }
-    }
-    return $ids;
+    return [];
 }
 
-function tt_is_demo_user($user)
-{
-    return $user && in_array(strtolower($user['email']), ['andrea.santos@kapelokal.ph', 'miguel.reyes@example.com'], true);
-}
-
-/** True only for the seeded preview administrator, not database-created administrators. */
-function tt_is_demo_admin($user = null)
-{
-    $user = $user ?: tt_current_user();
-    return $user && $user['role'] === 'admin'
-        && strtolower($user['email']) === 'demo.admin@toptunity.ph';
-}
 
 /** Removes everything the demo accounts saved to the database. */
 function tt_reset_demo_data()
 {
-    $ids = tt_demo_ids();
-    if (!$ids) { return; }
-    $in = implode(',', $ids);
-    $pdo = db();
-    $pdo->beginTransaction();
-    $proj = "SELECT id FROM projects WHERE client_id IN ($in) OR freelancer_id IN ($in)";
-    $pdo->exec("DELETE FROM attachments WHERE user_id IN ($in) OR (owner_type IN ('project','deliverable') AND owner_id IN (SELECT id + 1000 FROM projects WHERE client_id IN ($in)))");
-    $pdo->exec("DELETE FROM messages WHERE sender_id IN ($in)");
-    $pdo->exec("DELETE FROM notifications WHERE user_id IN ($in)");
-    $pdo->exec("DELETE FROM reports WHERE reporter_id IN ($in)");
-    $pdo->exec("DELETE FROM disputes WHERE filed_by IN ($in)");
-    $pdo->exec("DELETE FROM withdrawals WHERE freelancer_id IN ($in)");
-    $pdo->exec("DELETE FROM proposals WHERE freelancer_id IN ($in) OR project_id IN (SELECT id FROM projects WHERE client_id IN ($in))");
-    $pdo->exec("DELETE FROM work_logs WHERE freelancer_id IN ($in) OR project_id IN (SELECT id + 1000 FROM projects WHERE client_id IN ($in) OR freelancer_id IN ($in))");
-    $pdo->exec("DELETE FROM project_submissions WHERE freelancer_id IN ($in) OR project_id IN (SELECT id + 1000 FROM projects WHERE client_id IN ($in) OR freelancer_id IN ($in))");
-    $pdo->exec("DELETE FROM projects WHERE client_id IN ($in)");
-    $pdo->exec("UPDATE projects SET freelancer_id = NULL, contract_status = 'none', agreed_amount = 0, start_date = NULL, status = 'open' WHERE freelancer_id IN ($in)");
-    $pdo->exec("DELETE FROM platform_reviews WHERE user_id IN ($in)");
-    $pdo->exec("DELETE FROM reviews WHERE reviewer_id IN ($in)");
-    $pdo->exec("DELETE FROM saved_items WHERE user_id IN ($in)");
-    $pdo->exec("DELETE FROM freelancer_skills WHERE freelancer_id IN ($in)");
-    $pdo->exec("DELETE FROM client_profiles WHERE user_id IN ($in)");
-    $pdo->exec("DELETE FROM freelancer_profiles WHERE user_id IN ($in)");
-    $pdo->exec("DELETE FROM settings WHERE name LIKE 'sample_project_%'");
-    $pdo->commit();
+    return;
 }
 /* ==========================================================================
    ACTIVITY / AUDIT LOG. Records who did what and when. A logging failure
@@ -345,7 +276,7 @@ function tt_reset_demo_data()
 function tt_audit($action, $target = null, $user_id = null)
 {
     try {
-        $uid = $user_id ?? (tt_current_user()['id'] ?? null);
+        $uid = $user_id ?? ((tt_current_user()['id'] ?? 0) ?? null);
         db()->prepare('INSERT INTO audit_logs (user_id, action, target) VALUES (?, ?, ?)')
             ->execute([$uid ? (int) $uid : null, mb_substr((string) $action, 0, 160),
                        $target === null ? null : mb_substr((string) $target, 0, 160)]);

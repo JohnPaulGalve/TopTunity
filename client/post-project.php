@@ -68,10 +68,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     if ($in['type'] === 'fixed') {
-        if ($in['budget'] < 1)                             { $errors[] = 'Enter a budget for the Fixed Price project.'; }
+        if ($in['budget'] < 500)                           { $errors[] = 'The budget must be at least ₱500.'; }
+        if ($in['budget'] > 1000000)                       { $errors[] = 'The budget cannot be more than ₱1,000,000.'; }
     } else {
-        if ($in['rate'] < 1)                               { $errors[] = 'Enter an hourly rate.'; }
+        if ($in['rate'] < 100)                             { $errors[] = 'The hourly rate must be at least ₱100.'; }
+        if ($in['rate'] > 5000)                            { $errors[] = 'The hourly rate cannot be more than ₱5,000.'; }
         if ($in['max_hours'] < 1)                          { $errors[] = 'Enter the maximum hours.'; }
+        if ($in['max_hours'] > 500)                        { $errors[] = 'The maximum hours cannot be more than 500.'; }
     }
     $d = DateTime::createFromFormat('Y-m-d', $in['deadline']);
     if (!$d || $d->format('Y-m-d') !== $in['deadline']) {
@@ -152,7 +155,7 @@ include '../includes/client-nav.php';
 
     <div class="field">
       <label for="title">Project Title <span class="req">*</span></label>
-      <input class="input" type="text" id="title" name="title" value="<?= e($form['title']) ?>" minlength="5" maxlength="120" placeholder="e.g. Online ordering website for my café" required>
+      <input class="input" type="text" id="title" name="title" value="<?= e($form['title']) ?>" minlength="5" maxlength="120" placeholder="Enter a short project title" required>
     </div>
 
     <div class="field">
@@ -289,7 +292,7 @@ include '../includes/client-nav.php';
 
     <div class="fee-mini">
       <h2>Service Fee</h2>
-      <p>A 10% platform service fee is deducted from the amount released to the freelancer. Fixed Price: on approval. Hourly: on the End Date.</p>
+      <p>A <?= (int) tt_service_fee() ?>% platform service fee is deducted from the amount released to the freelancer. Fixed Price: on approval. Hourly: on the End Date.</p>
       <a href="<?= e($base_url) ?>pages/pricing.php" class="section-link">See Pricing <?= icon('arrow-right', 14) ?></a>
     </div>
 

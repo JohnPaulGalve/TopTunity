@@ -50,9 +50,6 @@ include '../includes/client-nav.php';
   <div>
     <h1>Account Settings</h1>
     <p class="subtle">Update your account information and password.</p>
-    <?php if (!empty($_SESSION['admin_password_change_required'])): ?>
-      <p class="note-soft" role="status" style="margin-top:0.8rem;">For account security, replace the real administrator's previous demo password before continuing.</p>
-    <?php endif; ?>
   </div>
 </div>
 

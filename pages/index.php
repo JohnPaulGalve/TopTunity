@@ -52,54 +52,52 @@ foreach (toptunity_category_catalog() as $category) {
     $categories[] = [$category, $style[0], $style[1], $count . ' open ' . ($count === 1 ? 'project' : 'projects')];
 }
 
-$projects = [
-    [
-        'category' => 'UI/UX Design', 'pill' => 'teal', 'posted' => 'Posted 15h ago',
-        'title'    => 'Clinic Website Redesign in Figma',
-        'desc'     => 'Redesign our clinic website (6 pages) in Figma with a mobile version and a clickable prototype.',
-        'tags'     => ['Figma', 'UI Design'],
-        'pay_type' => 'Budget', 'pay' => '₱18,000', 'deadline' => 'Nov 15, 2026',
-    ],
-    [
-        'category' => 'Data Entry and Admin', 'pill' => 'green', 'posted' => 'Posted yesterday',
-        'title'    => 'Inventory Spreadsheet Cleanup',
-        'desc'     => 'Clean up and merge our 6 inventory spreadsheets (about 4,000 items) into one organized file.',
-        'tags'     => ['Data Entry', 'Microsoft Excel'],
-        'pay_type' => 'Hourly', 'pay' => '₱300/hr', 'deadline' => 'Oct 30, 2026',
-    ],
-    [
-        'category' => 'Web Development', 'pill' => 'blue', 'posted' => 'Posted 2 days ago',
-        'title'    => 'Online Ordering Website for a Coffee Shop',
-        'desc'     => 'We need a simple online ordering website for Kapé Lokal where customers can browse our menu, place pick-u…',
-        'tags'     => ['JavaScript', 'MySQL', 'PHP'],
-        'pay_type' => 'Budget', 'pay' => '₱45,000', 'deadline' => 'Nov 20, 2026',
-    ],
-];
 
-$freelancers = [
-    ['Jerome Castillo', 'Backend Developer',             4.7, 10, ['PHP', 'REST API'],         '#CCFBF1', '#1E293B', 'glasses'],
-    ['Miguel Reyes',    'Full-Stack PHP Developer',      4.8, 5,  ['HTML/CSS', 'JavaScript'],  '#DBEAFE', '#1E293B', 'short'],
-    ['Rhea Mendoza',    'Content Writer and SEO Specialist', 4.8, 4, ['Copywriting', 'SEO'],   '#CCFBF1', '#1E293B', 'long'],
-    ['Janelle Cruz',    'Web and Database Developer',    4.7, 3,  ['HTML/CSS', 'JavaScript'],  '#FFEDD5', '#1E293B', 'bun'],
-];
+/* ---------- Projects shown on the home page: real open projects ranked by tt_project_score ---------- */
+function home_posted_text($hours)
+{
+    if ($hours < 24) { return 'Posted ' . max(1, $hours) . 'h ago'; }
+    if ($hours < 48) { return 'Posted yesterday'; }
+    return 'Posted ' . floor($hours / 24) . ' days ago';
+}
 
-$testimonials = [
-    [
-        'quote'  => 'I posted our ordering website project on a Monday and had twelve solid proposals by Wednesday. The match percentage helped me shortlist fast, and holding the payment until I approved the work gave me peace of mind.',
-        'name'   => 'Andrea Santos', 'role' => 'Client · Kapé Lokal Coffee Co.',
-        'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'long',
-    ],
-    [
-        'quote'  => 'The proposal process is clear and the 10% fee is shown upfront, so I always know my net earnings before I send an offer. Withdrawing to GCash is simple.',
-        'name'   => 'Rhea Mendoza', 'role' => 'Freelancer · Content Writer and SEO Specialist',
-        'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'long',
-    ],
-    [
-        'quote'  => 'Tracking the project from contract to completion was easy. I could see the status history and every submitted file in one place.',
-        'name'   => 'Grace Aquino', 'role' => 'Client · Aquino Dental Clinic',
-        'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'bun',
-    ],
-];
+$real_projects = [];
+foreach (tt_real_listing() as $rp) {
+    $rp['score'] = tt_project_score($rp, '');
+    $hourly = $rp['type'] === 'hourly';
+    $desc   = (string) $rp['desc'];
+    $real_projects[] = [
+        'category' => $rp['category'],
+        'pill'     => 'teal',
+        'posted'   => home_posted_text((int) $rp['age_h']),
+        'title'    => $rp['title'],
+        'desc'     => mb_strlen($desc) > 140 ? mb_substr($desc, 0, 137) . '...' : $desc,
+        'tags'     => array_slice((array) $rp['skills'], 0, 3),
+        'pay_type' => $hourly ? 'Hourly' : 'Budget',
+        'pay'      => '₱' . number_format((int) $rp['amount']) . ($hourly ? '/hr' : ''),
+        'deadline' => $rp['deadline'] ? date('M j, Y', strtotime($rp['deadline'])) : '—',
+        'score'    => $rp['score'],
+    ];
+}
+usort($real_projects, function ($a, $b) { return $b['score'] <=> $a['score']; });
+
+// Show the top 3 real projects, best score first
+$projects = array_slice($real_projects, 0, 3);
+
+$freelancers = [];
+$top_freelancers = tt_real_freelancers();
+uasort($top_freelancers, function ($a, $b) { return [$b['reviews'], $b['user_id']] <=> [$a['reviews'], $a['user_id']]; });
+foreach (array_slice($top_freelancers, 0, 4) as $rf) {
+    $freelancers[] = [$rf['name'], $rf['title'], (float) $rf['rating'], (int) $rf['reviews'], array_slice((array) $rf['skills'], 0, 2), $rf['bg'], $rf['hair'], $rf['style'], (int) $rf['id']];
+}
+
+$testimonials = [];
+$tpal = [['#FFEDD5', '#1E293B', 'long'], ['#CCFBF1', '#1E293B', 'short'], ['#DBEAFE', '#1E293B', 'bun']];
+$published = db()->query("SELECT pr.rating, pr.body, u.name, u.role FROM platform_reviews pr JOIN users u ON u.id = pr.user_id WHERE pr.status = 'published' ORDER BY pr.created_at DESC LIMIT 3")->fetchAll();
+foreach ($published as $k => $t) {
+    $testimonials[] = ['quote' => $t['body'], 'name' => $t['name'], 'role' => ucfirst($t['role']) . ' · TopTunity', 'rating' => (int) $t['rating'],
+                       'bg' => $tpal[$k % 3][0], 'hair' => $tpal[$k % 3][1], 'style' => $tpal[$k % 3][2]];
+}
 ?>
 
 <main>
@@ -125,15 +123,21 @@ $testimonials = [
           <a href="<?= e($base_url) ?>pages/register.php?role=freelancer" class="btn btn--outline">Become a Freelancer</a>
         </div>
 
+        <?php
+          $fl_count   = (int) db()->query("SELECT COUNT(*) FROM users WHERE role = 'freelancer' AND status = 'active'")->fetchColumn();
+          $avg_raw    = db()->query("SELECT AVG(rating) FROM platform_reviews WHERE status = 'published'")->fetchColumn();
+          $avg_rating = $avg_raw ? round((float) $avg_raw, 1) : 0;
+          $proof_fls  = array_slice(array_values(tt_real_freelancers()), 0, 4);
+        ?>
         <div class="social-proof">
           <div class="avatar-group">
-            <?php foreach (['aira-villareal.svg', 'miguel-reyes.svg', 'bea-lim.svg', 'janelle-cruz.svg'] as $avatar_asset): ?>
-              <?= tt_avatar_image_html($avatar_asset, 32, $base_url, 'TopTunity member') ?>
+            <?php foreach ($proof_fls as $pf): ?>
+              <?= tt_freelancer_avatar_html($pf, 32, $base_url) ?>
             <?php endforeach; ?>
           </div>
           <div>
-            <div class="social-proof__rating"><?= stars(4.8) ?> 4.8/5</div>
-            <div class="social-proof__note">from 12 active freelancers</div>
+            <div class="social-proof__rating"><?= stars($avg_rating) ?> <?= $avg_rating ? number_format($avg_rating, 1) . '/5' : 'No ratings yet' ?></div>
+            <div class="social-proof__note">from <?= $fl_count ?> active freelancer<?= $fl_count === 1 ? '' : 's' ?></div>
           </div>
         </div>
       </div>
@@ -232,6 +236,7 @@ $testimonials = [
       </div>
 
       <div class="projects-grid">
+        <?php if (!$projects): ?><p class="muted">No projects have been posted yet.</p><?php endif; ?>
         <?php foreach ($projects as $p): ?>
           <article class="project-card">
             <div class="project-card__body">
@@ -269,6 +274,7 @@ $testimonials = [
       </div>
 
       <div class="freelancers-grid">
+        <?php if (!$freelancers): ?><p class="muted">No freelancers have joined yet.</p><?php endif; ?>
         <?php foreach ($freelancers as $f): ?>
           <article class="freelancer-card">
             <?= avatar($f[5], $f[6], $f[7], 52) ?>
@@ -282,7 +288,7 @@ $testimonials = [
                 <span class="chip"><?= e($skill) ?></span>
               <?php endforeach; ?>
             </div>
-            <a href="<?= e($base_url) ?>pages/freelancer-profile.php?name=<?= urlencode($f[0]) ?>" class="btn btn--teal-outline">View Profile</a>
+            <a href="<?= e($base_url) ?>pages/freelancer-profile.php?id=<?= (int) $f[8] ?>" class="btn btn--teal-outline">View Profile</a>
           </article>
         <?php endforeach; ?>
       </div>
@@ -301,9 +307,10 @@ $testimonials = [
       </div>
 
       <div class="testimonials-grid">
+        <?php if (!$testimonials): ?><p class="muted">No reviews have been published yet.</p><?php endif; ?>
         <?php foreach ($testimonials as $t): ?>
           <figure class="testimonial-card">
-            <?= stars(5) ?>
+            <?= stars($t['rating']) ?>
             <span class="testimonial-card__quote-icon"><?= icon('quote', 22) ?></span>
             <blockquote>“<?= e($t['quote']) ?>”</blockquote>
             <figcaption class="testimonial-card__author">
@@ -317,14 +324,14 @@ $testimonials = [
         <?php endforeach; ?>
       </div>
 
-      <!-- 10% pricing preview -->
+      <!-- <?= (int) tt_service_fee() ?>% pricing preview -->
       <div class="pricing-banner">
         <div class="pricing-banner__content">
-          <span class="pricing-banner__percent">10%</span>
+          <span class="pricing-banner__percent"><?= (int) tt_service_fee() ?>%</span>
           <div>
             <p class="section-tag">Pricing preview</p>
             <h3>Simple, transparent service fee</h3>
-            <p>A 10% platform service fee is deducted from each completed project. Posting projects and sending proposals is free.</p>
+            <p>A <?= (int) tt_service_fee() ?>% platform service fee is deducted from each completed project. Posting projects and sending proposals is free.</p>
           </div>
         </div>
         <a href="<?= e($base_url) ?>pages/pricing.php" class="btn btn--primary">See Pricing <?= icon('arrow-right', 16) ?></a>
@@ -334,4 +341,5 @@ $testimonials = [
 
 </main>
 
+<button type="button" class="back-to-top" id="back-to-top" aria-label="Back to top" title="Back to top"><?= icon('arrow-up', 20) ?></button>
 <?php include '../includes/footer.php'; ?>

@@ -14,7 +14,12 @@ $projects  = toptunity_freelancer_projects();
 $earn      = toptunity_freelancer_earnings();
 $notes     = array_slice(toptunity_freelancer_notifications(), 0, 4);
 $threads   = array_slice(toptunity_freelancer_threads(), 0, 3);
-$skills    = tt_is_demo_freelancer() ? toptunity_freelancer(1)['skills'] : [];
+$skills  = tt_freelancer_saved_skills() ?: [];
+// New open projects (posted in the last 7 days) that match at least one of the freelancer's skills
+$new_match_count = 0;
+foreach (tt_real_listing() as $np) {
+    if ($np['age_h'] <= 168 && tt_skill_match($np['skills'], $skills) > 0) { $new_match_count++; }
+}
 
 $real_statuses = tt_freelancer_db_proposal_statuses();   // real proposals sent by this freelancer
 $pending  = count(array_filter($proposals, function ($p) { return $p['status'] === 'pending'; }))
@@ -24,7 +29,7 @@ $selected = count(array_filter($proposals, function ($p) { return $p['status'] =
 $proposal_total = count($proposals) + count($real_statuses);
 $ongoing  = array_values(array_filter($projects, function ($p) { return in_array($p['status'], ['ongoing', 'overdue'], true); }));
 $overdue  = count(array_filter($ongoing, function ($p) { return $p['status'] === 'overdue'; }));
-$ongoing_total  = count($ongoing) + tt_freelancer_db_ongoing_count();
+$ongoing_total  = count($ongoing);
 
 $page_title = "Freelancer Dashboard";
 include '../includes/header.php';
@@ -63,7 +68,7 @@ include '../includes/client-nav.php';
 <?php if ($skills): ?>
 <div class="rec-band" style="margin-top:1rem; display:flex; align-items:center; gap:0.7rem; padding:0.8rem 1.1rem; background:var(--color-teal-tint); border:1px solid #99F6E4; border-radius:var(--radius-sm); font-size:0.78rem; color:var(--color-teal-dark);">
   <?= icon('zap', 15) ?>
-  <span><strong>3 new projects match your skills</strong> — <?= e(implode(' · ', array_slice($skills, 0, 3))) ?>.</span>
+  <span><strong><?= (int) $new_match_count ?> new project<?= $new_match_count === 1 ? '' : 's' ?> match your skills</strong> — <?= e(implode(' · ', array_slice($skills, 0, 3))) ?>.</span>
   <a href="find-projects.php" class="link-teal" style="margin-left:auto;">See Recommended →</a>
 </div>
 <?php endif; ?>
@@ -92,7 +97,7 @@ include '../includes/client-nav.php';
 
     <section class="panel">
       <div class="panel__head"><h2>Ongoing Projects</h2><a href="my-projects.php" class="panel__link">My Projects →</a></div>
-      <?php foreach (array_merge(tt_freelancer_db_ongoing_rows(), $ongoing) as $p): ?>
+      <?php foreach ($ongoing as $p): ?>
         <div class="stat-line" style="padding:0.75rem 0; border-bottom:1px solid var(--color-border-gray);">
           <div style="flex:1; min-width:0;">
             <strong style="font-size:0.8rem;"><?= e($p['title']) ?></strong>

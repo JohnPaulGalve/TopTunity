@@ -17,6 +17,9 @@ $sort_options = ['top_rated' => 'Top Rated', 'rate_low' => 'Rate: low to high', 
 
 $q        = isset($_GET['q']) ? trim($_GET['q']) : '';
 $skill    = isset($_GET['skill']) ? $_GET['skill'] : '';
+$group    = isset($_GET['group']) ? $_GET['group'] : '';
+$work_groups = tt_work_groups();
+if (!in_array($group, $work_groups, true)) { $group = ''; }
 $sort     = isset($_GET['sort']) && isset($sort_options[$_GET['sort']]) ? $_GET['sort'] : 'top_rated';
 $page     = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
 $per_page = 5;
@@ -26,7 +29,8 @@ foreach ($all as $f) { foreach ($f['skills'] as $s) { $skill_counts[$s] = ($skil
 ksort($skill_counts);
 if ($skill !== '' && !isset($skill_counts[$skill])) { $skill = ''; }
 
-$results = array_values(array_filter($all, function ($f) use ($q, $skill) {
+$results = array_values(array_filter($all, function ($f) use ($q, $skill, $group) {
+    if ($group !== '' && !in_array($group, $f['groups'] ?? [], true)) { return false; }
     if ($skill !== '' && !in_array($skill, $f['skills'], true)) { return false; }
     if ($q !== '') {
         $hay = $f['name'] . ' ' . $f['title'] . ' ' . $f['bio'] . ' ' . implode(' ', $f['skills']);
@@ -51,10 +55,11 @@ $visible     = array_slice($results, ($page - 1) * $per_page, $per_page);
 $from        = $total ? ($page - 1) * $per_page + 1 : 0;
 $to          = ($page - 1) * $per_page + count($visible);
 
-$state = ['q' => $q, 'skill' => $skill, 'sort' => $sort, 'page' => $page];
+$state = ['q' => $q, 'skill' => $skill, 'group' => $group, 'sort' => $sort, 'page' => $page];
 function ff_url($state, $override = [])
 {
     $p = array_merge($state, $override);
+    if (($p['group'] ?? '') === '') { unset($p['group']); }
     if ($p['q'] === '')            { unset($p['q']); }
     if ($p['skill'] === '')        { unset($p['skill']); }
     if ($p['sort'] === 'top_rated'){ unset($p['sort']); }
@@ -86,6 +91,14 @@ include '../includes/client-nav.php';
 
 <div class="browse-layout" style="margin-top:1.25rem;">
   <aside class="filter-card" aria-label="Filter by skill">
+    <h2>Type of Work</h2>
+    <nav class="filter-list">
+      <a href="<?= e(ff_url($state, ['group' => '', 'page' => 1])) ?>" class="filter-option <?= $group === '' ? 'is-active' : '' ?>"><span class="check"><?= icon('check') ?></span> Any Type</a>
+      <?php foreach ($work_groups as $wg): ?>
+        <a href="<?= e(ff_url($state, ['group' => $wg, 'page' => 1])) ?>" class="filter-option <?= $group === $wg ? 'is-active' : '' ?>"><span class="check"><?= icon('check') ?></span> <?= e($wg) ?>s</a>
+      <?php endforeach; ?>
+    </nav>
+
     <h2>Filter by Skill</h2>
     <nav class="filter-list">
       <a href="<?= e(ff_url($state, ['skill' => '', 'page' => 1])) ?>" class="filter-option <?= $skill === '' ? 'is-active' : '' ?>">

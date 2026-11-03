@@ -39,11 +39,20 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
-// Auto-submit any form control marked with data-autosubmit (e.g. the sort dropdown)
+// Auto-submit any form control marked with data-autosubmit (e.g. the sort or filter dropdowns).
+// The page is reloaded, so the current scroll position is saved first and restored after the reload.
 document.addEventListener('DOMContentLoaded', function () {
+  var saved = sessionStorage.getItem('tt-scroll-y');
+  if (saved !== null) {
+    sessionStorage.removeItem('tt-scroll-y');
+    window.scrollTo(0, parseInt(saved, 10) || 0);
+  }
   document.querySelectorAll('[data-autosubmit]').forEach(function (el) {
     el.addEventListener('change', function () {
-      if (el.form) { el.form.submit(); }
+      if (el.form) {
+        sessionStorage.setItem('tt-scroll-y', String(window.scrollY));
+        el.form.submit();
+      }
     });
   });
 });
@@ -373,3 +382,77 @@ document.addEventListener('click', function (e) {
   shell.classList.add('app-shell--collapsed');
   menuBtn.setAttribute('aria-expanded', 'false');
 })();
+/* Whole-row navigation for lists: clicking anywhere on a row or card opens its item
+   (the first link inside it that carries an id), unless the click is on a button, form field or link. */
+document.addEventListener('click', function (e) {
+  var item = e.target.closest('tr, .listing-card, .project-row, .pay-item, .card-row, .list-row, .freelancer-row');
+  if (!item) { return; }
+  var control = e.target.closest('a, button, input, select, textarea, label');
+  if (control && item.contains(control)) { return; }
+  var links = Array.prototype.slice.call(item.querySelectorAll('a[href*="id="]'));
+  var link = links.filter(function (a) { return /view|details/i.test(a.textContent); })[0] || links[0];
+  if (link && link.getAttribute('href')) { window.location.href = link.href; }
+});
+
+/* Confirmation popup: forms with data-confirm="message" ask first, in a centred card over a blurred page.
+   Replaces the browser's own confirm() box. Confirm submits the form (keeping the clicked button); Cancel, Escape or a click outside does nothing. */
+(function () {
+  var overlay = null, pending = null;
+
+  function build() {
+    overlay = document.createElement('div');
+    overlay.className = 'tt-confirm-overlay';
+    overlay.setAttribute('hidden', '');
+    overlay.innerHTML =
+      '<div class="tt-confirm" role="dialog" aria-modal="true" aria-labelledby="tt-confirm-title">' +
+      '<h2 id="tt-confirm-title">Please confirm</h2>' +
+      '<p class="tt-confirm__text"></p>' +
+      '<div class="tt-confirm__actions">' +
+      '<button type="button" class="btn btn--outline tt-confirm__cancel">Cancel</button>' +
+      '<button type="button" class="btn btn--primary tt-confirm__ok">Confirm</button>' +
+      '</div></div>';
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) { close(); } });
+    overlay.querySelector('.tt-confirm__cancel').addEventListener('click', close);
+    overlay.querySelector('.tt-confirm__ok').addEventListener('click', function () {
+      var job = pending; close();
+      if (job) { job(); }
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !overlay.hasAttribute('hidden')) { close(); } });
+  }
+
+  function open(message, onOk) {
+    if (!overlay) { build(); }
+    pending = onOk;
+    overlay.querySelector('.tt-confirm__text').textContent = message;
+    overlay.removeAttribute('hidden');
+    overlay.querySelector('.tt-confirm__ok').focus();
+  }
+
+  function close() {
+    pending = null;
+    if (overlay) { overlay.setAttribute('hidden', ''); }
+  }
+
+  document.addEventListener('submit', function (e) {
+    var form = e.target;
+    if (!form || !form.matches || !form.matches('form[data-confirm]') || form.dataset.confirmed === '1') { return; }
+    e.preventDefault();
+    var submitter = e.submitter || null;
+    open(form.getAttribute('data-confirm'), function () {
+      form.dataset.confirmed = '1';
+      if (form.requestSubmit) { form.requestSubmit(submitter || undefined); } else { form.submit(); }
+      setTimeout(function () { delete form.dataset.confirmed; }, 0);
+    });
+  }, true);
+})();
+
+// Back to top: the arrow appears after the page is scrolled down, and returns to the top when clicked
+document.addEventListener('DOMContentLoaded', function () {
+  var btn = document.getElementById('back-to-top');
+  if (!btn) { return; }
+  function toggle() { btn.classList.toggle('is-visible', window.scrollY > 400); }
+  window.addEventListener('scroll', toggle, { passive: true });
+  btn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  toggle();
+});

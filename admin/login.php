@@ -36,14 +36,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         tt_login($user);
         tt_audit('admin sign in', $user['email'], $user['id']);
-        if (strtolower($user['email']) === 'admin@toptunity.ph') {
-            if ($password === 'admin123') {
-                $_SESSION['admin_password_change_required'] = true;
-                header('Location: ' . $base_url . 'admin/account-settings.php');
-                exit;
-            }
-            $_SESSION['admin_password_verified'] = true;
-        }
         header('Location: ' . $base_url . 'admin/dashboard.php');
         exit;
     }
@@ -58,7 +50,7 @@ include '../includes/header.php';
     <div style="padding:2.2rem 2rem; background:#FFFFFF; border:1px solid var(--color-border-gray); border-radius:var(--radius-lg); box-shadow:0 10px 30px rgba(15,23,42,0.06);">
       <div style="text-align:center;">
         <a href="<?= e($base_url) ?>pages/index.php" class="brand-logo" style="justify-content:center;" aria-label="TopTunity home">
-          <img src="<?= e(tt_image_url($base_url, 'images/Logo/logo-wordmark-dark.svg')) ?>" alt="TopTunity" class="brand-logo__image">
+          <img src="<?= e(tt_image_url($base_url, 'images/Logo/logo-wordmark-dark.svg')) ?>" alt="TopTunity" class="brand-logo__image" style="object-position:center;">
         </a>
         <h1 style="font-size:1.4rem; font-weight:700; margin-top:1rem;">Admin Login</h1>
         <p style="font-size:0.78rem; color:var(--color-muted-gray); margin-top:0.25rem;">For the platform administrator only.</p>

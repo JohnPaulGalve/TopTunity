@@ -178,7 +178,7 @@ include '../includes/client-nav.php';
             <h3>Payment, revision and dispute rules</h3>
             <ul>
               <li>Fixed Price: the agreed amount is held after you deposit it and released when you approve the work.</li>
-              <li>A 10% platform service fee is deducted from the freelancer's payment.</li>
+              <li>A <?= (int) tt_service_fee() ?>% platform service fee is deducted from the freelancer's payment.</li>
               <li>Either side can file a dispute while the project is ongoing.</li>
               <li>All payments are simulated (no real money is used).</li>
             </ul>

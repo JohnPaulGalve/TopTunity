@@ -11,7 +11,7 @@ $active_client = "";
 $labels = [5 => 'Excellent', 4 => 'Very good', 3 => 'Good', 2 => 'Fair', 1 => 'Poor'];
 $rating = isset($_POST['rating']) ? max(1, min(5, (int) $_POST['rating'])) : 5;
 $text   = "I posted our ordering website project on a Monday and had twelve solid proposals by Wednesday. The match percentage helped me shortlist fast, and holding the payment until I approved the work gave me peace of mind.";
-if (!tt_is_demo_account()) { $text = ""; }
+if (!false) { $text = ""; }
 $mine = tt_my_platform_review();
 if ($mine) { $rating = (int) $mine['rating']; $text = $mine['body']; }
 $max    = 1000;

@@ -11,7 +11,7 @@ require_once __DIR__ . '/../includes/data.php';
 
 $cats = ['Web Development', 'Mobile App Development', 'Graphic Design', 'UI/UX Design', 'Writing and Content', 'Digital Marketing', 'Video and Animation', 'Data Entry and Admin'];
 $tints = ['#CCFBF1', '#FFEDD5', '#E0E7FF', '#FEF9C3'];
-$uid = (int) tt_current_user()['id'];
+$uid = (int) (tt_current_user()['id'] ?? 0);
 $pf = $_SESSION[tt_demo_session_key()]['portfolio'] ?? ['hidden' => [], 'edit' => []];
 
 // Samples saved in the database (real freelancers, and demo uploads for this session)
@@ -23,7 +23,7 @@ foreach (tt_attachments('portfolio', $uid) as $i => $f) {
 }
 // The demo samples stay as they are; Remove and Edit only change them for this session
 $sample_items = [];
-if (tt_is_demo_freelancer()) {
+if (false) {
     foreach (toptunity_freelancer(1)['portfolio'] as $sm) {
         $key = 'd' . md5($sm['title']);
         if (!empty($pf['hidden'][$key])) { continue; }

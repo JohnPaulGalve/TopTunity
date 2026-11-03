@@ -2,6 +2,7 @@
 /**
  * pages/guide.php - How TopTunity works, for clients and freelancers
  */
+require_once __DIR__ . '/../includes/data.php';
 $user_role = "public";
 $base_url  = "/TopTunity/";
 
@@ -27,7 +28,7 @@ $freelancer_steps = [
     ['Submit a Proposal', 'Send your offer and estimated completion time. One proposal per project.'],
     ['Accept the Project', 'Review the contract terms and accept the project offer to start.'],
     ['Submit Completed Work', 'Upload your deliverables (Fixed Price) or log your hours (Hourly).'],
-    ['Get Paid (minus service fee)', 'Payment, minus the 10% service fee, goes to your Earnings balance.'],
+    ['Get Paid (minus service fee)', 'Payment, minus the ' . tt_service_fee() . '% service fee, goes to your Earnings balance.'],
     ['Review the Client', 'Rate and review the client after the project is completed.'],
 ];
 ?>

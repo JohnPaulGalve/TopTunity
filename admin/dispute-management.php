@@ -1,7 +1,7 @@
 <?php
 /**
  * admin/dispute-management.php - Review disputes and record a decision (matches the Dispute Management design).
- * Decisions are persisted to live dispute records or isolated demo session state.
+ * Decisions are persisted to live dispute records.
  */
 $user_role     = "admin";
 $base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
@@ -12,7 +12,7 @@ require_once __DIR__ . '/../includes/data.php';
 $all  = toptunity_admin_disputes();
 $sel  = null;
 $want = isset($_GET['id']) ? $_GET['id'] : '';
-foreach ($all as $d) { if ($d['id'] === $want) { $sel = $d; } }
+foreach ($all as $d) { if ((string) $d['id'] === (string) $want) { $sel = $d; } }
 if (!$sel && $all) { $sel = $all[0]; }
 
 $errors = [];
@@ -54,7 +54,7 @@ include '../includes/client-nav.php';
       <tbody>
         <?php if (!$all): ?><tr><td colspan="7" class="muted" style="text-align:center; padding:1.2rem;">No disputes are available.</td></tr><?php endif; ?>
         <?php foreach ($all as $d): ?>
-          <tr class="<?= $sel && $d['id'] === $sel['id'] ? 'is-selected' : '' ?>">
+          <tr class="<?= $sel && (string) $d['id'] === (string) $sel['id'] ? 'is-selected' : '' ?>">
             <td><?= e($d['date']) ?></td>
             <td><strong><?= e($d['project']) ?></strong></td>
             <td><?= e($d['billing']) ?></td>

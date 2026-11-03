@@ -10,18 +10,16 @@ $active_client = "";
 require_once __DIR__ . '/../includes/data.php';
 
 $me   = toptunity_current_freelancer();
-$demo = tt_is_demo_freelancer();
-$f    = $demo ? toptunity_freelancer(1) : null;
 $rev  = toptunity_freelancer_reviews();
 
 $form = [
     'name'      => $me['name'],
-    'title'     => $demo ? $f['title'] : '',
-    'location'  => $demo ? $f['location'] : '',
-    'contact'   => $demo ? '+63 917 555 0199' : '',
-    'rate'      => $demo ? $f['rate'] : '',
-    'languages' => $demo ? $f['languages'] : '',
-    'about'     => $demo ? $f['about'][0] : '',
+    'title'     => '',
+    'location'  => '',
+    'contact'   => '',
+    'rate'      => '',
+    'languages' => '',
+    'about'     => '',
 ];
 $form = tt_apply_profile_form($form);
 $errors = [];
@@ -80,7 +78,7 @@ include '../includes/client-nav.php';
 <div class="two-col" style="margin-top:1.25rem;">
   <div class="stack">
     <section class="profile-card">
-      <?php $my_photo = tt_user_photo((int) tt_current_user()['id'], 'freelancer'); ?><?= tt_avatar_html($me, 96, $base_url) ?>
+      <?php $my_photo = tt_user_photo((int) (tt_current_user()['id'] ?? 0), 'freelancer'); ?><?= tt_avatar_html($me, 96, $base_url) ?>
       <h2><?= e($form['name']) ?></h2>
       <p><?= e($form['title']) ?></p>
       <form method="post" enctype="multipart/form-data" style="display:inline;">
@@ -109,7 +107,7 @@ include '../includes/client-nav.php';
         <strong><?= e($rev['avg']) ?></strong>
         <div><a href="my-reviews.php"><?= (int) $rev['total'] ?> reviews received →</a></div>
       </div>
-      <a href="<?= e($base_url) ?>pages/freelancer-profile.php?id=<?= 5000 + (int) tt_current_user()['id'] ?>" target="_blank" rel="noopener" class="btn btn--row-outline" style="width:100%; margin-top:0.9rem;"><?= icon('eye', 13) ?> Preview Profile</a>
+      <a href="<?= e($base_url) ?>pages/freelancer-profile.php?id=<?= 5000 + (int) (tt_current_user()['id'] ?? 0) ?>" target="_blank" rel="noopener" class="btn btn--row-outline" style="width:100%; margin-top:0.9rem;"><?= icon('eye', 13) ?> Preview Profile</a>
       <p class="muted" style="margin-top:0.6rem;">How clients and visitors see your profile.</p>
     </section>
   </div>

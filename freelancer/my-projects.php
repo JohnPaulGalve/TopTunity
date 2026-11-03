@@ -8,6 +8,14 @@ $base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 $active_client = "projects";
 
 require_once __DIR__ . '/../includes/data.php';
+tt_refresh_project_statuses();   // keeps Overdue in step with the deadline
+$rv = !empty($_GET['review']) ? tt_review_target((int) $_GET['review'] + 0 >= 1000 ? (int) $_GET['review'] : 1000 + (int) $_GET['review']) : null;
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['review_project'])) {
+    $review_error = tt_save_client_review((int) $_POST['review_project'], (int) ($_POST['rating'] ?? 0), $_POST['review'] ?? '');
+    tt_flash($review_error ? 'Could not post your review: ' . $review_error : 'Thank you. Your review of the client was posted.');
+    header('Location: ' . $base_url . 'freelancer/my-projects.php');
+    exit;
+}
 
 $all  = toptunity_freelancer_projects();
 $tabs = ['all' => 'All', 'offer' => 'Project Offers', 'ongoing' => 'Ongoing', 'overdue' => 'Overdue', 'completed' => 'Completed'];
@@ -26,12 +34,6 @@ if (!empty($_POST['respond'])) {
     header('Location: ' . $base_url . 'freelancer/my-projects.php');
     exit;
 }
-$rv = !empty($_GET['review']) ? tt_review_target((int) $_GET['review'] + 0 >= 1000 ? (int) $_GET['review'] : 1000 + (int) $_GET['review']) : null;
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['review_project'])) {
-    tt_save_client_review((int) $_POST['review_project'], (int) ($_POST['rating'] ?? 0), $_POST['review'] ?? '');
-    header('Location: ' . $base_url . 'freelancer/my-projects.php');
-    exit;
-}
 $offers = array_map(function ($r) {
     return ['id' => 1000 + (int) $r['id'], 'title' => $r['title'], 'client' => $r['client_name'],
             'client_company' => $r['client_company'] ?: '', 'type' => $r['billing_type'],
@@ -45,7 +47,7 @@ $rows   = array_values(array_filter($all, function ($p) use ($tab) {
 }));
 if ($tab === 'offer') { $rows = []; }
 
-$pill = ['ongoing' => 'Ongoing', 'overdue' => 'Overdue', 'completed' => 'Completed'];
+$pill = ['ongoing' => 'Ongoing', 'overdue' => 'Overdue', 'completed' => 'Completed', 'waiting' => 'Waiting for contract', 'cancelled' => 'Cancelled'];
 
 $page_title = "My Projects";
 include '../includes/header.php';
@@ -111,7 +113,7 @@ include '../includes/client-nav.php';
         <tr><th>Agreed amount</th><td>₱<?= number_format($o['budget']) ?></td></tr>
         <tr><th>Start date</th><td>Today, <?= e(date('M d, Y')) ?> (the day you accept)</td></tr>
         <tr><th>End date</th><td><?= e(date('M d, Y', strtotime($o['deadline']))) ?></td></tr>
-        <tr><th>Platform service fee</th><td>10% (– ₱<?= number_format($o['budget'] * 0.1) ?>) · you receive ₱<?= number_format($o['budget'] * 0.9) ?></td></tr>
+        <tr><th>Platform service fee</th><td><?= (int) tt_service_fee() ?>% (– ₱<?= number_format(tt_fee_for($o['budget'])) ?>) · you receive ₱<?= number_format($o['budget'] - tt_fee_for($o['budget'])) ?></td></tr>
       </table>
       <div class="note-box">
         <ul>
@@ -144,7 +146,7 @@ include '../includes/client-nav.php';
         <tr><th>Agreed amount</th><td>₱<?= number_format($o['budget']) ?></td></tr>
         <tr><th>Start date</th><td>Today, <?= e(date('M d, Y')) ?> (the day you accept)</td></tr>
         <tr><th>End date</th><td><?= e(date('M d, Y', strtotime($o['deadline']))) ?></td></tr>
-        <tr><th>Platform service fee</th><td>10% (– ₱<?= number_format($o['budget'] * 0.1) ?>) · you receive ₱<?= number_format($o['budget'] * 0.9) ?></td></tr>
+        <tr><th>Platform service fee</th><td><?= (int) tt_service_fee() ?>% (– ₱<?= number_format(tt_fee_for($o['budget'])) ?>) · you receive ₱<?= number_format($o['budget'] - tt_fee_for($o['budget'])) ?></td></tr>
       </table>
       <div class="note-box">
         <ul>
@@ -205,7 +207,7 @@ include '../includes/client-nav.php';
         </div>
       </div>
       <div class="project-row__actions">
-        <?php if ($p['status'] === 'completed'): ?>
+        <?php if ($p['status'] === 'completed' && !tt_review_done($p['id'], tt_current_user()['id'])): ?>
           <a href="my-projects.php?review=<?= (int) $p['id'] ?>#review-client" class="btn btn--review"><?= icon('star', 13) ?> Review Client</a>
         <?php endif; ?>
         <a href="project-details.php?id=<?= (int) $p['id'] ?>" class="btn--row-dark">View Details</a>
@@ -215,12 +217,12 @@ include '../includes/client-nav.php';
 </div>
 <?php endif; ?>
 
-<!-- Review Client popup -->
+
 <div class="modal-overlay" id="review-client" role="dialog" aria-modal="true" aria-labelledby="rc-title">
   <div class="modal">
     <div class="modal__head"><h2 id="rc-title">Review Client</h2><a href="#" class="modal__close" aria-label="Close"><?= icon('x', 18) ?></a></div>
-    <div class="modal__who"><?= avatar('#FFEDD5', '#1E293B', 'bun', 36) ?><div><?php if (tt_is_demo_freelancer()): ?><strong>Joy Bautista</strong><small>Bautista Bakeshop · Sari-Sari Store POS System</small><?php elseif ($rv): ?><strong><?= e($rv['client_name']) ?></strong><small><?= e($rv['project']['title']) ?></small><?php else: ?><strong>Your client</strong><small>Open this from a completed project</small><?php endif; ?></div></div>
-    <form method="post" action="my-projects.php?review=<?= (int) ($rv ? $rv['project']['id'] : 0) ?>#review-client">
+    <div class="modal__who"><?= avatar('#FFEDD5', '#1E293B', 'bun', 36) ?><div><?php if ($rv): ?><strong><?= e($rv['client_name']) ?></strong><small><?= e($rv['project']['title']) ?></small><?php else: ?><strong>Your client</strong><small>Open this from a completed project</small><?php endif; ?></div></div>
+    <form method="post" action="my-projects.php">
       <input type="hidden" name="review_project" value="<?= (int) ($rv ? $rv['project']['id'] + 1000 : 0) ?>">
       <p class="field-label" style="margin-top:1rem; font-size:0.78rem; font-weight:600;">Rating</p>
       <div class="star-pick">
@@ -238,7 +240,6 @@ include '../includes/client-nav.php';
     </form>
   </div>
 </div>
-
 </main>
 
 <?php include '../includes/footer.php'; ?>

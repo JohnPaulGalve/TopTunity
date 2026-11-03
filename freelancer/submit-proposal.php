@@ -13,6 +13,21 @@ tt_handle_favourite();
 $id      = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $project = null;
 $db_project = $id >= 1000 ? tt_db_project($id) : null;
+// Client box: everything here comes from the database
+$client_box = null;
+if ($db_project) {
+    $cid = (int) $db_project['client_id'];
+    $cp = db()->prepare('SELECT company, location FROM client_profiles WHERE user_id = ?');
+    $cp->execute([$cid]);
+    $cprof = $cp->fetch() ?: ['company' => '', 'location' => ''];
+    $pc = db()->prepare('SELECT COUNT(*) FROM projects WHERE client_id = ?');
+    $pc->execute([$cid]);
+    $rv = db()->prepare("SELECT r.body, u.name FROM reviews r JOIN users u ON u.id = r.reviewer_id WHERE r.reviewee_id = ? AND r.reviewer_id <> ? ORDER BY r.id DESC LIMIT 1");
+    $rv->execute([$cid, $cid]);
+    $client_box = ['company' => (string) $cprof['company'], 'location' => (string) $cprof['location'],
+                   'posted' => (int) $pc->fetchColumn(), 'quote' => $rv->fetch() ?: null,
+                   'avatar' => tt_user_avatar_asset($cid)];
+}
 if ($db_project) {
     $cl = db()->prepare('SELECT name FROM users WHERE id = ?');
     $cl->execute([(int) $db_project['client_id']]);
@@ -27,13 +42,19 @@ if ($db_project) {
     foreach (toptunity_listing() as $row) { if ((int) $row['id'] === $id) { $project = $row; } }
 }
 $full    = ($project && !$db_project) ? toptunity_project($id) : null;
-$skills  = tt_is_demo_freelancer() ? toptunity_freelancer(1)['skills'] : [];
+$skills  = tt_freelancer_saved_skills() ?: [];
 $req     = $full ? $full['skills'] : [];
 $match   = tt_skill_match($req, $skills);
 $have    = count(array_intersect(array_map('strtolower', $req), array_map('strtolower', $skills)));
 $sent    = false;
+// A project stops taking proposals once a freelancer is selected, or its status is no longer Open
+$closed_label = null;
+if ($db_project && ($db_project['status'] !== 'open' || !empty($db_project['freelancer_id']) || ($db_project['contract_status'] ?? 'none') !== 'none')) {
+    $closed_label = ['ongoing' => 'Ongoing', 'overdue' => 'Overdue', 'completed' => 'Completed', 'cancelled' => 'Cancelled', 'closed' => 'Closed']
+                    [$db_project['status']] ?? (!empty($db_project['freelancer_id']) ? 'Freelancer selected' : 'Closed');
+}
 if ($db_project) {
-    foreach (tt_db_proposals($id) as $pr) { if ((int) $pr['freelancer_id'] === (int) tt_current_user()['id']) { $sent = true; } }
+    foreach (tt_db_proposals($id) as $pr) { if ((int) $pr['freelancer_id'] === (int) (tt_current_user()['id'] ?? 0)) { $sent = true; } }
 } else {
     foreach (toptunity_freelancer_proposals() as $pr) { if ($project && (int) $pr['project_id'] === $id) { $sent = true; } }
 }
@@ -53,6 +74,8 @@ if ($project && !$sent && !$deadline_passed && $_SERVER['REQUEST_METHOD'] === 'P
     $form['days']   = isset($_POST['days']) ? (int) $_POST['days'] : '';
     $form['letter'] = trim(isset($_POST['letter']) ? $_POST['letter'] : '');
     if ($form['offer'] === '' || $form['offer'] < 1)  { $errors[] = $project['type'] === 'hourly' ? 'Enter your hourly rate.' : 'Enter your total price.'; }
+    if ($form['offer'] !== '' && $project['type'] === 'hourly' && ($form['offer'] < 100 || $form['offer'] > 5000)) { $errors[] = 'Your hourly rate must be between ₱100 and ₱5,000.'; }
+    if ($form['offer'] !== '' && $project['type'] !== 'hourly' && ($form['offer'] < 500 || $form['offer'] > 1000000)) { $errors[] = 'Your total price must be between ₱500 and ₱1,000,000.'; }
     if ($form['days'] === '' || $form['days'] < 1)    { $errors[] = 'Enter how many days you need to finish.'; }
     if (mb_strlen($form['letter']) < 50)              { $errors[] = 'Your cover letter should be at least 50 characters.'; }
     if (!$errors && $db_project) {
@@ -85,7 +108,11 @@ include '../includes/client-nav.php';
       <h1><?= e($project['title']) ?></h1>
     </div>
     <div class="head-meta" style="margin-top:0.5rem;">
-      <span class="status status--open">Open</span>
+      <?php if ($closed_label): ?>
+        <span class="status status--open"><?= e($closed_label) ?></span>
+      <?php else: ?>
+        <span class="status status--open">Open</span>
+      <?php endif; ?>
       <span class="pill pill--blue"><?= $project['type'] === 'hourly' ? 'Hourly' : 'Fixed Price' ?></span>
       <span class="match-chip"><?= icon('zap', 11) ?> <?= (int) $match ?>% match</span>
     </div>
@@ -145,6 +172,8 @@ include '../includes/client-nav.php';
           <p>You can see its status in My Proposals.</p>
           <a href="my-proposals.php" class="btn btn--dark">View My Proposals</a>
         </div>
+      <?php elseif ($closed_label): ?>
+        <p class="muted">This project is no longer taking proposals<?= $closed_label === 'Freelancer selected' ? ' because a freelancer has already been selected' : ' (' . e(strtolower($closed_label)) . ')' ?>.</p>
       <?php elseif ($deadline_passed): ?>
         <p class="muted">The deadline for this project has passed, so proposals are closed.</p>
       <?php else: ?>
@@ -167,7 +196,7 @@ include '../includes/client-nav.php';
           </div>
           <?php $est = (int) ($form['offer'] ?: ($project['amount'] ?: 0)); ?>
           <div class="note-box" style="margin-top:0;">
-            <?= icon('dollar', 14) ?> At ₱<?= number_format($est ?: $project['amount']) ?><?= $project['type'] === 'hourly' ? '/hr' : '' ?> you receive ₱<?= number_format(round(($est ?: $project['amount']) * 0.9)) ?><?= $project['type'] === 'hourly' ? '/hr' : '' ?> after the 10% platform service fee.
+            <?= icon('dollar', 14) ?> At ₱<?= number_format($est ?: $project['amount']) ?><?= $project['type'] === 'hourly' ? '/hr' : '' ?> you receive ₱<?= number_format(($est ?: $project['amount']) - tt_fee_for($est ?: $project['amount'])) ?><?= $project['type'] === 'hourly' ? '/hr' : '' ?> after the <?= (int) tt_service_fee() ?>% platform service fee.
           </div>
           <label class="check-label" style="margin-top:0.9rem;"><input type="checkbox" name="confirm" value="1"> I confirm that I can deliver this project within the time I offered.</label>
           <div class="form-actions" style="justify-content:space-between;">
@@ -183,12 +212,14 @@ include '../includes/client-nav.php';
     <section class="box" style="margin-top:0;">
       <h2>Client Profile</h2>
       <div class="modal__who" style="margin-top:0.6rem;">
-        <?= avatar('#CCFBF1', '#1E293B', 'glasses', 40) ?>
-        <div><strong><?= e($project['client']) ?></strong><small>BrightPath Tutorial Center</small></div>
+        <?= $client_box && $client_box['avatar'] ? tt_avatar_image_html($client_box['avatar'], 40, $base_url, $project['client']) : avatar('#CCFBF1', '#1E293B', 'short', 40) ?>
+        <div><strong><?= e($project['client']) ?></strong><?php if ($client_box && $client_box['company'] !== ''): ?><small><?= e($client_box['company']) ?></small><?php endif; ?></div>
       </div>
-      <div class="kv"><span>Projects posted</span><strong>7</strong></div>
-      <div class="kv"><span>Location</span><strong>Mandaluyong City</strong></div>
-      <p class="muted" style="margin-top:0.6rem; font-style:italic;">“Clear requirements and pays on time. Very approachable.” — Bea Lim</p>
+      <div class="kv"><span>Projects posted</span><strong><?= (int) ($client_box['posted'] ?? 0) ?></strong></div>
+      <div class="kv"><span>Location</span><strong><?= e($client_box['location'] ?? '') ?></strong></div>
+      <?php if (!empty($client_box['quote'])): ?>
+      <p class="muted" style="margin-top:0.6rem; font-style:italic;">“<?= e($client_box['quote']['body']) ?>” — <?= e($client_box['quote']['name']) ?></p>
+      <?php endif; ?>
       <a href="report-dispute.php?tab=report<?= $db_project ? '&amp;user=' . (int) $db_project['client_id'] : '' ?>" class="btn btn--row-outline" style="width:100%; margin-top:0.7rem;"><?= icon('flag', 13) ?> Report User</a>
     </section>
     <?php if ($project['type'] === 'hourly'): ?>

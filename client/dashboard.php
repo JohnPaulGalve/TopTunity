@@ -117,7 +117,7 @@ foreach ($projects as $p) {
                   <strong><?= e($p['title']) ?></strong>
                   <small><?= $p['type'] === 'hourly' ? 'Hourly · ₱' . number_format($p['rate']) . '/hr' : 'Fixed Price · ₱' . number_format($p['budget']) ?></small>
                 </td>
-                <td><span class="status status--<?= e($p['status']) ?>"><?= e(toptunity_status_label($p['status'])) ?></span></td>
+                <td><?php [$sl, $sc] = tt_project_status_view($p['status'], $p['contract_status'] ?? 'none', !empty($p['freelancer_id'])); ?><span class="status status--<?= e($sc) ?>"><?= e($sl) ?></span></td>
                 <td class="num"><?= (int) $p['proposals'] ?></td>
                 <td class="num"><?= e(date('M d, Y', strtotime($p['deadline']))) ?></td>
                 <td class="num"><a href="<?= e($base_url) ?>client/project-tracking.php?id=<?= (int) $id ?>" class="view">View</a></td>

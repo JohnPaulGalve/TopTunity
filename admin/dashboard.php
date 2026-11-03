@@ -1,7 +1,6 @@
 <?php
 /**
  * admin/dashboard.php - Platform statistics (matches the Admin Dashboard design).
- * Demo admins see presentation data; real admins see figures derived from live records.
  */
 $user_role     = "admin";
 $base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
@@ -17,14 +16,7 @@ $total   = max(1, $clients + $freel);
 $fee = tt_service_fee();
 $money = toptunity_admin_money_totals();
 $notes = array_slice(toptunity_admin_notifications(), 0, 5);
-if (tt_is_demo_admin()) {
-    $status_bars = [['Open', 118], ['Past Deadline', 14], ['Ongoing', 86], ['Overdue', 9], ['Completed', 203], ['Closed', 21], ['Cancelled', 12]];
-    $months  = ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'];
-    $held    = [215, 250, 275, 305, 345, 487];
-    $release = [150, 180, 200, 230, 260, 285];
-    $fees    = [15, 18, 20, 23, 25, 29];
-    $user_growth = '+124 this month';
-} else {
+{
     $status_labels = ['open' => 'Open', 'past' => 'Past Deadline', 'ongoing' => 'Ongoing', 'overdue' => 'Overdue',
                       'completed' => 'Completed', 'closed' => 'Closed', 'suspended' => 'Suspended', 'cancelled' => 'Cancelled'];
     $status_counts = array_fill_keys(array_keys($status_labels), 0);
@@ -34,8 +26,8 @@ if (tt_is_demo_admin()) {
     $status_bars = [];
     foreach ($status_labels as $status => $label) { $status_bars[] = [$label, $status_counts[$status]]; }
 
-    $user_growth_stmt = db()->prepare('SELECT COUNT(*) FROM users WHERE created_at >= ? AND email NOT IN (?, ?, ?)');
-    $user_growth_stmt->execute([date('Y-m-01'), 'andrea.santos@kapelokal.ph', 'miguel.reyes@example.com', 'demo.admin@toptunity.ph']);
+    $user_growth_stmt = db()->prepare('SELECT COUNT(*) FROM users WHERE created_at >= ?');
+    $user_growth_stmt->execute([date('Y-m-01')]);
     $user_growth = '+' . number_format((int) $user_growth_stmt->fetchColumn()) . ' this month';
 
     $months = $month_keys = [];

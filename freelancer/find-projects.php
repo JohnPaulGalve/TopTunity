@@ -10,11 +10,14 @@ require_once __DIR__ . '/../includes/data.php';
 tt_handle_favourite();
 
 $categories = toptunity_category_catalog();
-$skills     = tt_is_demo_freelancer() ? toptunity_freelancer(1)['skills'] : [];
+$skills     = false ? toptunity_freelancer(1)['skills'] : [];
 
 $q    = isset($_GET['q']) ? trim($_GET['q']) : '';
 $cat  = isset($_GET['category']) && in_array($_GET['category'], $categories, true) ? $_GET['category'] : '';
 $type = isset($_GET['type']) && in_array($_GET['type'], ['fixed', 'hourly'], true) ? $_GET['type'] : '';
+$group = isset($_GET['group']) ? $_GET['group'] : '';
+$work_groups = tt_work_groups();
+if (!in_array($group, $work_groups, true)) { $group = ''; }
 $page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
 $per_page = 5;
 
@@ -30,7 +33,8 @@ foreach (toptunity_listing() as $row) {
 $counts = array_fill_keys($categories, 0);
 foreach ($rows as $r) { $counts[$r['category']] = ($counts[$r['category']] ?? 0) + 1; }
 
-$results = array_values(array_filter($rows, function ($r) use ($q, $cat, $type) {
+$results = array_values(array_filter($rows, function ($r) use ($q, $cat, $type, $group) {
+    if ($group !== '' && ($r['group'] ?? '') !== $group) { return false; }
     if ($cat !== '' && $r['category'] !== $cat) { return false; }
     if ($type !== '' && $r['type'] !== $type) { return false; }
     if ($q !== '' && stripos($r['title'] . ' ' . $r['desc'] . ' ' . implode(' ', $r['skills']), $q) === false) { return false; }
@@ -47,9 +51,11 @@ $total_pages = max(1, (int) ceil($total / $per_page));
 $page        = min($page, $total_pages);
 $visible     = array_slice($results, ($page - 1) * $per_page, $per_page);
 
-function fp_url($q, $cat, $type, $page = 1)
+function fp_url($q, $cat, $type, $page = 1, $group = null)
 {
+    $group = $group ?? ($GLOBALS['group'] ?? '');
     $p = [];
+    if ($group !== '') { $p['group'] = $group; }
     if ($q !== '')    { $p['q'] = $q; }
     if ($cat !== '')  { $p['category'] = $cat; }
     if ($type !== '') { $p['type'] = $type; }
@@ -81,6 +87,13 @@ include '../includes/client-nav.php';
 <div class="browse-layout" style="margin-top:1.25rem;">
   <aside class="filter-card">
     <h2>Filter Projects</h2>
+    <p class="section-tag" style="margin:0.4rem 0 0.3rem;">Type of work</p>
+    <nav class="filter-list">
+      <a href="<?= e(fp_url($q, $cat, $type, 1, '')) ?>" class="filter-option <?= $group === '' ? 'is-active' : '' ?>"><span class="check"><?= icon('check') ?></span> Any Type</a>
+      <?php foreach ($work_groups as $wg): ?>
+        <a href="<?= e(fp_url($q, $cat, $type, 1, $wg)) ?>" class="filter-option <?= $group === $wg ? 'is-active' : '' ?>"><span class="check"><?= icon('check') ?></span> <?= e($wg) ?>s</a>
+      <?php endforeach; ?>
+    </nav>
     <p class="section-tag" style="margin:0.4rem 0 0.3rem;">Category</p>
     <nav class="filter-list">
       <a href="<?= e(fp_url($q, '', $type)) ?>" class="filter-option <?= $cat === '' ? 'is-active' : '' ?>"><span class="check"><?= icon('check') ?></span> All Categories</a>
@@ -98,7 +111,7 @@ include '../includes/client-nav.php';
   </aside>
 
   <section>
-    <?php if ($recommended && $q === '' && $cat === '' && $type === ''): ?>
+    <?php if ($recommended && $q === '' && $cat === '' && $type === '' && $group === ''): ?>
       <div class="recommend-band">
         <div class="recommend-band__head">
           <h2><?= icon('zap', 16) ?> Recommended Projects</h2>

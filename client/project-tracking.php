@@ -13,7 +13,7 @@ require_once __DIR__ . '/../includes/data.php';
 $projects = toptunity_client_projects();
 $id       = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $p        = isset($projects[$id]) ? $projects[$id] : null;
-$public   = $p ? toptunity_client_detail($id) : null;
+$public   = $p ? array_merge(['intro' => '', 'desc' => '', 'features' => [], 'closing' => '', 'files' => [], 'skills' => []], $p) : null;
 $db_mode = $p && $id >= 1000;
 $dbprops = $db_mode ? tt_db_proposals($id) : [];
 $db_row  = $db_mode ? tt_db_project($id) : null;
@@ -22,7 +22,7 @@ $sample_state = null;
 if (!$db_mode && $p) {
     $sample_state = tt_sample_state($id);
     $db_row = [
-        'client_id' => 0, 'budget' => (int) ($p['budget'] ?? 0), 'billing_type' => $p['type'] ?? 'fixed',
+        'client_id' => 0, 'status' => $p['status'] ?? 'open', 'budget' => (int) ($p['budget'] ?? 0), 'billing_type' => $p['type'] ?? 'fixed',
         'hourly_rate' => (int) ($p['rate'] ?? 0), 'max_hours' => (int) ($p['max_hours'] ?? 0), 'deadline' => $p['deadline'],
         'freelancer_id' => $sample_state['freelancer_id'], 'contract_status' => $sample_state['contract_status'],
         'agreed_amount' => (int) $sample_state['agreed'], 'contract_sent_at' => $sample_state['sent_at'],
@@ -35,6 +35,18 @@ if (!$db_mode && $p) {
 
 if ($p && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $act = $_POST['action'] ?? '';
+    if ($db_mode && $act === 'rate_freelancer') {
+        $rate_error = tt_save_freelancer_review($id, (int) ($_POST['rating'] ?? 0), $_POST['review'] ?? '');
+        tt_flash($rate_error ? 'Could not post your rating: ' . $rate_error : 'Thank you. Your rating of the freelancer was posted.');
+        header('Location: ' . $base_url . 'client/project-tracking.php?id=' . $id . '#review');
+        exit;
+    }
+    if ($db_mode && $act === 'cancel_project') {
+        $err = tt_db_cancel_project($id);
+        tt_flash($err ? 'Could not cancel: ' . $err : 'The project was cancelled. Any held deposit has been refunded.');
+        header('Location: ' . $base_url . 'client/project-tracking.php?id=' . $id);
+        exit;
+    }
     if ($db_mode && in_array($act, ['approve_hours', 'reject_hours'], true)) {
         $err = tt_db_review_work_log($id, (int) ($_POST['work_log'] ?? 0),
                                     $act === 'approve_hours' ? 'approved' : 'rejected',
@@ -86,7 +98,9 @@ if ($p && $_SERVER['REQUEST_METHOD'] === 'POST') {
             $err = tt_db_select_freelancer($id, (int) ($_POST['proposal'] ?? 0));
             $ok  = 'Freelancer selected. Now send the contract.';
         } elseif ($act === 'send') {
-            $err = tt_db_send_contract($id, (int) ($_POST['agreed'] ?? 0));
+            $rate  = (int) ($_POST['hourly_rate'] ?? 0);
+            $hours = (int) ($_POST['max_hours']   ?? 0);
+            $err = tt_db_send_contract($id, (int) ($_POST['agreed'] ?? 0), $rate ?: null, $hours ?: null);
             $ok = 'Contract sent. The freelancer must accept it before the project starts.';
         }
     }
@@ -166,7 +180,7 @@ include '../includes/client-nav.php';
     <div>
       <h1><?= e($p['title']) ?></h1>
       <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; margin:0.5rem 0 0.2rem;">
-        <span class="status status--<?= e($p['status']) ?>"><?= e(!empty($db_row['freelancer_id']) && ($db_row['contract_status'] ?? 'none') === 'none' && $p['status'] === 'open' ? 'Freelancer Selected' : toptunity_status_label($p['status'])) ?></span>
+        <?php [$sl, $sc] = tt_project_status_view($p['status'], $db_row['contract_status'] ?? 'none', !empty($db_row['freelancer_id'])); ?><span class="status status--<?= e($sc) ?>"><?= e($sl) ?></span>
         <span class="status" style="background:var(--color-chip-bg); color:var(--color-slate-text);"><?= $p['type'] === 'hourly' ? 'Hourly' : 'Fixed Price' ?></span>
       </div>
       <div class="head-meta">
@@ -192,7 +206,12 @@ include '../includes/client-nav.php';
     <div class="head-actions">
       <?php if ($p['status'] === 'open'): ?>
         <a href="post-project.php?id=<?= (int) $id ?>" class="btn btn--row-outline"><?= icon('edit', 13) ?> Edit Project</a>
-        <a href="project-tracking.php?id=<?= (int) $id ?>&amp;action=cancel" class="btn btn--danger-outline"><?= icon('x-circle', 13) ?> Cancel Project</a>
+      <?php endif; ?>
+      <?php if (in_array($p['status'], ['open', 'ongoing', 'overdue'], true)): ?>
+        <form method="post" action="project-tracking.php?id=<?= (int) $id ?>" style="display:inline;" data-confirm="Cancel this project? Any held deposit is refunded to you. This cannot be undone.">
+          <input type="hidden" name="action" value="cancel_project">
+          <button type="submit" class="btn btn--danger-outline"><?= icon('x-circle', 13) ?> Cancel Project</button>
+        </form>
       <?php endif; ?>
       <?php if ($assigned && in_array($p['status'], ['ongoing', 'overdue', 'completed'], true)): ?>
         <a href="messages.php" class="btn btn--row-outline"><?= icon('message', 13) ?> Message Freelancer</a>
@@ -201,7 +220,7 @@ include '../includes/client-nav.php';
         <a href="report-dispute.php?id=<?= (int) $id ?>" class="btn btn--danger-outline"><?= icon('flag', 13) ?> File a Dispute</a>
       <?php endif; ?>
       <?php if ($p['status'] === 'completed' && $assigned): ?>
-        <a href="#review" class="btn btn--review"><?= icon('star', 13) ?> Review Freelancer</a>
+        <?php if (!tt_review_done($id, tt_current_user()['id'])): ?><a href="#review" class="btn btn--review"><?= icon('star', 13) ?> Review Freelancer</a><?php endif; ?>
       <?php endif; ?>
     </div>
   </div>
@@ -221,7 +240,7 @@ include '../includes/client-nav.php';
       <div class="stack">
         <section class="box">
           <h2>Description</h2>
-          <p><?= e($public['intro'] ?? $public['desc']) ?></p>
+          <p><?= e($public['intro'] ?? $public['desc'] ?? '') ?></p>
           <?php if (!empty($public['features'])): ?>
             <ul class="dots">
               <?php foreach ($public['features'] as $item): ?><li><?= e($item) ?></li><?php endforeach; ?>
@@ -323,7 +342,7 @@ include '../includes/client-nav.php';
         <?php foreach ($props as $pr):
           $is_selected = $p['freelancer'] && $pr['name'] === $p['freelancer'] && $db_row['contract_status'] !== 'none';
           $can_select  = $db_row['status'] === 'open' && $db_row['contract_status'] === 'none'
-              && empty($db_row['freelancer_id']) && in_array($pr['status'], ['pending', 'not_selected'], true);
+              && empty($db_row['freelancer_id']) && in_array($pr['status'] ?? 'pending', ['pending', 'not_selected'], true);
         ?>
           <article class="proposal-card">
             <div class="proposal-top">
@@ -432,7 +451,8 @@ include '../includes/client-nav.php';
       $label  = ['none' => 'Pending · not sent', 'pending' => 'Pending · awaiting freelancer', 'active' => 'Active', 'declined' => 'Declined', 'completed' => 'Completed'][$cs] ?? 'Pending';
       $agreed = $db_row['contract_status'] === 'none' ? (int) $db_row['budget'] : (int) $db_row['agreed_amount'];
       if ($db_row['billing_type'] === 'hourly') { $agreed = (int) $db_row['hourly_rate'] * (int) $db_row['max_hours']; }
-      $fee = round($agreed * 0.10);
+      $fee = tt_fee_for($agreed);
+      $is_hourly = $db_row['billing_type'] === 'hourly';
     ?>
       <div class="two-col">
         <section class="box" style="margin-top:0;">
@@ -445,10 +465,40 @@ include '../includes/client-nav.php';
           <?php if ($cs === 'none'): ?>
           <form method="post" action="project-tracking.php?id=<?= (int) $id ?>&amp;tab=contract" data-requires-checkbox="agree" style="margin-top:1rem;">
             <input type="hidden" name="action" value="send">
+            <?php if ($is_hourly): ?>
+            <div class="field" style="margin-top:0;">
+              <label>Billing Type</label>
+              <div class="input" style="display:flex; align-items:center;">Hourly</div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.9rem;">
+              <div class="field" style="margin-top:0;">
+                <label for="hourly_rate_display">Hourly Rate (₱/hr)</label>
+                <div class="input-prefix"><span>₱</span><input class="input" id="hourly_rate_display" name="hourly_rate" type="number" min="1" value="<?= (int) $db_row['hourly_rate'] ?>" required oninput="updateBudget()"></div>
+              </div>
+              <div class="field" style="margin-top:0;">
+                <label for="max_hours_display">Maximum Hours</label>
+                <input class="input" id="max_hours_display" name="max_hours" type="number" min="1" value="<?= (int) $db_row['max_hours'] ?>" required oninput="updateBudget()">
+              </div>
+            </div>
+            <p style="font-size:0.78rem; color:var(--color-muted-gray); margin:0.35rem 0 0.6rem;">
+              Budget (computed automatically): <strong id="budget_preview">₱<?= number_format((int) $db_row['hourly_rate'] * (int) $db_row['max_hours']) ?></strong>
+            </p>
+            <input type="hidden" id="agreed_hidden" name="agreed" value="<?= (int) $agreed ?>">
+            <script>
+            function updateBudget() {
+              var rate  = parseFloat(document.getElementById('hourly_rate_display').value) || 0;
+              var hours = parseFloat(document.getElementById('max_hours_display').value) || 0;
+              var total = Math.round(rate * hours);
+              document.getElementById('budget_preview').textContent = '\u20B1' + total.toLocaleString('en-US');
+              document.getElementById('agreed_hidden').value = total;
+            }
+            </script>
+            <?php else: ?>
             <div class="field" style="margin-top:0;">
               <label for="agreed">Agreed amount (₱)</label>
               <div class="input-prefix"><span>₱</span><input class="input" id="agreed" name="agreed" type="number" min="1" value="<?= (int) $agreed ?>" required></div>
             </div>
+            <?php endif; ?>
             <div class="field">
               <label>End Date (project deadline)</label>
               <div class="input" style="display:flex; align-items:center;"><?= e(date('M d, Y', strtotime($db_row['deadline']))) ?></div>
@@ -464,8 +514,8 @@ include '../includes/client-nav.php';
             <div class="terms-box">
               <h3>Payment, revision and dispute rules</h3>
               <ul>
-                <li>Fixed Price: the agreed amount is held after you deposit it and released when you approve the work.</li>
-                <li>A 10% platform service fee is deducted from the freelancer's payment.</li>
+                <li><?= $is_hourly ? 'Hourly: you log approved hours; you are billed on the End Date, up to the maximum hours. Unused amounts are refunded.' : 'Fixed Price: the agreed amount is held after you deposit it and released when you approve the work.' ?></li>
+                <li>A <?= (int) tt_service_fee() ?>% platform service fee is deducted from the freelancer's payment.</li>
                 <li>Either side can file a dispute while the project is ongoing.</li>
                 <li>All payments are simulated (no real money is used).</li>
               </ul>
@@ -495,10 +545,32 @@ include '../includes/client-nav.php';
           </section>
           <section class="box">
             <h2>Summary</h2>
-            <div class="kv"><span>Agreed amount</span><strong>₱<?= number_format($agreed) ?></strong></div>
-            <div class="kv"><span>Platform service fee (10%)</span><strong style="color:var(--color-error-base);">– ₱<?= number_format($fee) ?></strong></div>
-            <div class="kv"><span>Freelancer receives</span><strong style="color:var(--color-teal-dark);">₱<?= number_format($agreed - $fee) ?></strong></div>
+            <div class="kv"><span>Agreed amount</span><strong id="summary_agreed">₱<?= number_format($agreed) ?></strong></div>
+            <div class="kv"><span>Platform service fee (<?= (int) tt_service_fee() ?>%)</span><strong id="summary_fee" style="color:var(--color-error-base);">– ₱<?= number_format($fee) ?></strong></div>
+            <div class="kv"><span>Freelancer receives</span><strong id="summary_net" style="color:var(--color-teal-dark);">₱<?= number_format($agreed - $fee) ?></strong></div>
           </section>
+          <?php if ($is_hourly && $cs === 'none'): ?>
+          <script>
+          (function() {
+            var FEE_RATE = <?= (int) tt_service_fee() ?>; // platform fee setting, in percent
+            var origUpdate = window.updateBudget;
+            window.updateBudget = function() {
+              if (origUpdate) origUpdate();
+              var rate  = parseFloat(document.getElementById('hourly_rate_display') ? document.getElementById('hourly_rate_display').value : 0) || 0;
+              var hours = parseFloat(document.getElementById('max_hours_display')   ? document.getElementById('max_hours_display').value   : 0) || 0;
+              var total = Math.round(rate * hours);
+              var fee   = Math.round(total * FEE_RATE / 100);
+              var fmt = function(n) { return '₱' + n.toLocaleString('en-US'); };
+              var sa = document.getElementById('summary_agreed');
+              var sf = document.getElementById('summary_fee');
+              var sn = document.getElementById('summary_net');
+              if (sa) sa.textContent = fmt(total);
+              if (sf) sf.textContent = '– ' + fmt(fee);
+              if (sn) sn.textContent = fmt(total - fee);
+            };
+          })();
+          </script>
+          <?php endif; ?>
           <section class="box">
             <h2>Questions about the terms?</h2>
             <p class="muted" style="font-size:0.78rem; margin:0.4rem 0 0.8rem;">Talk to the freelancer before sending.</p>
@@ -523,13 +595,13 @@ include '../includes/client-nav.php';
         if ($w['status'] === 'pending')  { $hours_pending += $w['hours']; }
       }
       $hours_total = $hours_approved + $hours_pending;
-      $elapsed = (strtotime('2026-10-08') - strtotime($tracking['start'])) / 86400;
+      $elapsed = (strtotime(date('Y-m-d')) - strtotime($tracking['start'])) / 86400;
       $total_span = max(1, (strtotime($p['deadline']) - strtotime($tracking['start'])) / 86400);
       $progress = min(100, (int) round($elapsed / $total_span * 100));
     ?>
       <!-- Current status -->
       <section class="box" style="margin-top:1.25rem;">
-        <div class="status-banner">Current Status: <strong>Project Started</strong>
+        <div class="status-banner">Current Status: <strong><?= e($steps[$tracking['current_step']]) ?></strong>
           <span style="margin-left:auto; font-size:0.74rem;">Freelancer · <?= $tfd ? e($tfd['name']) : '—' ?></span>
         </div>
         <ol class="tracking-steps">
@@ -591,7 +663,7 @@ include '../includes/client-nav.php';
               <span>Maximum Hours <strong><?= (int) $tracking['max_hours'] ?> h</strong></span>
               <span>To be billed <strong>₱<?= number_format($hours_approved * ($p['rate'] ?? 0)) ?></strong></span>
             </div>
-            <p class="note-line">Billed on the End Date: approved hours × hourly rate (minus 10% service fee) goes to the freelancer. The unused deposit is refunded. Hours not reviewed by the End Date count as approved.</p>
+            <p class="note-line">Billed on the End Date: approved hours × hourly rate (minus <?= (int) tt_service_fee() ?>% service fee) goes to the freelancer. The unused deposit is refunded. Hours not reviewed by the End Date count as approved.</p>
           </section>
 
           <!-- Submitted work -->
@@ -659,14 +731,18 @@ include '../includes/client-nav.php';
 
           <section class="box">
             <h2>Deposit Project Amount</h2>
-            <div class="kv"><span>Status</span><span class="status status--held">Held</span></div>
+            <div class="kv"><span>Status</span><span class="status status--<?= e(['paid' => 'released', 'refunded' => 'open'][$tracking['deposit_status']] ?? 'held') ?>"><?= e(['paid' => 'Released', 'refunded' => 'Refunded', 'held' => 'Held'][$tracking['deposit_status']] ?? 'Held') ?></span></div>
             <div class="kv"><span>Amount</span><strong>₱<?= number_format($tracking['deposit']) ?></strong></div>
             <a href="billing.php" class="btn btn--row-outline" style="margin-top:0.7rem; width:100%;">View in Billing and Payments</a>
           </section>
 
           <section class="box">
             <h2>Contract</h2>
-            <div class="kv"><span>Status</span><span class="status status--open">Active</span></div>
+            <?php
+              $cstate = $p['status'] === 'cancelled' ? 'cancelled' : (($db_row['contract_status'] ?? 'none'));
+              $clabel = ['cancelled' => ['Cancelled', 'cancelled'], 'completed' => ['Completed', 'released'], 'active' => ['Active', 'ongoing'], 'pending' => ['Awaiting acceptance', 'pending']][$cstate] ?? ['No contract yet', 'open'];
+            ?>
+            <div class="kv"><span>Status</span><span class="status status--<?= e($clabel[1]) ?>"><?= e($clabel[0]) ?></span></div>
             <div class="kv"><span>Agreed</span><strong><?= e(date('M d, Y', strtotime($tracking['start']))) ?></strong></div>
             <a href="project-tracking.php?id=<?= (int) $id ?>&amp;tab=contract<?= $tf ? '&amp;freelancer=' . (int) $tf['id'] : '' ?>" class="btn btn--row-outline" style="margin-top:0.7rem; width:100%;">View Contract →</a>
           </section>
@@ -703,6 +779,29 @@ include '../includes/client-nav.php';
     <?php endif; ?>
   <?php endif; ?>
 
+<?php endif; ?>
+
+
+<?php if ($db_mode && $p['status'] === 'completed' && !empty($db_row['freelancer_id']) && !tt_review_done($id, tt_current_user()['id'])): ?>
+<section class="box" id="review" style="margin-top:1rem;">
+  <h2>Rate the freelancer</h2>
+  <p class="muted">Your rating appears on the freelancer's profile. You can rate once per project.</p>
+  <form method="post" action="project-tracking.php?id=<?= (int) $id ?>#review" style="margin-top:0.8rem;">
+    <input type="hidden" name="action" value="rate_freelancer">
+    <p class="field-label" style="font-size:0.78rem; font-weight:600;">Rating</p>
+    <div class="star-pick">
+      <?php for ($s = 5; $s >= 1; $s--): ?>
+        <input type="radio" id="rf-<?= $s ?>" name="rating" value="<?= $s ?>" <?= $s === 5 ? 'checked' : '' ?>>
+        <label for="rf-<?= $s ?>" aria-label="<?= $s ?> stars">★</label>
+      <?php endfor; ?>
+    </div>
+    <div class="field">
+      <label for="rf-text" style="font-size:0.78rem; font-weight:600;">Review</label>
+      <textarea id="rf-text" name="review" class="input" rows="4" minlength="10" required style="height:auto; padding:0.7rem; font-size:0.8rem;" placeholder="How did the freelancer do the work?"></textarea>
+    </div>
+    <button type="submit" class="btn btn--primary">Submit rating</button>
+  </form>
+</section>
 <?php endif; ?>
 
 </main>

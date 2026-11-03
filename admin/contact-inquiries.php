@@ -12,7 +12,7 @@ require_once __DIR__ . '/../includes/data.php';
 $all  = toptunity_admin_inquiries();
 $want = isset($_GET['id']) ? $_GET['id'] : '';
 $sel  = null;
-foreach ($all as $i) { if ($i['id'] === $want) { $sel = $i; } }
+foreach ($all as $i) { if ((string) $i['id'] === (string) $want) { $sel = $i; } }
 if (!$sel && $all) { $sel = $all[0]; }
 
 $errors = [];
@@ -23,11 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $sel) {
         if ($err) { $errors[] = $err; }
     } elseif (mb_strlen($reply) < 10) {
         $errors[] = 'Write a reply of at least 10 characters.';
-    } else {
-        $_SESSION['demo_admin_inquiry_replies'][$sel['id']] = $reply;
     }
     if (!$errors) {
-        tt_flash(!empty($sel['real']) ? 'Your response was saved. Send it to the contact by email.' : 'Demo response recorded for preview.');
+        tt_flash('Your response was saved. Send it to the contact by email.');
         header('Location: ' . $base_url . 'admin/contact-inquiries.php?id=' . urlencode($sel['id']));
         exit;
     }
@@ -54,7 +52,7 @@ include '../includes/client-nav.php';
         <tbody>
           <?php if (!$all): ?><tr><td colspan="4" class="muted" style="text-align:center; padding:1.2rem;">No contact inquiries are available.</td></tr><?php endif; ?>
           <?php foreach ($all as $i): ?>
-            <tr class="<?= $i['id'] === $sel['id'] ? 'is-selected' : '' ?>">
+            <tr class="<?= (string) $i['id'] === (string) $sel['id'] ? 'is-selected' : '' ?>">
               <td><?= e($i['date']) ?></td>
               <td><a href="contact-inquiries.php?id=<?= e($i['id']) ?>"><strong><?= e($i['name']) ?></strong></a></td>
               <td><?= e($i['subject']) ?></td>

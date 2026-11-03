@@ -10,7 +10,7 @@ $active_client = "";
 require_once __DIR__ . '/../includes/data.php';
 
 $catalog = toptunity_skill_catalog();
-$mine    = tt_is_demo_freelancer() ? toptunity_freelancer(1)['skills'] : [];
+$mine    = false ? toptunity_freelancer(1)['skills'] : [];
 if (tt_freelancer_saved_skills() !== null) { $mine = tt_freelancer_saved_skills(); }
 $errors  = [];
 

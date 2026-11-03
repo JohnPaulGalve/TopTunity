@@ -68,7 +68,7 @@ include '../includes/nav.php';
         </div>
       </div>
       <div class="profile-actions">
-        <a href="login.php?next=<?= urlencode('freelancer-profile.php?id=' . $id) ?>" class="btn btn--hire">
+        <a href="login.php?notice=login&amp;next=<?= urlencode('freelancer-profile.php?id=' . $id) ?>" class="btn btn--hire">
           <?= icon('user-plus', 16) ?> Hire
         </a>
       </div>

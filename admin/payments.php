@@ -8,7 +8,7 @@ $active_client = "payments";
 
 require_once __DIR__ . '/../includes/data.php';
 
-$rows   = toptunity_admin_payments();   // demo rows plus real records
+$rows   = toptunity_admin_payments();
 $totals = toptunity_admin_money_totals();
 $cls    = ['held' => 'held', 'released' => 'released', 'paid' => 'released', 'refunded' => 'refunded'];
 
@@ -20,7 +20,7 @@ include '../includes/client-nav.php';
 <div class="welcome-row">
   <div>
     <h1>Payments and Transactions</h1>
-    <p class="subtle">All transactions are simulated (dummy). No real money is used.</p>
+    <p class="subtle">All transactions are simulated. No real money is used.</p>
   </div>
 </div>
 
@@ -39,7 +39,7 @@ include '../includes/client-nav.php';
         <?php foreach ($rows as $r): ?>
           <tr>
             <td><?= e($r['date']) ?></td>
-            <td><strong><?= e($r['project']) ?></strong><small><?= e($r['billing']) ?><?= !empty($r['sample']) ? ' · Sample' : '' ?></small></td>
+            <td><strong><?= e($r['project']) ?></strong><small><?= e($r['billing']) ?><?= !empty($r['reference']) ? ' · ' . e($r['reference']) : '' ?><?= !empty($r['method']) ? ' · ' . e($r['method'] === 'bank' ? 'Bank transfer' : ucfirst($r['method'])) : '' ?><?= !empty($r['transfer_ref']) ? ' · Client ref ' . e($r['transfer_ref']) : '' ?></small></td>
             <td><?= e($r['type']) ?></td>
             <td class="num">₱<?= number_format($r['amount']) ?></td>
             <td class="num"><?= !empty($r['fee']) ? '₱' . number_format($r['fee']) : '—' ?></td>

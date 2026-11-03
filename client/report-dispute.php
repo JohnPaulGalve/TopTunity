@@ -21,9 +21,7 @@ $tab = isset($_GET['tab']) && isset($tabs[$_GET['tab']]) ? $_GET['tab'] : 'repor
 $people = [];
 foreach (tt_contracted_freelancers_for_client() as $cf) { $people[5000 + (int) $cf['id']] = $cf['name'] . ' · Freelancer'; }
 foreach (toptunity_client_threads() as $thread_id => $thread) {
-    if (empty($thread['real'])) { $people['sample-' . $thread_id] = $thread['name'] . ' · Freelancer'; }
 }
-if (tt_is_demo_account()) { $people['sample-daniel'] = 'Daniel Ocampo · Freelancer'; }
 $pre_user = (string) ($_GET['user'] ?? '');
 if (!isset($people[$pre_user])) { $pre_user = ''; }
 
@@ -37,12 +35,6 @@ $open_projects = array_filter(toptunity_client_projects(), function ($p) {
 $pre_project = 0;
 
 $submissions = tt_my_submissions();
-if (tt_is_demo_account()) {
-    $submissions = array_merge($submissions, [
-        ['type' => 'Report', 'about' => 'Daniel Ocampo · Freelancer', 'reason' => 'Abusive or inappropriate messages', 'date' => 'Sep 28, 2026', 'status' => 'pending'],
-        ['type' => 'Dispute', 'about' => 'Menu Board and Cup Sleeve Design', 'reason' => 'Freelancer stopped responding', 'date' => 'Sep 12, 2026', 'status' => 'released'],
-    ]);
-}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $up  = tt_handle_uploads('attachments');
@@ -56,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $err = tt_db_report($_POST['type'] ?? 'User', $_POST['reason'] ?? '', $_POST['details'] ?? '', $reported_id);
         if (!$err && strtolower($_POST['type'] ?? 'User') === 'user' && isset($people[$selected]) && $reported_id === 0) {
             db()->prepare('UPDATE reports SET details = CONCAT(?, "\\n", details) WHERE id = ? AND reporter_id = ?')
-                ->execute(['Reported user: ' . $people[$selected], (int) $GLOBALS['tt_last']['id'], (int) tt_current_user()['id']]);
+                ->execute(['Reported user: ' . $people[$selected], (int) $GLOBALS['tt_last']['id'], (int) (tt_current_user()['id'] ?? 0)]);
         }
         $ok  = 'Your report was sent to the administrator.';
     } else {
@@ -158,7 +150,7 @@ include '../includes/client-nav.php';
 
       <div class="field">
         <label for="details">Details</label>
-        <textarea id="details" name="details" class="input" rows="4" minlength="10" style="height:auto; padding:0.8rem; line-height:1.6; font-size:0.82rem;" required><?= $tab === 'report' && tt_is_demo_account() ? 'After I chose another freelancer, this user sent me several rude messages and demanded I cancel my project. Screenshots attached.' : '' ?></textarea>
+        <textarea id="details" name="details" class="input" rows="4" minlength="10" style="height:auto; padding:0.8rem; line-height:1.6; font-size:0.82rem;" required><?= $tab === 'report' && false ? 'After I chose another freelancer, this user sent me several rude messages and demanded I cancel my project. Screenshots attached.' : '' ?></textarea>
       </div>
 
       <div class="field">

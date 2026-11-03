@@ -18,6 +18,12 @@ $current = $p ? ($p['status'] === 'completed' ? 8 : ($p['status'] === 'offer' ? 
 
 $errors = [];
 $log    = ['date' => date('Y-m-d'), 'hours' => '', 'task' => ''];
+if ($p && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['review_project'])) {
+    $review_error = tt_save_client_review((int) $_POST['review_project'], (int) ($_POST['rating'] ?? 0), $_POST['review'] ?? '');
+    tt_flash($review_error ? 'Could not post your review: ' . $review_error : 'Thank you. Your review of the client was posted.');
+    header('Location: ' . $base_url . 'freelancer/project-details.php?id=' . (int) $id);
+    exit;
+}
 if ($p && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['log_hours'])) {
     $log['date']  = isset($_POST['date']) ? $_POST['date'] : '';
     $log['hours'] = isset($_POST['hours']) ? $_POST['hours'] : '';
@@ -27,7 +33,7 @@ if ($p && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['log_hours'])) {
     if ($log['hours'] === '' || (float) $log['hours'] < 0.5 || (float) $log['hours'] > 12) { $errors[] = 'Enter between 0.5 and 12 hours.'; }
     if (mb_strlen($log['task']) < 5)                                          { $errors[] = 'Describe the task (at least 5 characters).'; }
     if (!$errors && $id < 1000) {
-        $errors[] = 'Work logs are available for active projects in your account, not sample projects.';
+        $errors[] = 'Work logs are available for active projects in your account.';
     }
     if (!$errors) {
         $err = tt_db_log_hours($id, $log['date'], (float) $log['hours'], $log['task']);
@@ -77,7 +83,7 @@ include '../includes/client-nav.php';
 <?php else:
   $is_hourly = $p['type'] === 'hourly';
   $days_left = max(0, (int) ceil((strtotime($p['deadline']) - strtotime(date('Y-m-d'))) / 86400));
-  $status_label = ['ongoing' => 'Ongoing', 'overdue' => 'Overdue', 'completed' => 'Completed', 'offer' => 'Project Offer'][$p['status']];
+  $status_label = ['ongoing' => 'Ongoing', 'overdue' => 'Overdue', 'completed' => 'Completed', 'offer' => 'Project Offer', 'waiting' => 'Waiting for contract', 'cancelled' => 'Cancelled'][$p['status']] ?? 'Waiting for contract';
 ?>
 
 <div class="head-row">
@@ -169,7 +175,7 @@ include '../includes/client-nav.php';
     <section class="box" id="submit-work">
       <h2>Submit Completed Work</h2>
       <?php if ($p['status'] === 'completed'): ?>
-        <p class="muted">The work was approved and the payment was released.</p>
+        <p class="muted">Delivery status: <strong><?= e(ucfirst($p['submitted']['status'] ?? 'approved')) ?></strong> · Payment released: <strong>₱<?= number_format($p['released'] ?? 0) ?></strong></p>
       <?php else: ?>
         <form method="post" action="project-details.php?id=<?= (int) $id ?>" style="margin-top:0.6rem;" enctype="multipart/form-data">
           <div class="field" style="margin-top:0;">
@@ -210,25 +216,27 @@ include '../includes/client-nav.php';
       <h2>Project Dates</h2>
       <div class="kv"><span>Start Date</span><strong><?= e(date('M d, Y', strtotime($p['start']))) ?></strong></div>
       <div class="kv"><span>End Date</span><strong><?= e(date('M d, Y', strtotime($p['deadline']))) ?></strong></div>
-      <div class="kv"><span>Days left</span><strong style="color:var(--color-vibrant-teal);"><?= $days_left ?> days</strong></div>
+      <div class="kv"><span>Days left</span><strong style="color:var(--color-vibrant-teal);"><?= $p['status'] === 'completed' ? 'Finished' : $days_left . ' days' ?></strong></div>
     </section>
     <section class="box">
       <h2>Contract</h2>
-      <div class="kv"><span>Status</span><span class="status status--ongoing">Active</span></div>
+      <div class="kv"><span>Status</span><span class="status status--<?= $p['contract_status'] === 'completed' ? 'released' : ($p['contract_status'] === 'pending' ? 'pending' : 'ongoing') ?>"><?= e($p['contract_status'] === 'completed' ? 'Completed' : ($p['contract_status'] === 'pending' ? 'Awaiting acceptance' : 'Active')) ?></span></div>
       <div class="kv"><span>Agreed on</span><strong><?= e(date('M d, Y', strtotime($p['start']))) ?></strong></div>
       <a href="#contract-details" class="btn btn--row-outline" style="width:100%; margin-top:0.7rem;">View Contract →</a>
     </section>
     <?php if ($is_hourly): ?>
     <section class="box">
       <h2>Hourly Billing</h2>
-      <p class="muted">On the End Date, approved hours × your hourly rate, minus the 10% platform fee, goes to your Earnings balance.</p>
+      <p class="muted">On the End Date, approved hours × your hourly rate, minus the <?= (int) tt_service_fee() ?>% platform fee, goes to your Earnings balance.</p>
     </section>
     <?php endif; ?>
     <?php if ($p['status'] === 'completed'): ?>
     <section class="box">
       <h2>Work Approved</h2>
       <p class="muted">The project is completed and the payment was released (minus the service fee).</p>
+      <?php if ($p['status'] === 'completed' && !tt_review_done($id, tt_current_user()['id'])): ?>
       <a href="#review-client" class="btn btn--review" style="width:100%; margin-top:0.7rem;"><?= icon('star', 13) ?> Review Client</a>
+      <?php endif; ?>
     </section>
     <?php endif; ?>
     <section class="warn-box">
@@ -251,14 +259,19 @@ include '../includes/client-nav.php';
   <div class="kv"><span>Agreed amount</span><strong>₱<?= number_format($p['budget']) ?></strong></div>
   <div class="kv"><span>Start date</span><strong><?= e(date('M d, Y', strtotime($p['start']))) ?></strong></div>
   <div class="kv"><span>End date</span><strong><?= e(date('M d, Y', strtotime($p['deadline']))) ?></strong></div>
-  <p class="note-line">The platform service fee is 10%. Payments are simulated and no real money is moved.</p>
+  <p class="note-line">The platform service fee is <?= (int) tt_service_fee() ?>%. Payments are simulated and no real money is moved.</p>
 </section>
 
+
+<?php endif; ?>
+
+<?php if ($p && $p['status'] === 'completed' && !tt_review_done($id, tt_current_user()['id'])): ?>
 <div class="modal-overlay" id="review-client" role="dialog" aria-modal="true" aria-labelledby="rc2-title">
   <div class="modal">
     <div class="modal__head"><h2 id="rc2-title">Review Client</h2><a href="#" class="modal__close" aria-label="Close"><?= icon('x', 18) ?></a></div>
     <div class="modal__who"><?= avatar('#FFEDD5', '#1E293B', 'bun', 36) ?><div><strong><?= e($p['client']) ?></strong><small><?= e($p['client_company']) ?> · <?= e($p['title']) ?></small></div></div>
     <form method="post" action="project-details.php?id=<?= (int) $id ?>">
+        <input type="hidden" name="review_project" value="<?= (int) $id ?>">
       <p style="margin-top:1rem; font-size:0.78rem; font-weight:600;">Rating</p>
       <div class="star-pick">
         <?php for ($s = 5; $s >= 1; $s--): ?>
@@ -273,9 +286,7 @@ include '../includes/client-nav.php';
     </form>
   </div>
 </div>
-
 <?php endif; ?>
-
 </main>
 
 <?php include '../includes/footer.php'; ?>

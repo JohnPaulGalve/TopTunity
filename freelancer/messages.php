@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message'])) {
         if ($err) { tt_flash('Could not send: ' . $err); }
         header('Location: ' . $base_url . 'freelancer/messages.php?with=' . (int) $t['with']);
     } else {
-        $dk = 'demo_' . (int) tt_current_user()['id'];
+        $dk = 'demo_' . (int) (tt_current_user()['id'] ?? 0);
         $key = ($threads[$open]['name'] ?? '') . '|' . ($threads[$open]['project_id'] ?? 0);
         $body = trim($_POST['message']);
         if ($body !== '' && mb_strlen($body) <= 2000) {
@@ -37,7 +37,7 @@ elseif (!empty($threads[$open])) { tt_mark_demo_thread_read($threads[$open]); $t
 
 $thread  = $threads ? $threads[$open] : null;
 if ($thread && empty($thread['real'])) {
-    $dk = 'demo_' . (int) tt_current_user()['id'];
+    $dk = 'demo_' . (int) (tt_current_user()['id'] ?? 0);
     $key = $thread['name'] . '|' . ($thread['project_id'] ?? 0);
     if (!empty($_SESSION[$dk][$key])) { $thread['messages'] = array_merge($thread['messages'], $_SESSION[$dk][$key]); }
 }

@@ -69,6 +69,9 @@ include '../includes/nav.php';
         <h2>Login</h2>
         <p>Welcome back. Log in to your client or freelancer account.</p>
 
+        <?php if (isset($_GET['notice']) && $_GET['notice'] === 'login' && !$error): ?>
+          <div class="form-alert" role="status" style="background:#EFF6FF; border-color:#BFDBFE; color:#1E3A8A;"><?= icon('info', 15) ?> Please log in or register first to hire, message, or submit a proposal.</div>
+        <?php endif; ?>
         <?php if ($error): ?>
           <div class="form-alert" role="alert"><?= icon('alert', 15) ?> <?= e($error) ?></div>
         <?php endif; ?>

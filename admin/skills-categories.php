@@ -9,15 +9,7 @@ $active_client = "skills";
 require_once __DIR__ . '/../includes/data.php';
 
 $catalog = toptunity_skill_catalog();
-if (tt_is_demo_admin()) {
-    $demo_catalog = tt_demo_admin_catalog_state();
-    $skill_rows = array_map(static function ($name) {
-        return ['name' => $name, 'count' => 0];
-    }, array_keys($demo_catalog['skills']));
-    $categories = array_map(static function ($name) {
-        return ['name' => $name, 'count' => 0];
-    }, $demo_catalog['categories']);
-} else {
+{
     $skill_rows = db()->query('SELECT s.name, COUNT(DISTINCT fs.freelancer_id) AS count
                                FROM skills s LEFT JOIN freelancer_skills fs ON fs.skill_id = s.id
                                GROUP BY s.id, s.name ORDER BY s.name')->fetchAll();
@@ -87,7 +79,7 @@ include '../includes/client-nav.php';
                 <button type="submit" class="catalog-save">Save</button>
               </form>
             </details>
-            <form method="post" action="skills-categories.php" onsubmit="return confirm('Remove this skill and its freelancer/project associations?');">
+            <form method="post" action="skills-categories.php" data-confirm="Remove this skill and its freelancer/project associations?">
               <input type="hidden" name="catalog_action" value="remove">
               <input type="hidden" name="kind" value="skill">
               <input type="hidden" name="name" value="<?= e($s['name']) ?>">
@@ -130,7 +122,7 @@ include '../includes/client-nav.php';
                 <button type="submit" class="catalog-save">Save</button>
               </form>
             </details>
-            <form method="post" action="skills-categories.php" onsubmit="return confirm('Remove this category? Projects and skills using it will become uncategorized.');">
+            <form method="post" action="skills-categories.php" data-confirm="Remove this category? Projects and skills using it will become uncategorized.">
               <input type="hidden" name="catalog_action" value="remove">
               <input type="hidden" name="kind" value="category">
               <input type="hidden" name="name" value="<?= e($c['name']) ?>">

@@ -20,11 +20,6 @@ $people = [];
 foreach (tt_contracted_clients_for_freelancer() as $client) {
     $people[(int) $client['id']] = $client['name'] . ' · Client';
 }
-if (tt_is_demo_freelancer()) {
-    foreach (['Rico Manalastas', 'Andrea Santos', 'Grace Aquino', 'Mark Francisco', 'Ramon Villanueva', 'Joy Bautista'] as $sample_name) {
-        $people['sample-' . count($people)] = $sample_name . ' · Client';
-    }
-}
 $pre_user = (int) ($_GET['user'] ?? 0);
 if (!isset($people[$pre_user])) { $pre_user = 0; }
 $reasons_report  = ['Fake or misleading project posting', 'Abusive or inappropriate messages', 'Asked for payment outside TopTunity', 'Other'];
@@ -32,7 +27,7 @@ $reasons_dispute = ['Client did not approve or pay for work', 'Scope changed wit
 $projects = array_filter(toptunity_freelancer_projects(), function ($p) { return $p['status'] === 'ongoing'; });
 
 // Real projects this freelancer is working on (added to the sample list)
-$me_id = (int) tt_current_user()['id'];
+$me_id = (int) (tt_current_user()['id'] ?? 0);
 foreach (db()->query("SELECT id, title FROM projects WHERE freelancer_id = $me_id AND status IN ('ongoing','overdue')")->fetchAll() as $rp) {
     $projects[] = ['id' => 1000 + (int) $rp['id'], 'title' => $rp['title'], 'status' => 'ongoing'];
 }
@@ -76,12 +71,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $submissions = tt_my_submissions();
-if (tt_is_demo_freelancer()) {
-    $submissions = array_merge($submissions, [
-        ['type' => 'Report', 'about' => 'Rico Manalastas · Client', 'reason' => 'Fake or misleading project posting', 'date' => 'Oct 02, 2026', 'status' => 'pending'],
-        ['type' => 'Dispute', 'about' => 'Tuition Payment Tracker', 'reason' => 'Payment or release problem', 'date' => 'Sep 12, 2026', 'status' => 'released'],
-    ]);
-}
 
 $page_title = "Report and Dispute";
 include '../includes/header.php';
@@ -166,7 +155,7 @@ include '../includes/client-nav.php';
 
       <div class="field">
         <label for="details">Details <span class="req">*</span></label>
-        <textarea id="details" name="details" class="input" rows="4" minlength="20" style="height:auto; padding:0.8rem; line-height:1.6; font-size:0.82rem;" required><?= $tab === 'report' && tt_is_demo_freelancer() ? 'The client asked me to pay a "registration fee" through GCash before sending the contract. This looks like a scam.' : '' ?></textarea>
+        <textarea id="details" name="details" class="input" rows="4" minlength="20" style="height:auto; padding:0.8rem; line-height:1.6; font-size:0.82rem;" required><?= $tab === 'report' && false ? 'The client asked me to pay a "registration fee" through GCash before sending the contract. This looks like a scam.' : '' ?></textarea>
       </div>
 
       <div class="field">

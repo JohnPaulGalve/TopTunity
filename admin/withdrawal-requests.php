@@ -8,24 +8,23 @@ $active_client = "withdraw";
 
 require_once __DIR__ . '/../includes/data.php';
 
-$all  = toptunity_admin_withdrawals();   // real requests first, then demo rows
+$all  = toptunity_admin_withdrawals();
 $want = isset($_GET['id']) ? (string) $_GET['id'] : '';
 $sel  = null;
 foreach ($all as $w) {
-    if ((string) $w['id'] === $want && (empty($w['sample']) || tt_is_demo_admin())) { $sel = $w; break; }
+    if ((string) (string) $w['id'] === (string) $want) { $sel = $w; break; }
 }
 if (!$sel) {
     foreach ($all as $w) {
-        if (empty($w['sample']) || tt_is_demo_admin()) { $sel = $w; break; }
+        $sel = $w; break;
     }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $sel) {
     $action = $_POST['action'] ?? '';
     $reason = trim($_POST['reason'] ?? '');
-    $err = !empty($sel['sample'])
-        ? tt_admin_process_demo_withdrawal((string) $sel['id'], (string) $action, $reason)
-        : tt_db_process_withdrawal((int) $sel['id'], (string) $action, $reason);
+    $reference = trim($_POST['reference'] ?? '');
+    $err = tt_db_process_withdrawal((int) preg_replace('/\D/', '', (string) $sel['id']), (string) $action, $reason, $reference);
     tt_flash($err ? 'Could not continue: ' . $err : ($action === 'process' ? 'Marked as processed.' : 'Rejected. The amount returns to the freelancer\'s balance.'));
     header('Location: ' . $base_url . 'admin/withdrawal-requests.php?id=' . urlencode((string) $sel['id']));
     exit;
@@ -79,10 +78,15 @@ include '../includes/client-nav.php';
       <div class="kv"><span>Account</span><strong><?= e($sel['account']) ?></strong></div>
       <div class="kv"><span>Amount</span><strong>₱<?= number_format($sel['amount']) ?></strong></div>
       <div class="kv"><span>Status</span><span class="status status--<?= e($cls[$sel['status']]) ?>"><?= e(ucfirst($sel['status'])) ?></span></div>
+      <?php if ($sel['status'] === 'processed'): ?>
+        <div class="kv"><span>Processed on</span><strong><?= e($sel['processed']) ?></strong></div>
+        <div class="kv"><span>Reference</span><strong><?= e($sel['reference']) ?></strong></div>
+      <?php endif; ?>
 
       <?php if ($sel['status'] === 'pending'): ?>
         <form method="post" action="withdrawal-requests.php?id=<?= (int) $sel['id'] ?>" style="margin-top:0.9rem;">
-          <button type="submit" name="action" value="process" class="btn btn--green btn--block">✓ Mark as Processed</button>
+          <input class="input" name="reference" minlength="4" maxlength="30" placeholder="Transfer reference (from GCash or bank)" style="height:38px;">
+          <button type="submit" name="action" value="process" class="btn btn--green btn--block" style="margin-top:0.6rem;">✓ Mark as Processed</button>
           <input class="input" name="reason" minlength="10" placeholder="Reason, if rejecting (10+ characters)" style="margin-top:0.6rem; height:38px;">
           <button type="submit" name="action" value="reject" class="btn btn--block" style="margin-top:0.5rem; background:#FFFFFF; border:1px solid var(--color-error-base); color:var(--color-error-base);">Mark as Rejected</button>
         </form>

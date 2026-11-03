@@ -9,6 +9,18 @@ $active_client = "activity";
 
 require_once __DIR__ . '/../includes/data.php';
 
+// Clear the whole activity log (administrator only). A new entry records who cleared it.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['clear_log'])) {
+    $me = tt_current_user();
+    if ($me && $me['role'] === 'admin') {
+        db()->exec('DELETE FROM audit_logs');
+        tt_audit('clear activity log', 'all entries deleted by ' . $me['name'], (int) $me['id']);
+        tt_flash('The activity log was cleared.');
+    }
+    header('Location: ' . $base_url . 'admin/activity-log.php');
+    exit;
+}
+
 $q       = trim(isset($_GET['q']) ? $_GET['q'] : '');
 $action  = isset($_GET['action']) ? $_GET['action'] : '';
 $from    = isset($_GET['from']) ? $_GET['from'] : '';
@@ -79,8 +91,13 @@ include '../includes/client-nav.php';
   <label style="flex:1 1 150px;">To
     <input class="input" type="date" name="to" value="<?= e($to) ?>">
   </label>
-  <button class="btn btn--primary" type="submit">Apply</button>
-  <a class="btn btn--row-outline" href="activity-log.php">Clear</a>
+  <div style="display:flex; gap:0.5rem; align-items:center; flex:0 0 auto;">
+    <button class="btn btn--primary" type="submit">Apply</button>
+    <button class="btn btn--row-outline" type="submit" form="clear-activity-log">Clear</button>
+  </div>
+</form>
+<form id="clear-activity-log" method="post" action="activity-log.php" data-confirm="Clear the whole activity log? All entries will be permanently deleted.">
+  <input type="hidden" name="clear_log" value="1">
 </form>
 
 <p class="subtle"><?= (int) $total ?> record<?= $total === 1 ? '' : 's' ?> found.</p>

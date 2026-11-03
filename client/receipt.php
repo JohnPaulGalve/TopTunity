@@ -8,7 +8,7 @@ if (!$payment_id || !$user || $user['role'] !== 'client') {
     exit('Receipt not found.');
 }
 
-$stmt = db()->prepare("SELECT pay.id, pay.type, pay.amount, pay.service_fee, pay.status, pay.created_at, p.title
+$stmt = db()->prepare("SELECT pay.id, pay.type, pay.amount, pay.service_fee, pay.status, pay.created_at, pay.reference, pay.method, pay.transfer_ref, p.title
                        FROM payments pay
                        JOIN projects p ON p.id = pay.project_id
                        WHERE pay.id = ? AND p.client_id = ?");
@@ -26,10 +26,13 @@ $safe = static function ($value) {
 $receipt = [
     'TopTunity payment receipt',
     'Receipt ID: TT-' . (int) $payment['id'],
+    'Payment reference: ' . ($payment['reference'] ?: 'Not applicable'),
     'Date: ' . date('M d, Y H:i', strtotime($payment['created_at'])),
     'Client: ' . $safe($user['name']),
     'Project: ' . $safe($payment['title']),
     'Transaction: ' . ($labels[$payment['type']] ?? 'Payment'),
+    'Method: ' . ($payment['method'] ? ($payment['method'] === 'bank' ? 'Bank transfer' : ucfirst($payment['method'])) : 'Not recorded'),
+    'Client payment reference: ' . ($payment['transfer_ref'] ?: 'Not recorded'),
     'Status: ' . ucfirst($payment['status']),
     'Amount: PHP ' . number_format((int) $payment['amount']),
     'Service fee: PHP ' . number_format((int) $payment['service_fee']),

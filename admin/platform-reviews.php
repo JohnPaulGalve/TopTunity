@@ -1,7 +1,7 @@
 <?php
 /**
  * admin/platform-reviews.php - Platform reviews, published as testimonials or hidden (matches the design).
- * Publishing and hiding are saved to live records or isolated demo session state.
+ * Publishing and hiding are saved to live records.
  */
 $user_role     = "admin";
 $base_url      = (rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $all  = toptunity_admin_reviews();
 $want = isset($_GET['id']) ? $_GET['id'] : '';
 $sel  = null;
-foreach ($all as $r) { if ($r['id'] === $want) { $sel = $r; } }
+foreach ($all as $r) { if ((string) $r['id'] === (string) $want) { $sel = $r; } }
 if (!$sel && $all) { $sel = $all[0]; }
 $cls = ['new' => 'pending', 'published' => 'released', 'hidden' => 'cancelled'];
 
@@ -49,7 +49,7 @@ include '../includes/client-nav.php';
         <tbody>
           <?php if (!$all): ?><tr><td colspan="5" class="muted" style="text-align:center; padding:1.2rem;">No reviews are available.</td></tr><?php endif; ?>
           <?php foreach ($all as $r): ?>
-            <tr class="<?= $sel && $r['id'] === $sel['id'] ? 'is-selected' : '' ?>">
+            <tr class="<?= $sel && (string) $r['id'] === (string) $sel['id'] ? 'is-selected' : '' ?>">
               <td><?= e($r['date']) ?></td>
               <td><a href="platform-reviews.php?id=<?= e($r['id']) ?>" style="display:flex; align-items:center; gap:0.5rem;"><?= avatar('#CCFBF1', '#1E293B', 'short', 26) ?><strong><?= e($r['user']) ?></strong></a></td>
               <td><?= e($r['role']) ?></td>

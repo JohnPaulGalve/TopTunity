@@ -15,21 +15,25 @@ require_once __DIR__ . '/../includes/data.php';
 $all_projects = toptunity_listing();
 
 $categories = toptunity_category_catalog();
+$work_groups = tt_work_groups();
 
 /* ---------- Read & validate query string ---------- */
 $q        = isset($_GET['q']) ? trim($_GET['q']) : '';
 $cat      = isset($_GET['category']) ? $_GET['category'] : '';
-$sort     = isset($_GET['sort']) ? $_GET['sort'] : 'newest';
+$group    = isset($_GET['group']) ? $_GET['group'] : '';
+$sort     = isset($_GET['sort']) ? $_GET['sort'] : 'best';
 $page     = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
 $per_page = 5;
 
 $sort_options = [
+    'best'        => 'Best match',
     'newest'      => 'Newest',
     'budget_high' => 'Highest budget',
     'deadline'    => 'Nearest deadline',
 ];
 if (!in_array($cat, $categories, true))   { $cat = ''; }
-if (!isset($sort_options[$sort]))         { $sort = 'newest'; }
+if (!in_array($group, $work_groups, true)) { $group = ''; }
+if (!isset($sort_options[$sort]))         { $sort = 'best'; }
 
 /* ---------- Helpers local to this page ---------- */
 function project_total($p)
@@ -50,7 +54,8 @@ function browse_url($state, $override = [])
     $params = array_merge($state, $override);
     if ($params['q'] === '')           { unset($params['q']); }
     if ($params['category'] === '')    { unset($params['category']); }
-    if ($params['sort'] === 'newest')  { unset($params['sort']); }
+    if ($params['group'] === '')       { unset($params['group']); }
+    if ($params['sort'] === 'best')    { unset($params['sort']); }
     if ((int) $params['page'] <= 1)    { unset($params['page']); }
     $qs = http_build_query($params);
     return 'browse-projects.php' . ($qs ? '?' . $qs : '');
@@ -58,12 +63,19 @@ function browse_url($state, $override = [])
 
 /* ---------- Category counts (always across all projects) ---------- */
 $counts = array_fill_keys($categories, 0);
+$group_counts = array_fill_keys($work_groups, 0);
+foreach ($all_projects as $p) {
+    if (isset($group_counts[$p['group'] ?? ''])) { $group_counts[$p['group']]++; }
+}
 foreach ($all_projects as $p) {
     if (isset($counts[$p['category']])) { $counts[$p['category']]++; }
 }
 
 /* ---------- Filter ---------- */
-$results = array_values(array_filter($all_projects, function ($p) use ($q, $cat) {
+$results = array_values(array_filter($all_projects, function ($p) use ($q, $cat, $group) {
+    if ($group !== '' && ($p['group'] ?? '') !== $group) {
+        return false;
+    }
     if ($cat !== '' && $p['category'] !== $cat) {
         return false;
     }
@@ -77,7 +89,9 @@ $results = array_values(array_filter($all_projects, function ($p) use ($q, $cat)
 }));
 
 /* ---------- Sort ---------- */
+foreach ($results as $i => $r) { $results[$i]['score'] = tt_project_score($r, $q); }
 usort($results, function ($a, $b) use ($sort) {
+    if ($sort === 'best')        { return $b['score'] <=> $a['score']; }
     if ($sort === 'budget_high') { return project_total($b) <=> project_total($a); }
     if ($sort === 'deadline')    { return strtotime($a['deadline']) <=> strtotime($b['deadline']); }
     return $a['age_h'] <=> $b['age_h']; // newest first
@@ -92,7 +106,7 @@ $visible     = array_slice($results, $offset, $per_page);
 $from        = $total ? $offset + 1 : 0;
 $to          = $offset + count($visible);
 
-$state = ['q' => $q, 'category' => $cat, 'sort' => $sort, 'page' => $page];
+$state = ['q' => $q, 'category' => $cat, 'group' => $group, 'sort' => $sort, 'page' => $page];
 ?>
 
 <main class="page-browse">
@@ -110,6 +124,7 @@ $state = ['q' => $q, 'category' => $cat, 'sort' => $sort, 'page' => $page];
         <input type="search" name="q" value="<?= e($q) ?>" placeholder="Search projects by title or skill…" aria-label="Search projects">
       </div>
       <?php if ($cat !== ''): ?><input type="hidden" name="category" value="<?= e($cat) ?>"><?php endif; ?>
+      <?php if ($group !== ''): ?><input type="hidden" name="group" value="<?= e($group) ?>"><?php endif; ?>
       <?php if ($sort !== 'newest'): ?><input type="hidden" name="sort" value="<?= e($sort) ?>"><?php endif; ?>
       <button type="submit" class="btn btn--dark">Search</button>
     </form>
@@ -118,6 +133,23 @@ $state = ['q' => $q, 'category' => $cat, 'sort' => $sort, 'page' => $page];
 
       <!-- Filter sidebar -->
       <aside class="filter-card" aria-label="Filter projects">
+        <h2>Type of Work</h2>
+        <nav class="filter-list">
+          <a href="<?= e(browse_url($state, ['group' => '', 'page' => 1])) ?>"
+             class="filter-option <?= $group === '' ? 'is-active' : '' ?>" <?= $group === '' ? 'aria-current="true"' : '' ?>>
+            <span class="check"><?= icon('check') ?></span>
+            Any Type
+            <span class="filter-option__count"><?= count($all_projects) ?></span>
+          </a>
+          <?php foreach ($work_groups as $wg): ?>
+            <a href="<?= e(browse_url($state, ['group' => $wg, 'page' => 1])) ?>"
+               class="filter-option <?= $group === $wg ? 'is-active' : '' ?>" <?= $group === $wg ? 'aria-current="true"' : '' ?>>
+              <span class="check"><?= icon('check') ?></span>
+              <?= e($wg) ?>s
+              <span class="filter-option__count"><?= (int) $group_counts[$wg] ?></span>
+            </a>
+          <?php endforeach; ?>
+        </nav>
         <h2>Filter by Category</h2>
         <nav class="filter-list">
           <a href="<?= e(browse_url($state, ['category' => '', 'page' => 1])) ?>"
@@ -148,6 +180,7 @@ $state = ['q' => $q, 'category' => $cat, 'sort' => $sort, 'page' => $page];
           <form class="listing-meta__right" method="get" action="browse-projects.php">
             <?php if ($q !== ''): ?><input type="hidden" name="q" value="<?= e($q) ?>"><?php endif; ?>
             <?php if ($cat !== ''): ?><input type="hidden" name="category" value="<?= e($cat) ?>"><?php endif; ?>
+      <?php if ($group !== ''): ?><input type="hidden" name="group" value="<?= e($group) ?>"><?php endif; ?>
             <span>
               <?php if ($total): ?>
                 Showing <?= $from ?>–<?= $to ?> of <?= $total ?> open projects

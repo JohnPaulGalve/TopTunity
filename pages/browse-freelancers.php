@@ -23,6 +23,9 @@ $sort_options = [
 
 $q        = isset($_GET['q']) ? trim($_GET['q']) : '';
 $skill    = isset($_GET['skill']) ? $_GET['skill'] : '';
+$group    = isset($_GET['group']) ? $_GET['group'] : '';
+$work_groups = tt_work_groups();
+if (!in_array($group, $work_groups, true)) { $group = ''; }
 $sort     = isset($_GET['sort']) ? $_GET['sort'] : 'top_rated';
 $page     = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
 $per_page = 5;
@@ -40,7 +43,10 @@ ksort($skill_counts);
 if ($skill !== '' && !isset($skill_counts[$skill])) { $skill = ''; }
 
 /* Filter */
-$results = array_values(array_filter($all, function ($f) use ($q, $skill) {
+$results = array_values(array_filter($all, function ($f) use ($q, $skill, $group) {
+    if ($group !== '' && !in_array($group, $f['groups'] ?? [], true)) {
+        return false;
+    }
     if ($skill !== '' && !in_array($skill, $f['skills'], true)) {
         return false;
     }
@@ -70,11 +76,12 @@ $visible     = array_slice($results, $offset, $per_page);
 $from        = $total ? $offset + 1 : 0;
 $to          = $offset + count($visible);
 
-$state = ['q' => $q, 'skill' => $skill, 'sort' => $sort, 'page' => $page];
+$state = ['q' => $q, 'skill' => $skill, 'group' => $group, 'sort' => $sort, 'page' => $page];
 
 function fr_url($state, $override = [])
 {
     $params = array_merge($state, $override);
+    if (($params['group'] ?? '') === '') { unset($params['group']); }
     if ($params['q'] === '')          { unset($params['q']); }
     if ($params['skill'] === '')      { unset($params['skill']); }
     if ($params['sort'] === 'top_rated') { unset($params['sort']); }
@@ -105,6 +112,14 @@ function fr_url($state, $override = [])
     <div class="browse-layout">
 
       <aside class="filter-card" aria-label="Filter freelancers">
+        <h2>Type of Work</h2>
+        <p class="subtle" style="font-size:0.8rem; margin:0 0 0.5rem;">Not sure of the skill? Pick the kind of person you need.</p>
+        <nav class="filter-list">
+          <a href="<?= e(fr_url($state, ['group' => '', 'page' => 1])) ?>" class="filter-option <?= $group === '' ? 'is-active' : '' ?>" <?= $group === '' ? 'aria-current="true"' : '' ?>><span class="check"><?= icon('check') ?></span> Any Type</a>
+          <?php foreach ($work_groups as $wg): ?>
+            <a href="<?= e(fr_url($state, ['group' => $wg, 'page' => 1])) ?>" class="filter-option <?= $group === $wg ? 'is-active' : '' ?>" <?= $group === $wg ? 'aria-current="true"' : '' ?>><span class="check"><?= icon('check') ?></span> <?= e($wg) ?>s</a>
+          <?php endforeach; ?>
+        </nav>
         <h2>Filter by Skill</h2>
         <nav class="filter-list">
           <a href="<?= e(fr_url($state, ['skill' => '', 'page' => 1])) ?>"

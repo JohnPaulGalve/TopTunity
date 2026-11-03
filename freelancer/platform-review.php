@@ -11,7 +11,7 @@ require_once __DIR__ . '/../includes/data.php';
 
 $labels = [5 => 'Excellent', 4 => 'Very good', 3 => 'Good', 2 => 'Fair', 1 => 'Poor'];
 $rating = isset($_POST['rating']) ? max(1, min(5, (int) $_POST['rating'])) : 5;
-$text   = tt_is_demo_freelancer() ? 'Recommended Projects shows me jobs that actually match my PHP and MySQL skills. Contracts are clear and the 10% fee is shown upfront. Most of my repeat clients found me through TopTunity.' : '';
+$text   = false ? 'Recommended Projects shows me jobs that actually match my PHP and MySQL skills. Contracts are clear and the ' . tt_service_fee() . '% fee is shown upfront. Most of my repeat clients found me through TopTunity.' : '';
 $mine = tt_my_platform_review();
 if ($mine) { $rating = (int) $mine['rating']; $text = $mine['body']; }
 $errors = [];

@@ -15,224 +15,7 @@ require_once __DIR__ . '/auth.php';
 
 function toptunity_projects()
 {
-    return [
-        1 => [
-            'title' => 'Online Ordering Website for a Coffee Shop',
-            'category' => 'Web Development', 'status' => 'Open', 'type' => 'fixed',
-            'budget' => 45000, 'deadline' => '2026-11-20', 'posted' => '2026-10-06',
-            'proposals' => 12, 'ref' => 'TT-1038',
-            'desc' => 'We need a simple online ordering website for Kapé Lokal where customers can browse our menu, place pick-up orders and pay on arrival.',
-            'intro' => 'We need a simple online ordering website for Kapé Lokal where customers can browse our menu, place pick-up orders and pay on arrival. The admin side should let staff update menu items, mark orders as ready and view daily sales.',
-            'features' => [
-                'Online menu with photos and prices',
-                'Pick-up order form with a pay-on-arrival option',
-                'Admin panel for staff to update menu items',
-                'Order status board for ready and completed orders',
-                'Daily sales summary',
-            ],
-            'closing' => 'Please share two ordering or shop websites you have built.',
-            'skills' => ['PHP', 'MySQL', 'JavaScript'],
-            'files' => [['name' => 'menu-draft.pdf', 'size' => '240 KB', 'type' => 'pdf']],
-            'client' => ['name' => 'Andrea Santos', 'company' => 'Kapé Lokal Coffee Co.', 'rating' => 4.9, 'reviews' => 9,
-                'location' => 'Quezon City', 'projects' => 5, 'since' => 'Mar 2025', 'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'long'],
-        ],
-        2 => [
-            'title' => 'Student Enrollment System for a Tutorial Center',
-            'category' => 'Web Development', 'status' => 'Open', 'type' => 'hourly',
-            'rate' => 500, 'max_hours' => 80, 'budget' => 40000,
-            'deadline' => '2026-12-05', 'posted' => '2026-10-01',
-            'proposals' => 8, 'ref' => 'TT-1039',
-            'desc' => 'Build a web-based enrollment and payment tracking system for about 300 students across 12 review classes.',
-            'intro' => 'BrightPath Tutorial Center is moving away from paper enrollment forms. We need a web-based system where our staff can enroll students into review classes, record tuition payments and print a class list for each tutor.',
-            'features' => [
-                'Student registration with parent/guardian contact details',
-                'Class schedules for 12 review classes (Grades 7–12 and college entrance)',
-                'Payment tracking with balances and official receipt numbers',
-                'Simple dashboard with total enrollees per class and unpaid balances',
-            ],
-            'closing' => 'You will work with our office manager. Please include a link to a similar system you have built.',
-            'skills' => ['PHP', 'MySQL', 'HTML/CSS', 'JavaScript'],
-            'files' => [
-                ['name' => 'enrollment-form-sample.pdf', 'size' => '412 KB', 'type' => 'pdf'],
-                ['name' => 'class-schedule-2026.xlsx', 'size' => '86 KB', 'type' => 'sheet'],
-            ],
-            'client' => ['name' => 'Ramon Villanueva', 'company' => 'BrightPath Tutorial Center', 'rating' => 4.7, 'reviews' => 6,
-                'location' => 'Mandaluyong City', 'projects' => 7, 'since' => 'Feb 2025', 'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'short'],
-        ],
-        3 => [
-            'title' => 'Logo and Brand Kit for a Home Bakeshop',
-            'category' => 'Graphic Design', 'status' => 'Open', 'type' => 'fixed',
-            'budget' => 8500, 'deadline' => '2026-10-25', 'posted' => '2026-10-04',
-            'proposals' => 17, 'ref' => 'TT-1040',
-            'desc' => 'Looking for a warm, friendly logo plus color palette, packaging sticker and Facebook cover for Bautista Bakeshop.',
-            'intro' => 'We are looking for a warm, friendly logo for Bautista Bakeshop, with a matching color palette, a packaging sticker and a Facebook cover image.',
-            'features' => [
-                'Primary logo with light and dark versions',
-                'Color palette with hex and CMYK values',
-                'Packaging sticker artwork',
-                'Facebook cover image',
-            ],
-            'closing' => 'Share a portfolio of logo work you are proud of.',
-            'skills' => ['Logo Design', 'Adobe Illustrator'],
-            'files' => [['name' => 'bakeshop-brief.pdf', 'size' => '180 KB', 'type' => 'pdf']],
-            'client' => ['name' => 'Joy Bautista', 'company' => 'Bautista Bakeshop', 'rating' => 4.6, 'reviews' => 3,
-                'location' => 'Pasig City', 'projects' => 1, 'since' => 'Jun 2026', 'bg' => '#FEF9C3', 'hair' => '#1E293B', 'style' => 'bun'],
-        ],
-        4 => [
-            'title' => 'Appointment Booking App for a Dental Clinic',
-            'category' => 'Mobile App Development', 'status' => 'Open', 'type' => 'fixed',
-            'budget' => 60000, 'deadline' => '2026-12-15', 'posted' => '2026-10-03',
-            'proposals' => 6, 'ref' => 'TT-1041',
-            'desc' => 'Android and iOS app where patients can book, reschedule and get reminders for dental appointments.',
-            'intro' => 'We need an Android and iOS app where patients can book, reschedule and get reminders for their dental appointments. Clinic staff should see the schedule from an admin view.',
-            'features' => [
-                'Patient sign-up and login',
-                'Book, reschedule and cancel appointments',
-                'Push and SMS reminders',
-                'Admin view of the clinic calendar',
-            ],
-            'closing' => 'Please include a published app or a link to a similar booking app.',
-            'skills' => ['Flutter', 'Firebase'],
-            'files' => [],
-            'client' => ['name' => 'Grace Aquino', 'company' => 'Aquino Dental Clinic', 'rating' => 4.8, 'reviews' => 4,
-                'location' => 'Quezon City', 'projects' => 2, 'since' => 'Jan 2026', 'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'bun'],
-        ],
-        5 => [
-            'title' => '10 SEO Blog Articles for a Travel Agency',
-            'category' => 'Writing and Content', 'status' => 'Open', 'type' => 'fixed',
-            'budget' => 12000, 'deadline' => '2026-11-08', 'posted' => '2026-10-02',
-            'proposals' => 21, 'ref' => 'TT-1042',
-            'desc' => 'Ten 1,000-word articles about Palawan island-hopping tours, optimized for local search keywords.',
-            'intro' => 'We need ten 1,000-word articles about Palawan island-hopping tours. Each article should target a local search keyword and read naturally for travelers.',
-            'features' => [
-                'Ten articles of about 1,000 words each',
-                'Keyword research list for each article',
-                'One round of revisions',
-                'Meta titles and descriptions',
-            ],
-            'closing' => 'Send two sample articles with their target keywords.',
-            'skills' => ['SEO', 'Copywriting'],
-            'files' => [['name' => 'keyword-list.xlsx', 'size' => '40 KB', 'type' => 'sheet']],
-            'client' => ['name' => 'Mark Francisco', 'company' => 'Palawan Tours Co.', 'rating' => 4.5, 'reviews' => 5,
-                'location' => 'Puerto Princesa', 'projects' => 3, 'since' => 'Nov 2025', 'bg' => '#E0E7FF', 'hair' => '#1E293B', 'style' => 'short'],
-        ],
-        6 => [
-            'title' => 'Clinic Website Redesign in Figma',
-            'category' => 'UI/UX Design', 'status' => 'Open', 'type' => 'fixed',
-            'budget' => 18000, 'deadline' => '2026-11-15', 'posted' => '2026-10-07',
-            'proposals' => 4, 'ref' => 'TT-1043',
-            'desc' => 'Redesign our clinic website (6 pages) in Figma with a mobile version and a clickable prototype.',
-            'intro' => 'Redesign our clinic website (6 pages) in Figma. We need a mobile version of each page and a clickable prototype we can test with patients.',
-            'features' => [
-                'Six redesigned pages for desktop',
-                'Mobile version of each page',
-                'Clickable prototype with working links',
-                'Style guide with colors and fonts',
-            ],
-            'closing' => 'Please share examples of past Figma redesigns.',
-            'skills' => ['Figma', 'UI Design'],
-            'files' => [['name' => 'current-site-screenshots.pdf', 'size' => '1.2 MB', 'type' => 'pdf']],
-            'client' => ['name' => 'Grace Aquino', 'company' => 'Aquino Dental Clinic', 'rating' => 4.8, 'reviews' => 4,
-                'location' => 'Quezon City', 'projects' => 2, 'since' => 'Jan 2026', 'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'bun'],
-        ],
-        7 => [
-            'title' => 'Inventory Spreadsheet Cleanup',
-            'category' => 'Data Entry and Admin', 'status' => 'Open', 'type' => 'hourly',
-            'rate' => 300, 'max_hours' => 40, 'budget' => 12000,
-            'deadline' => '2026-10-30', 'posted' => '2026-10-07',
-            'proposals' => 9, 'ref' => 'TT-1044',
-            'desc' => 'Clean up and merge our 6 inventory spreadsheets (about 4,000 items) into one organized file.',
-            'intro' => 'Clean up and merge our 6 inventory spreadsheets (about 4,000 items) into one organized file that our staff can search and update.',
-            'features' => [
-                'Merge six inventory sheets into one file',
-                'Remove duplicates and fix item codes',
-                'Standardize names, units and prices',
-                'Short notes on what changed',
-            ],
-            'closing' => 'Tell us how you would handle items that appear in two sheets with different prices.',
-            'skills' => ['Data Entry', 'Microsoft Excel'],
-            'files' => [['name' => 'inventory-sample.xlsx', 'size' => '120 KB', 'type' => 'sheet']],
-            'client' => ['name' => 'Liza Ramos', 'company' => 'Ramos General Supplies', 'rating' => 4.9, 'reviews' => 7,
-                'location' => 'Caloocan City', 'projects' => 4, 'since' => 'Sep 2025', 'bg' => '#DCFCE7', 'hair' => '#1E293B', 'style' => 'long'],
-        ],
-        8 => [
-            'title' => 'Facebook Ads Setup for a Salon',
-            'category' => 'Digital Marketing', 'status' => 'Open', 'type' => 'fixed',
-            'budget' => 7500, 'deadline' => '2026-11-02', 'posted' => '2026-10-01',
-            'proposals' => 11, 'ref' => 'TT-1045',
-            'desc' => 'Set up and run a one-month Facebook and Instagram ad campaign to get more walk-in bookings.',
-            'intro' => 'We want a one-month Facebook and Instagram ad campaign to bring more walk-in bookings to our salon in Makati.',
-            'features' => [
-                'Campaign setup for Facebook and Instagram',
-                'Audience targeting around the salon area',
-                'Weekly performance report',
-                'Two rounds of ad copy and image changes',
-            ],
-            'closing' => 'Share a campaign you have run and the results you got.',
-            'skills' => ['Facebook Ads', 'Social Media'],
-            'files' => [],
-            'client' => ['name' => 'Carla Mendoza', 'company' => 'Mendoza Hair Studio', 'rating' => 4.4, 'reviews' => 2,
-                'location' => 'Makati City', 'projects' => 1, 'since' => 'Sep 2026', 'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'long'],
-        ],
-        9 => [
-            'title' => 'Weekly Vlog Video Editing',
-            'category' => 'Video and Animation', 'status' => 'Open', 'type' => 'hourly',
-            'rate' => 250, 'max_hours' => 60, 'budget' => 15000,
-            'deadline' => '2026-12-20', 'posted' => '2026-09-28',
-            'proposals' => 14, 'ref' => 'TT-1046',
-            'desc' => 'Edit four 8-minute travel vlogs per month with captions, background music and a simple intro.',
-            'intro' => 'We publish travel vlogs every week and need a reliable editor to turn raw footage into finished videos.',
-            'features' => [
-                'Edit four vlogs of about 8 minutes each per month',
-                'Captions and subtitles',
-                'Background music and sound levels',
-                'Simple title intro and end card',
-            ],
-            'closing' => 'Send a link to two travel edits you have done.',
-            'skills' => ['Video Editing', 'Premiere Pro'],
-            'files' => [['name' => 'vlog-style-guide.pdf', 'size' => '320 KB', 'type' => 'pdf']],
-            'client' => ['name' => 'Paolo Dizon', 'company' => 'Dizon Travels', 'rating' => 4.7, 'reviews' => 5,
-                'location' => 'Cebu City', 'projects' => 3, 'since' => 'Apr 2026', 'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'short'],
-        ],
-        10 => [
-            'title' => 'Product Photo Retouching (50 Images)',
-            'category' => 'Graphic Design', 'status' => 'Open', 'type' => 'fixed',
-            'budget' => 5000, 'deadline' => '2026-10-28', 'posted' => '2026-09-18',
-            'proposals' => 19, 'ref' => 'TT-1047',
-            'desc' => 'Remove backgrounds and fix color on 50 product photos for an online shop.',
-            'intro' => 'Our online shop needs 50 product photos cleaned up before we list them. Each photo needs a clean background and accurate color.',
-            'features' => [
-                'Remove backgrounds on 50 photos',
-                'Correct white balance and color',
-                'Export in web and print sizes',
-                'Consistent file naming',
-            ],
-            'closing' => 'Include a before and after example from a past project.',
-            'skills' => ['Photoshop', 'Retouching'],
-            'files' => [['name' => 'product-list.xlsx', 'size' => '60 KB', 'type' => 'sheet']],
-            'client' => ['name' => 'Nina Reyes', 'company' => 'Reyes Home Goods', 'rating' => 4.6, 'reviews' => 6,
-                'location' => 'Pasig City', 'projects' => 4, 'since' => 'Jun 2025', 'bg' => '#FEF9C3', 'hair' => '#1E293B', 'style' => 'bun'],
-        ],
-        11 => [
-            'title' => 'Explainer Animation for a Water Refilling Station',
-            'category' => 'Video and Animation', 'status' => 'Open', 'type' => 'fixed',
-            'budget' => 14000, 'deadline' => '2026-12-01', 'posted' => '2026-09-08',
-            'proposals' => 7, 'ref' => 'TT-1048',
-            'desc' => 'A 60-second animated explainer showing how our refilling and delivery service works.',
-            'intro' => 'We need a 60-second animated explainer that shows how our refilling and delivery service works, for our website and social media.',
-            'features' => [
-                '60-second animated explainer video',
-                'Storyboard for approval before animation',
-                'Voiceover and background music',
-                'Two rounds of revisions',
-            ],
-            'closing' => 'Share an animation sample with a similar length.',
-            'skills' => ['Animation', 'After Effects'],
-            'files' => [['name' => 'explainer-script.pdf', 'size' => '95 KB', 'type' => 'pdf']],
-            'client' => ['name' => 'Ben Torres', 'company' => 'Torres Water Refilling', 'rating' => 4.3, 'reviews' => 2,
-                'location' => 'Antipolo City', 'projects' => 1, 'since' => 'Aug 2026', 'bg' => '#E0E7FF', 'hair' => '#1E293B', 'style' => 'glasses'],
-        ],
-    ];
+    return [];
 }
 
 /** Remove just-uploaded files when the related form cannot be saved. */
@@ -309,25 +92,7 @@ function toptunity_project($id)
 /** Flat list in the shape browse-projects.php expects. */
 function toptunity_listing_sample()
 {
-    $rows = [];
-    foreach (toptunity_projects() as $id => $p) {
-        $is_hourly = $p['type'] === 'hourly';
-        $rows[] = [
-            'id'        => $id,
-            'title'     => $p['title'],
-            'category'  => $p['category'],
-            'type'      => $p['type'],
-            'amount'    => $is_hourly ? $p['rate'] : $p['budget'],
-            'max_hours' => $is_hourly ? $p['max_hours'] : 0,
-            'age_h'     => max(0, (int) floor((time() - strtotime($p['posted'])) / 3600)),
-            'client'    => $p['client']['name'],
-            'deadline'  => $p['deadline'],
-            'proposals' => $p['proposals'],
-            'desc'      => $p['desc'],
-            'skills'    => $p['skills'],
-        ];
-    }
-    return $rows;
+    return [];
 }
 
 /* ==========================================================================
@@ -336,160 +101,7 @@ function toptunity_listing_sample()
    ========================================================================== */
 function toptunity_freelancers_sample()
 {
-    return [
-        1 => [
-            'name' => 'Miguel Reyes', 'title' => 'Full-Stack PHP Developer', 'location' => 'Cebu City, Philippines',
-            'completed' => 42, 'rating' => 4.9, 'reviews' => 38, 'rate' => 650, 'available' => true,
-            'bio' => 'I build fast, secure web systems for small businesses: ordering sites, inventory systems and admin dashboards using PHP, MySQL and JavaScript.',
-            'about' => [
-                "Hi! I'm Miguel, a full-stack developer from Cebu with 5 years of experience building web systems for small businesses: online ordering sites, point-of-sale and inventory systems, and admin dashboards.",
-                "I work mainly with PHP (Laravel and native), MySQL and vanilla JavaScript. I care about clean code, fast pages and clear communication. You will get progress updates every two days and a short video walkthrough when I submit the work.",
-            ],
-            'skills' => ['PHP', 'MySQL', 'JavaScript', 'Laravel', 'HTML/CSS', 'Bootstrap', 'REST API'],
-            'languages' => 'English, Filipino, Cebuano', 'since' => 'March 2024', 'ontime' => '96%',
-            'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'short',
-            'portfolio' => [
-                ['title' => 'Sari-Sari Store POS System', 'category' => 'Web Development', 'tint' => '#CCFBF1'],
-                ['title' => 'Resort Booking Website', 'category' => 'Web Development', 'tint' => '#FFEDD5'],
-                ['title' => 'Clinic Inventory Dashboard', 'category' => 'Web Development', 'tint' => '#E0E7FF'],
-                ['title' => 'Café Menu Landing Page', 'category' => 'Web Development', 'tint' => '#FEF9C3'],
-            ],
-            'feedback' => [
-                ['by' => 'Grace Aquino', 'role' => 'Client', 'project' => 'Clinic Inventory Dashboard', 'date' => '2026-09-18', 'stars' => 5,
-                    'text' => 'Miguel built our clinic inventory dashboard ahead of schedule. He explained every feature clearly and fixed small issues the same day.', 'style' => 'bun', 'bg' => '#FFEDD5'],
-                ['by' => 'Mark Francisco', 'role' => 'Client', 'project' => 'Resort Booking Website', 'date' => '2026-08-02', 'stars' => 5,
-                    'text' => 'Very professional and easy to talk to. The booking site works perfectly on mobile and our inquiries doubled.', 'style' => 'short', 'bg' => '#E0E7FF'],
-                ['by' => 'Ramon Villanueva', 'role' => 'Client', 'project' => 'Tuition Payment Tracker', 'date' => '2026-06-21', 'stars' => 4,
-                    'text' => 'Good work on the payment tracking module. A few revisions were needed, but he handled them quickly.', 'style' => 'short', 'bg' => '#CCFBF1'],
-            ],
-        ],
-        2 => [
-            'name' => 'Bea Lim', 'title' => 'UI/UX Designer', 'location' => 'Makati City, Philippines',
-            'completed' => 31, 'rating' => 4.8, 'reviews' => 27, 'rate' => 600, 'available' => true,
-            'bio' => 'I design simple, friendly app and web interfaces backed by user research and clickable Figma prototypes.',
-            'about' => [
-                'I am a UI/UX designer who helps small businesses turn rough ideas into clear, friendly apps and websites.',
-                'My process starts with a short user review, then moves through wireframes, a clickable Figma prototype and one round of testing before handoff.',
-            ],
-            'skills' => ['Figma', 'UI Design', 'HTML/CSS', 'Prototyping'],
-            'languages' => 'English, Filipino', 'since' => 'July 2024', 'ontime' => '94%',
-            'bg' => '#DBEAFE', 'hair' => '#1E293B', 'style' => 'long',
-            'portfolio' => [
-                ['title' => 'Clinic Booking App', 'category' => 'Mobile App Development', 'tint' => '#DBEAFE'],
-                ['title' => 'Coffee Shop Menu Website', 'category' => 'UI/UX Design', 'tint' => '#FFEDD5'],
-                ['title' => 'Inventory Admin Panel', 'category' => 'UI/UX Design', 'tint' => '#CCFBF1'],
-            ],
-            'feedback' => [
-                ['by' => 'Andrea Santos', 'role' => 'Client', 'project' => 'Coffee Shop Menu Website', 'date' => '2026-07-14', 'stars' => 5,
-                    'text' => 'Bea turned our rough sketches into a clean menu site our customers actually use.', 'style' => 'long', 'bg' => '#FFEDD5'],
-            ],
-        ],
-        3 => [
-            'name' => 'Rhea Mendoza', 'title' => 'Content Writer and SEO Specialist', 'location' => 'Iloilo City, Philippines',
-            'completed' => 53, 'rating' => 4.9, 'reviews' => 44, 'rate' => 400, 'available' => true,
-            'bio' => 'I write search-friendly blog posts, product descriptions and website copy that sound human.',
-            'about' => [
-                'I write blog posts, product descriptions and website copy that rank well and still sound like a real person wrote them.',
-                'Every project starts with keyword research and a short brief call, so the content fits your customers and your goals.',
-            ],
-            'skills' => ['Copywriting', 'SEO', 'WordPress'],
-            'languages' => 'English, Filipino, Hiligaynon', 'since' => 'January 2024', 'ontime' => '98%',
-            'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'long',
-            'portfolio' => [
-                ['title' => 'Travel Blog Series', 'category' => 'Writing and Content', 'tint' => '#CCFBF1'],
-                ['title' => 'Bakery Product Descriptions', 'category' => 'Writing and Content', 'tint' => '#FEF9C3'],
-                ['title' => 'Dental Clinic Website Copy', 'category' => 'Writing and Content', 'tint' => '#FFEDD5'],
-            ],
-            'feedback' => [
-                ['by' => 'Grace Aquino', 'role' => 'Client', 'project' => 'Dental Clinic Website Copy', 'date' => '2026-06-02', 'stars' => 5,
-                    'text' => 'Rhea wrote clear, friendly copy for every page and our appointment requests went up within a month.', 'style' => 'bun', 'bg' => '#FFEDD5'],
-            ],
-        ],
-        4 => [
-            'name' => 'Carlo Dizon', 'title' => 'Mobile App Developer', 'location' => 'Davao City, Philippines',
-            'completed' => 21, 'rating' => 4.7, 'reviews' => 19, 'rate' => 700, 'available' => true,
-            'bio' => 'Flutter developer building Android and iOS apps for clinics, shops and schools.',
-            'about' => [
-                'I build Android and iOS apps with Flutter, backed by Firebase, for clinics, shops and schools.',
-                'I test on real devices and share a working build every week so you can see progress early.',
-            ],
-            'skills' => ['Flutter', 'Firebase', 'JavaScript'],
-            'languages' => 'English, Filipino, Bisaya', 'since' => 'May 2025', 'ontime' => '93%',
-            'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'short',
-            'portfolio' => [
-                ['title' => 'Clinic Queue App', 'category' => 'Mobile App Development', 'tint' => '#DBEAFE'],
-                ['title' => 'Shop Loyalty App', 'category' => 'Mobile App Development', 'tint' => '#CCFBF1'],
-                ['title' => 'School Attendance App', 'category' => 'Mobile App Development', 'tint' => '#FFEDD5'],
-            ],
-            'feedback' => [
-                ['by' => 'Nina Reyes', 'role' => 'Client', 'project' => 'Shop Loyalty App', 'date' => '2026-07-09', 'stars' => 4,
-                    'text' => 'Carlo delivered a stable app. Push notifications took a couple of tries to get right.', 'style' => 'bun', 'bg' => '#FEF9C3'],
-            ],
-        ],
-        5 => [
-            'name' => 'Paolo Garcia', 'title' => 'Graphic Designer', 'location' => 'Quezon City, Philippines',
-            'completed' => 36, 'rating' => 4.6, 'reviews' => 31, 'rate' => 450, 'available' => true,
-            'bio' => 'Brand identities, logos and social media graphics for local food and retail brands.',
-            'about' => [
-                'I design brand identities, logos and social media graphics for local food and retail businesses.',
-                'You get source files, a color palette and a simple usage guide with every brand kit.',
-            ],
-            'skills' => ['Logo Design', 'Adobe Illustrator', 'Social Media Marketing'],
-            'languages' => 'English, Filipino', 'since' => 'August 2024', 'ontime' => '95%',
-            'bg' => '#FEF9C3', 'hair' => '#1E293B', 'style' => 'short',
-            'portfolio' => [
-                ['title' => 'Bakeshop Brand Kit', 'category' => 'Graphic Design', 'tint' => '#FEF9C3'],
-                ['title' => 'Food Cart Logo', 'category' => 'Graphic Design', 'tint' => '#FFEDD5'],
-                ['title' => 'Retail Social Campaign', 'category' => 'Graphic Design', 'tint' => '#CCFBF1'],
-            ],
-            'feedback' => [
-                ['by' => 'Joy Bautista', 'role' => 'Client', 'project' => 'Bakeshop Brand Kit', 'date' => '2026-04-11', 'stars' => 5,
-                    'text' => 'Paolo understood our brand right away. The sticker and Facebook cover look great together.', 'style' => 'bun', 'bg' => '#FEF9C3'],
-            ],
-        ],
-        6 => [
-            'name' => 'Jerome Castillo', 'title' => 'Backend Developer', 'location' => 'Manila, Philippines',
-            'completed' => 18, 'rating' => 4.7, 'reviews' => 10, 'rate' => 700, 'available' => true,
-            'bio' => 'Backend developer focused on PHP APIs, payment flows and reliable databases.',
-            'about' => [
-                'I build the backend parts of web apps: APIs, payment flows, user accounts and reliable databases.',
-                'I write clear documentation for every endpoint so your frontend team can start right away.',
-            ],
-            'skills' => ['PHP', 'REST API', 'MySQL'],
-            'languages' => 'English, Filipino', 'since' => 'February 2025', 'ontime' => '92%',
-            'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'glasses',
-            'portfolio' => [
-                ['title' => 'Payment API', 'category' => 'Web Development', 'tint' => '#CCFBF1'],
-                ['title' => 'Booking Backend', 'category' => 'Web Development', 'tint' => '#DBEAFE'],
-                ['title' => 'Reporting Service', 'category' => 'Web Development', 'tint' => '#FFEDD5'],
-            ],
-            'feedback' => [
-                ['by' => 'Ramon Villanueva', 'role' => 'Client', 'project' => 'Booking Backend', 'date' => '2026-05-30', 'stars' => 5,
-                    'text' => 'Jerome designed clean endpoints and documented everything. Our integration took two days.', 'style' => 'short', 'bg' => '#CCFBF1'],
-            ],
-        ],
-        7 => [
-            'name' => 'Janelle Cruz', 'title' => 'Web and Database Developer', 'location' => 'Bacolod City, Philippines',
-            'completed' => 9, 'rating' => 4.7, 'reviews' => 3, 'rate' => 450, 'available' => false,
-            'bio' => 'Web and database developer who builds clean forms, reports and data cleanup tools for small offices.',
-            'about' => [
-                'I build forms, reports and data tools for small offices that need their records in order.',
-                'I focus on simple screens that staff can learn in one session.',
-            ],
-            'skills' => ['HTML/CSS', 'JavaScript', 'MySQL'],
-            'languages' => 'English, Filipino, Ilonggo', 'since' => 'October 2025', 'ontime' => '100%',
-            'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'bun',
-            'portfolio' => [
-                ['title' => 'Inventory Database', 'category' => 'Data Entry and Admin', 'tint' => '#DCFCE7'],
-                ['title' => 'Clinic Records Form', 'category' => 'Web Development', 'tint' => '#FFEDD5'],
-                ['title' => 'Sales Report Dashboard', 'category' => 'Web Development', 'tint' => '#E0E7FF'],
-            ],
-            'feedback' => [
-                ['by' => 'Nina Reyes', 'role' => 'Client', 'project' => 'Sales Report Dashboard', 'date' => '2026-06-12', 'stars' => 5,
-                    'text' => 'Janelle made our sales report simple to read. Our staff learned it in one session.', 'style' => 'bun', 'bg' => '#FEF9C3'],
-            ],
-        ],
-    ];
+    return [];
 }
 
 /** One freelancer by id, or null. */
@@ -502,12 +114,7 @@ function toptunity_freelancer_unused_old($id)
 /** Find a freelancer by full name (used by links from the homepage). */
 function toptunity_freelancer_by_name($name)
 {
-    foreach (toptunity_freelancers() as $id => $f) {
-        if (strcasecmp($f['name'], $name) === 0) {
-            return ['id' => $id] + $f;
-        }
-    }
-    return null;
+    return [];
 }
 
 /* ==========================================================================
@@ -516,46 +123,13 @@ function toptunity_freelancer_by_name($name)
    ========================================================================== */
 function toptunity_testimonials()
 {
-    $testimonials = [
-        ['quote' => 'I posted our ordering website project on a Monday and had twelve solid proposals by Wednesday. The match percentage helped me shortlist fast, and holding the payment until I approved the work gave me peace of mind.',
-         'name' => 'Andrea Santos', 'role' => 'client', 'context' => 'Kapé Lokal Coffee Co.', 'stars' => 5, 'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'long'],
-        ['quote' => 'The proposal process is clear and the 10% fee is shown upfront, so I always know my net earnings before I send an offer. Withdrawing to GCash is simple.',
-         'name' => 'Rhea Mendoza', 'role' => 'freelancer', 'context' => 'Content Writer', 'stars' => 5, 'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'long'],
-        ['quote' => 'Tracking the project from contract to completion was easy. I could see the status history and every submitted file in one place.',
-         'name' => 'Grace Aquino', 'role' => 'client', 'context' => 'Aquino Dental Clinic', 'stars' => 5, 'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'bun'],
-        ['quote' => 'Recommended Projects shows me jobs that actually match my PHP and MySQL skills. Most of my repeat clients found me through TopTunity.',
-         'name' => 'Miguel Reyes', 'role' => 'freelancer', 'context' => 'Full-Stack PHP Developer', 'stars' => 5, 'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'short'],
-        ['quote' => 'Found a talented designer for our logo within a week. Some filters for budget, but overall a great experience.',
-         'name' => 'Joy Bautista', 'role' => 'client', 'context' => 'Bautista Bakeshop', 'stars' => 4, 'bg' => '#FEF9C3', 'hair' => '#1E293B', 'style' => 'bun'],
-        ['quote' => 'Contracts are agreed before any work starts, so there are no surprises about scope or deadlines. That alone makes it worth it.',
-         'name' => 'Carlo Dizon', 'role' => 'freelancer', 'context' => 'Mobile App Developer', 'stars' => 5, 'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'short'],
-        ['quote' => 'The hourly log made it easy to approve hours every week. Billing on the deadline was automatic and the unused deposit came back right away.',
-         'name' => 'Ramon Villanueva', 'role' => 'client', 'context' => 'BrightPath Tutorial Center', 'stars' => 5, 'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'short'],
-        ['quote' => 'My portfolio and reviews do the selling for me. Clients can see my Figma work before they even message me.',
-         'name' => 'Bea Lim', 'role' => 'freelancer', 'context' => 'UI/UX Designer', 'stars' => 5, 'bg' => '#DBEAFE', 'hair' => '#1E293B', 'style' => 'long'],
-        ['quote' => 'Great for small, steady projects. Hours are logged per day, and I can see which ones the client already approved.',
-         'name' => 'Kevin Tan', 'role' => 'freelancer', 'context' => 'Data Entry Specialist', 'stars' => 4, 'bg' => '#DCFCE7', 'hair' => '#1E293B', 'style' => 'short'],
-    ];
-    $demo_ids = tt_demo_ids();
-    $sql = "SELECT pr.rating, pr.body, u.name, u.role,
-                   COALESCE(NULLIF(cp.company, ''), NULLIF(fp.title, ''), '') AS context
-            FROM platform_reviews pr
-            JOIN users u ON u.id = pr.user_id
-            LEFT JOIN client_profiles cp ON cp.user_id = u.id
-            LEFT JOIN freelancer_profiles fp ON fp.user_id = u.id
-            WHERE pr.status = 'published' AND u.role IN ('client', 'freelancer')
-              AND pr.body IS NOT NULL AND TRIM(pr.body) <> ''";
-    if ($demo_ids) {
-        $sql .= ' AND pr.user_id NOT IN (' . implode(',', array_map('intval', $demo_ids)) . ')';
+    $tpal = [['#FFEDD5', '#1E293B', 'long'], ['#CCFBF1', '#1E293B', 'short'], ['#DBEAFE', '#1E293B', 'bun']];
+    $out = [];
+    foreach (db()->query("SELECT pr.rating, pr.body, u.name, u.role FROM platform_reviews pr JOIN users u ON u.id = pr.user_id WHERE pr.status = 'published' ORDER BY pr.created_at DESC LIMIT 3")->fetchAll() as $k => $t) {
+        $out[] = ['quote' => $t['body'], 'name' => $t['name'], 'role' => ucfirst($t['role']), 'context' => 'Verified TopTunity member', 'stars' => (int) $t['rating'],
+                  'bg' => $tpal[$k % 3][0], 'hair' => $tpal[$k % 3][1], 'style' => $tpal[$k % 3][2]];
     }
-    foreach (db()->query($sql . ' ORDER BY pr.created_at DESC')->fetchAll() as $review) {
-        $testimonials[] = [
-            'quote' => $review['body'], 'name' => $review['name'], 'role' => $review['role'],
-            'context' => $review['context'] ?: ucfirst($review['role']) . ' on TopTunity',
-            'stars' => (int) $review['rating'], 'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'short',
-        ];
-    }
-    return $testimonials;
+    return $out;
 }
 
 /* ==========================================================================
@@ -591,22 +165,14 @@ function toptunity_faqs()
 }
 
 
-/** True when the signed-in account is the demo client (Andrea). Other accounts start empty. */
-function tt_is_demo_account()
-{
-    return isset($_SESSION['user']) && $_SESSION['user']['role'] === 'client'
-        && strcasecmp($_SESSION['user']['email'], 'andrea.santos@kapelokal.ph') === 0;
-}
-
 /* ==========================================================================
-   CLIENT AREA (logged-in client: Andrea Santos)
+   CLIENT AREA (no sample data)
    ========================================================================== */
 function toptunity_current_client_default()
 {
-    return [
-        'name' => 'Andrea Santos', 'company' => 'Kapé Lokal Coffee Co.',
-        'role' => 'Client', 'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'long',
-    ];
+    $me = ['name' => '', 'company' => '', 'role' => 'Client', 'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'long'];
+    if (!empty($_SESSION['user']) && $_SESSION['user']['role'] === 'client') { $me['name'] = $_SESSION['user']['name']; }
+    return $me;
 }
 
 /**
@@ -616,27 +182,7 @@ function toptunity_current_client_default()
  */
 function toptunity_client_projects_sample()
 {
-    return [
-        1 => ['title' => 'Online Ordering Website for a Coffee Shop', 'category' => 'Web Development', 'status' => 'open',
-              'type' => 'fixed', 'budget' => 45000, 'deadline' => '2026-11-20', 'proposals' => 12, 'freelancer' => null, 'posted' => '2026-10-06'],
-        2 => ['title' => 'Point-of-Sale and Inventory Dashboard', 'category' => 'Web Development', 'status' => 'ongoing',
-              'type' => 'hourly', 'rate' => 600, 'max_hours' => 60, 'budget' => 36000, 'deadline' => '2026-10-31', 'proposals' => 9, 'freelancer' => 'Janelle Cruz', 'posted' => '2026-09-08'],
-        3 => ['title' => 'Monthly Social Media Content Calendar', 'category' => 'Digital Marketing', 'status' => 'ongoing',
-              'type' => 'hourly', 'rate' => 350, 'max_hours' => 40, 'budget' => 14000, 'deadline' => '2026-11-30', 'proposals' => 9, 'freelancer' => 'Liza Navarro', 'posted' => '2026-09-20'],
-        4 => ['title' => 'Menu Board and Cup Sleeve Design', 'category' => 'Graphic Design', 'status' => 'overdue',
-              'type' => 'fixed', 'budget' => 8500, 'deadline' => '2026-10-01', 'proposals' => 15, 'freelancer' => 'Paolo Garcia', 'posted' => '2026-08-25'],
-        5 => ['title' => '30-Second Promo Video for Opening Week', 'category' => 'Video and Animation', 'status' => 'past',
-              'type' => 'fixed', 'budget' => 9000, 'deadline' => '2026-09-25', 'proposals' => 4, 'freelancer' => null, 'posted' => '2026-08-10',
-              'note' => 'Closed by administrator'],
-        6 => ['title' => 'Product Photo Retouching', 'category' => 'Graphic Design', 'status' => 'completed',
-              'type' => 'fixed', 'budget' => 5000, 'deadline' => '2026-09-05', 'proposals' => 11, 'freelancer' => 'Liza Navarro', 'posted' => '2026-08-01'],
-        7 => ['title' => 'Weekly Menu Social Posts (July)', 'category' => 'Digital Marketing', 'status' => 'completed',
-              'type' => 'hourly', 'rate' => 350, 'max_hours' => 24, 'budget' => 8400, 'deadline' => '2026-07-31', 'proposals' => 8, 'freelancer' => 'Liza Navarro', 'posted' => '2026-06-28'],
-        8 => ['title' => 'Barista Training Manual Layout', 'category' => 'Graphic Design', 'status' => 'cancelled',
-              'type' => 'fixed', 'budget' => 4000, 'deadline' => '2026-08-30', 'proposals' => 6, 'freelancer' => null, 'posted' => '2026-07-20'],
-        9 => ['title' => 'Loyalty Points Web App', 'category' => 'Web Development', 'status' => 'open',
-              'type' => 'hourly', 'rate' => 550, 'max_hours' => 50, 'budget' => 27500, 'deadline' => '2026-12-12', 'proposals' => 2, 'freelancer' => null, 'posted' => '2026-10-02'],
-    ];
+    return [];
 }
 
 /** Human labels for each project status (used by pills and filter tabs). */
@@ -645,7 +191,7 @@ function toptunity_status_label($status)
     $labels = [
         'open' => 'Open', 'ongoing' => 'Ongoing', 'overdue' => 'Overdue',
         'completed' => 'Completed', 'past' => 'Past Deadline', 'closed' => 'Closed',
-        'suspended' => 'Suspended', 'cancelled' => 'Cancelled',
+        'suspended' => 'Suspended', 'cancelled' => 'Cancelled', 'waiting' => 'Waiting for contract',
     ];
     return isset($labels[$status]) ? $labels[$status] : ucfirst($status);
 }
@@ -654,27 +200,13 @@ function toptunity_status_label($status)
 /** Recent notifications for the dashboard and notifications page. */
 function toptunity_client_notifications()
 {
-    if (!tt_is_demo_account()) { return []; }
-    return [
-        ['icon' => 'file', 'tint' => 'blue', 'title' => 'New proposals', 'text' => '3 new proposals on Online Ordering Website.', 'time' => '2h', 'new' => true],
-        ['icon' => 'message', 'tint' => 'blue', 'title' => 'New messages', 'text' => 'Janelle Cruz sent you a message.', 'time' => '3h', 'new' => true],
-        ['icon' => 'wallet', 'tint' => 'orange', 'title' => 'Hours logged', 'text' => 'Janelle logged 3.0 hrs on POS Dashboard.', 'time' => '5h', 'new' => false],
-        ['icon' => 'check-circle', 'tint' => 'teal', 'title' => 'Payment confirmations', 'text' => 'Deposit of ₱30,000 is now held.', 'time' => '1d', 'new' => false],
-    ];
+    return [];
 }
 
 /** Recent conversations for the dashboard and messages page. */
 function toptunity_client_messages()
 {
-    if (!tt_is_demo_account()) { return []; }
-    return [
-        ['name' => 'Janelle Cruz', 'project' => 'POS and Inventory Dashboard', 'text' => 'I pushed the low-stock alerts — can you test it today?', 'time' => '5m', 'unread' => true,
-         'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'bun'],
-        ['name' => 'Liza Navarro', 'project' => 'Social Media Calendar', 'text' => 'Here are the captions for week 1, po!', 'time' => '1h', 'unread' => true,
-         'bg' => '#DBEAFE', 'hair' => '#1E293B', 'style' => 'long'],
-        ['name' => 'Paolo Garcia', 'project' => 'Menu Board Design', 'text' => 'Sorry for the delay, sending the files tonight.', 'time' => '1d', 'unread' => false,
-         'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'short'],
-    ];
+    return [];
 }
 
 /* ==========================================================================
@@ -684,86 +216,44 @@ function toptunity_client_messages()
 /** Proposals received on a client project. Each: freelancer_id, offer, days, letter. */
 function toptunity_project_proposals($id)
 {
-    $projects = toptunity_client_projects();
-    if (!isset($projects[$id])) { return []; }
-    $p = $projects[$id];
-
-    if ($id === 1) {
-        return [
-            ['freelancer_id' => 1, 'offer' => 42000, 'days' => 21,
-             'letter' => 'I have built several ordering systems for cafés in Cebu. I can deliver the menu, cart, pick-up scheduling and a staff dashboard in three weeks, including a short training video for your team.'],
-            ['freelancer_id' => 7, 'offer' => 45000, 'days' => 25,
-             'letter' => 'Front-end focused developer. I will make the ordering flow fast and mobile-friendly, with a simple PHP backend your staff can manage. Sample: kape-no-lola.ph ordering page.'],
-            ['freelancer_id' => 6, 'offer' => 32000, 'days' => 30,
-             'letter' => 'I can build your ordering website in native PHP with MySQL, with an admin page for updating menu items and order status. Affordable rate and weekly progress updates.'],
-        ];
-    }
-
-    // Other projects: generated from the freelancer list so every project has proposals
-    $ids    = array_keys(toptunity_freelancers());
-    $base   = $p['type'] === 'hourly' ? $p['rate'] * max(1, (int) round($p['max_hours'] * 0.8)) : $p['budget'];
-    $count  = min(3, (int) $p['proposals']);
-    $out    = [];
-    for ($i = 0; $i < $count; $i++) {
-        $out[] = [
-            'freelancer_id' => $ids[($id + $i) % count($ids)],
-            'offer'         => (int) round($base * (0.92 + 0.04 * $i) / 100) * 100,
-            'days'          => 14 + $i * 5 + $id,
-            'letter'        => 'I can deliver this project on time, with clear weekly progress updates and a short video walkthrough when the work is submitted.',
-        ];
-    }
-    return $out;
+    return [];
 }
 
 /** Contract terms for a project once a freelancer has been selected (sample for project 2). */
 function toptunity_project_tracking($id)
 {
-    if ($id !== 2 && $id < 1000) { return null; }
-    $tracking = $id === 2 ? [
-        'current_step' => 5,
-        'start'        => '2026-09-14',
-        'deposit'      => 36000,
-        'deposit_status' => 'held',
-        'worklog' => [
-            ['date' => '2026-10-03', 'hours' => 3.0, 'task' => 'Low-stock alert emails for 25 ingredients', 'status' => 'pending'],
-            ['date' => '2026-10-02', 'hours' => 5.5, 'task' => 'Daily sales report page with totals per cashier', 'status' => 'approved'],
-            ['date' => '2026-10-01', 'hours' => 4.0, 'task' => 'Product and stock tables, CRUD screens', 'status' => 'approved'],
-            ['date' => '2026-09-30', 'hours' => 2.0, 'task' => 'Duplicate test data cleanup (not in scope)', 'status' => 'rejected'],
-        ],
-        'max_hours' => 60,
-        'files' => [
-            ['name' => 'pos-dashboard-v2.zip', 'size' => '4.8 MB', 'type' => 'doc'],
-            ['name' => 'sales-report-preview.png', 'size' => '560 KB', 'type' => 'pdf'],
-        ],
-        'message' => 'Hi Andrea! Version 2 of the dashboard is ready for testing: stock levels, low-stock alerts and the daily sales report. Login details are in the README.',
-        'history' => [
-            ['date' => '2026-10-03 18:42', 'status' => 'Hours Logged (3.0 h)', 'by' => 'Freelancer'],
-            ['date' => '2026-10-02 09:15', 'status' => 'Hours Approved (5.5 h)', 'by' => 'Client'],
-            ['date' => '2026-09-14 10:03', 'status' => 'Project Started (payment held)', 'by' => 'Client'],
-            ['date' => '2026-09-14 08:30', 'status' => 'Contract Accepted · Start Date set', 'by' => 'Freelancer'],
-            ['date' => '2026-09-13 16:12', 'status' => 'Contract Sent', 'by' => 'Client'],
-            ['date' => '2026-09-13 16:05', 'status' => 'Freelancer Selected', 'by' => 'Client'],
-            ['date' => '2026-09-08 11:20', 'status' => 'Project Posted', 'by' => 'Client'],
-        ],
-    ] : ['current_step' => 5, 'start' => date('Y-m-d'), 'deposit' => 0, 'deposit_status' => 'held',
-         'worklog' => [], 'hours_approved' => 0, 'hours_pending' => 0, 'max_hours' => 0,
-         'files' => [], 'message' => '', 'history' => []];
-    if ($id >= 1000) {
-        $tracking['worklog'] = tt_project_work_logs($id);
-        $tracking['hours_approved'] = array_sum(array_map(function ($entry) {
-            return $entry['status'] === 'approved' ? (float) $entry['hours'] : 0;
-        }, $tracking['worklog']));
-        $tracking['hours_pending'] = array_sum(array_map(function ($entry) {
-            return $entry['status'] === 'pending' ? (float) $entry['hours'] : 0;
-        }, $tracking['worklog']));
-        $submission = tt_project_submission($id);
-        $tracking['message'] = $submission ? $submission['message'] : '';
-        $tracking['submission_status'] = $submission ? $submission['status'] : null;
-        $tracking['submission_review_note'] = $submission ? $submission['review_note'] : null;
-        $tracking['files'] = tt_attachments('deliverable', $id);
-        $tracking['deposit'] = (int) (tt_db_project($id)['agreed_amount'] ?? 0);
-    }
-    return $tracking;
+    if ((int) $id < 1000) { return null; }
+    $r = db()->prepare("SELECT status, contract_status, start_date, created_at, deadline, max_hours FROM projects WHERE id = ?");
+    $r->execute([(int) $id - 1000]);
+    $p = $r->fetch();
+    // Tracking starts only once the freelancer has accepted the contract (contract active or finished)
+    if (!$p || !in_array($p['contract_status'], ['active', 'completed'], true)) { return null; }
+    $sub  = tt_project_submission((int) $id);
+    $dq = db()->prepare("SELECT COALESCE(SUM(amount),0) AS total FROM payments WHERE project_id = ? AND type = 'escrow'");
+    $dq->execute([(int) $id - 1000]);
+    $total = (int) $dq->fetchColumn();
+    // The status is the latest deposit's status (held, paid or refunded)
+    $lq = db()->prepare("SELECT status FROM payments WHERE project_id = ? AND type = 'escrow' ORDER BY id DESC LIMIT 1");
+    $lq->execute([(int) $id - 1000]);
+    $latest = $lq->fetchColumn();
+    $dep = ['total' => $total, 'status' => $latest ?: 'none'];
+    if ($p['contract_status'] === 'completed') { $step = 7; }
+    elseif ($sub && $sub['status'] === 'pending') { $step = 6; }
+    elseif ($sub) { $step = 5; }
+    else { $step = 4; }
+    return [
+        'current_step'           => $step,
+        'start'                  => $p['start_date'] ?: substr($p['created_at'], 0, 10),
+        'max_hours'              => (int) $p['max_hours'],
+        'message'                => $sub ? (string) $sub['message'] : '',
+        'files'                  => [],
+        'submission_status'      => $sub ? $sub['status'] : 'none',
+        'submission_review_note' => $sub ? (string) $sub['review_note'] : '',
+        'history'                => [],
+        'worklog'                => [],
+        'deposit'                => $dep ? (int) $dep['total'] : 0,
+        'deposit_status'         => $dep ? $dep['status'] : 'none',
+    ];
 }
 
 /**
@@ -772,46 +262,7 @@ function toptunity_project_tracking($id)
  */
 function toptunity_client_detail($id)
 {
-    $saved_here = tt_saved_projects_for_current_user();
-    if (isset($saved_here[$id])) {
-        $r = $saved_here[$id];
-        return ['title' => $r['title'], 'category' => $r['category'], 'desc' => $r['intro'], 'intro' => $r['intro'],
-                'features' => [], 'closing' => '', 'skills' => $r['skills'], 'files' => $r['files']];
-    }
-    $cp = toptunity_client_projects()[$id] ?? null;
-    if (!$cp) { return null; }
-
-    foreach (toptunity_projects() as $pub) {
-        if ($pub['title'] === $cp['title']) { return $pub; }
-    }
-
-    $intros = [
-        2 => 'Build a point-of-sale and inventory dashboard with stock levels, low-stock alerts and a daily sales report for each cashier.',
-        3 => 'Plan and create a monthly social media content calendar with captions, visuals and posting dates for each week.',
-        4 => 'Design a menu board and cup sleeve set in print-ready files for the café, with clear pricing and brand colors.',
-        5 => 'Edit a 30-second promo video for our opening week, with captions, background music and a clear call to action.',
-        6 => 'Retouch product photos for the online shop: clean backgrounds, accurate color and consistent sizing.',
-        7 => 'Write weekly social media posts for the menu, with captions, hashtags and photo suggestions.',
-        8 => 'Lay out a barista training manual with clear sections, diagrams and printable pages.',
-        9 => 'Build a loyalty points web app where customers earn and redeem points, with an admin page for managing rewards.',
-    ];
-    $skills = [
-        2 => ['PHP', 'MySQL', 'JavaScript'], 3 => ['Copywriting', 'Social Media Marketing', 'Canva'],
-        4 => ['Adobe Illustrator', 'Photoshop'], 5 => ['Premiere Pro', 'Video Editing'],
-        6 => ['Photoshop', 'Retouching'], 7 => ['Copywriting', 'SEO'],
-        8 => ['Adobe Illustrator', 'Layout Design'], 9 => ['PHP', 'MySQL', 'HTML/CSS'],
-    ];
-
-    return [
-        'title'    => $cp['title'],
-        'category' => $cp['category'],
-        'desc'     => isset($intros[$id]) ? $intros[$id] : $cp['title'],
-        'intro'    => isset($intros[$id]) ? $intros[$id] : $cp['title'],
-        'features' => [],
-        'closing'  => '',
-        'skills'   => isset($skills[$id]) ? $skills[$id] : [],
-        'files'    => [],
-    ];
+    return [];
 }
 
 /* ==========================================================================
@@ -822,87 +273,45 @@ function toptunity_client_detail($id)
 /** Full notification list. cat is used by the filter tabs. */
 function toptunity_client_notifications_all_demo()
 {
-    if (!tt_is_demo_account()) { return []; }
-    return [
-        ['cat' => 'proposals', 'icon' => 'file', 'tint' => 'blue', 'new' => true,
-         'title' => 'New Proposals', 'text' => 'Jerome Castillo submitted a proposal on Online Ordering Website for a Coffee Shop.', 'time' => '2h ago'],
-        ['cat' => 'responses', 'icon' => 'users', 'tint' => 'teal', 'new' => true,
-         'title' => "Freelancer's Response", 'text' => 'Liza Navarro accepted your contract for Monthly Social Media Content Calendar. Please deposit the amount.', 'time' => '5h ago'],
-        ['cat' => 'messages', 'icon' => 'message', 'tint' => 'blue', 'new' => true,
-         'title' => 'New Messages', 'text' => 'Janelle Cruz: "I pushed the low-stock alerts — can you test it today?"', 'time' => '5h ago'],
-        ['cat' => 'work', 'icon' => 'upload', 'tint' => 'teal', 'new' => false,
-         'title' => 'Work Submissions', 'text' => 'Janelle Cruz submitted work on Point-of-Sale and Inventory Dashboard.', 'time' => 'Yesterday'],
-        ['cat' => 'hours', 'icon' => 'clock', 'tint' => 'orange', 'new' => false,
-         'title' => 'Hours Logged', 'text' => 'Janelle Cruz logged 3.0 hours on Oct 03. Review them before Oct 31.', 'time' => 'Yesterday'],
-        ['cat' => 'deadline', 'icon' => 'alert', 'tint' => 'orange', 'new' => false,
-         'title' => 'Deadline and Overdue Alerts', 'text' => 'Menu Board and Cup Sleeve Design is now Overdue. Extend the deadline or accept late work.', 'time' => 'Oct 02'],
-        ['cat' => 'payments', 'icon' => 'check-circle', 'tint' => 'teal', 'new' => false,
-         'title' => 'Payment Confirmations', 'text' => 'Your deposit of ₱36,000 for Point-of-Sale and Inventory Dashboard is now held.', 'time' => 'Sep 14'],
-        ['cat' => 'refunds', 'icon' => 'refresh', 'tint' => 'orange', 'new' => false,
-         'title' => 'Refunds', 'text' => '₱4,000 was refunded for the cancelled project Barista Training Manual Layout.', 'time' => 'Aug 31'],
-    ];
+    return [];
 }
 
 /** Message threads. Each has a list of messages: from = 'me' | 'them'. */
 function toptunity_client_threads_demo_base()
 {
-    if (!tt_is_demo_account()) { return []; }
-    return [
-        [
-            'name' => 'Miguel Reyes', 'project' => 'Online Ordering Website', 'project_id' => 1,
-            'preview' => 'Sure — here are the details you asked for...', 'time' => '5m', 'unread' => true,
-            'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'short',
-            'messages' => [
-                ['from' => 'them', 'text' => 'Hello po! I have a question about the project requirements — do you also need a delivery option, or pick-up only for now?', 'time' => 'Oct 04, 9:12 AM'],
-                ['from' => 'me',   'text' => 'Sure — here are the details you asked for. Pick-up only for now, but please make it easy to add delivery next year.', 'time' => 'Oct 04, 9:30 AM · Seen'],
-                ['from' => 'them', 'file' => ['name' => 'ordering-flow-draft.pdf', 'size' => '620 KB'], 'text' => 'Attached the ordering flow for your review.', 'time' => 'Oct 04, 9:41 AM'],
-                ['from' => 'me',   'text' => 'Thanks, I will check it today.', 'time' => 'Oct 04, 9:45 AM · Seen'],
-            ],
-        ],
-        [
-            'name' => 'Janelle Cruz', 'project' => 'POS and Inventory Dashboard', 'project_id' => 2,
-            'preview' => 'I pushed the low-stock alerts — can you test it...', 'time' => '1h', 'unread' => true,
-            'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'bun',
-            'messages' => [
-                ['from' => 'them', 'text' => 'Hi Andrea! I pushed the low-stock alerts. Can you test it today?', 'time' => 'Oct 07, 3:10 PM'],
-                ['from' => 'me',   'text' => 'Will do. I will test the daily report first.', 'time' => 'Oct 07, 3:20 PM · Seen'],
-            ],
-        ],
-        [
-            'name' => 'Liza Navarro', 'project' => 'Social Media Calendar', 'project_id' => 3,
-            'preview' => 'Here are the captions for week 1, po!', 'time' => '1h', 'unread' => true,
-            'bg' => '#DBEAFE', 'hair' => '#1E293B', 'style' => 'long',
-            'messages' => [
-                ['from' => 'them', 'text' => 'Here are the captions for week 1, po!', 'time' => 'Oct 07, 2:05 PM'],
-            ],
-        ],
-        [
-            'name' => 'Paolo Garcia', 'project' => 'Menu Board Design', 'project_id' => 4,
-            'preview' => 'Sorry for the delay, sending the files tonight.', 'time' => '3d', 'unread' => false,
-            'bg' => '#FEF9C3', 'hair' => '#1E293B', 'style' => 'short',
-            'messages' => [
-                ['from' => 'them', 'text' => 'Sorry for the delay, sending the files tonight.', 'time' => 'Oct 05, 6:40 PM'],
-            ],
-        ],
-        [
-            'name' => 'Jerome Castillo', 'project' => 'Online Ordering Website', 'project_id' => 1,
-            'preview' => 'Thank you for considering my proposal!', 'time' => '1d', 'unread' => false,
-            'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'glasses',
-            'messages' => [
-                ['from' => 'them', 'text' => 'Thank you for considering my proposal!', 'time' => 'Oct 06, 4:02 PM'],
-            ],
-        ],
-    ];
+    return [];
 }
 
 /** Hourly billing rows for the billing page. */
 function toptunity_client_hourly_billing()
 {
-    if (!tt_is_demo_account()) { return []; }
-    return [
-        ['end' => '2026-07-31', 'project' => 'Weekly Menu Social Posts (July)', 'approved' => 24.0, 'rate' => 350, 'billed' => 8400, 'unused' => 1400, 'status' => 'paid'],
-        ['end' => '2026-10-31', 'project' => 'Point-of-Sale and Inventory Dashboard', 'approved' => 32.5, 'rate' => 600, 'billed' => null, 'unused' => null, 'status' => 'upcoming'],
-    ];
+    $u = tt_current_user();
+    if (!$u || $u['role'] !== 'client') { return []; }
+    $q = db()->prepare("SELECT p.id, p.title, p.hourly_rate, p.deadline, p.status,
+                               (SELECT COALESCE(SUM(hours),0) FROM work_logs w WHERE w.project_id = p.id AND w.status = 'approved') AS approved,
+                               (SELECT COALESCE(SUM(amount),0) FROM payments x WHERE x.project_id = p.id AND x.type = 'escrow') AS escrow,
+                               (SELECT COUNT(*) FROM payments x WHERE x.project_id = p.id AND x.type = 'refund') AS refunded,
+                               (SELECT COALESCE(SUM(amount),0) FROM payments x WHERE x.project_id = p.id AND x.type = 'refund') AS refund_amount
+                        FROM projects p
+                        WHERE p.client_id = ? AND p.billing_type = 'hourly' AND p.contract_status IN ('active','completed')
+                        ORDER BY p.deadline");
+    $q->execute([(int) $u['id']]);
+    $out = [];
+    foreach ($q->fetchAll() as $r) {
+        $approved = (float) $r['approved'];
+        $rate     = (int) $r['hourly_rate'];
+        $billed   = (int) round($approved * $rate);
+        $settled  = $r['status'] === 'completed';
+        $out[] = [
+            'end'      => date('M j, Y', strtotime($r['deadline'])),
+            'project'  => $r['title'],
+            'approved' => $approved,
+            'rate'     => $rate,
+            'billed'   => $settled ? $billed : 0,
+            'unused'   => $settled ? max(0, (int) $r['escrow'] - $billed) : null,
+        ];
+    }
+    return $out;
 }
 
 /* ==========================================================================
@@ -910,27 +319,7 @@ function toptunity_client_hourly_billing()
    ========================================================================== */
 function toptunity_client_reviews()
 {
-    if (!tt_is_demo_account()) { return []; }
-    return [
-        ['by' => 'Miguel Reyes', 'project' => 'Cafe Menu Landing Page', 'date' => '2026-09-02', 'stars' => 5,
-         'text' => 'Clear requirements and very quick to reply. Andrea approved the work on the same day I submitted it. Would gladly work with Kapé Lokal again!', 'bg' => '#CCFBF1', 'style' => 'short'],
-        ['by' => 'Liza Navarro', 'project' => 'Product Photo Retouching', 'date' => '2026-09-05', 'stars' => 5,
-         'text' => 'Friendly client and the photos were well organized. Payment was released right after approval.', 'bg' => '#DBEAFE', 'style' => 'long'],
-        ['by' => 'Paolo Garcia', 'project' => 'Loyalty Card Design', 'date' => '2026-07-18', 'stars' => 4,
-         'text' => 'Good communication. The brief changed once mid-project but we sorted it out quickly.', 'bg' => '#FEF9C3', 'style' => 'short'],
-        ['by' => 'Janelle Cruz', 'project' => 'POS Dashboard (Phase 1)', 'date' => '2026-06-12', 'stars' => 5,
-         'text' => 'Andrea gave clear feedback every week and paid on time.', 'bg' => '#FFEDD5', 'style' => 'bun'],
-        ['by' => 'Carla Mendoza', 'project' => 'Salon Flyer Set', 'date' => '2026-05-30', 'stars' => 5,
-         'text' => 'Very organized and easy to work with.', 'bg' => '#FFEDD5', 'style' => 'long'],
-        ['by' => 'Nina Reyes', 'project' => 'Retail Banner Design', 'date' => '2026-05-14', 'stars' => 5,
-         'text' => 'Quick decisions and fair scope. Would hire again.', 'bg' => '#FEF9C3', 'style' => 'bun'],
-        ['by' => 'Rhea Mendoza', 'project' => 'Brand Voice Guide', 'date' => '2026-04-22', 'stars' => 5,
-         'text' => 'Gave me the context I needed and approved the drafts promptly.', 'bg' => '#CCFBF1', 'style' => 'long'],
-        ['by' => 'Kevin Tan', 'project' => 'Inventory Clean-up', 'date' => '2026-03-09', 'stars' => 4,
-         'text' => 'Payment flow was smooth. The scope grew a little, but we agreed on the changes.', 'bg' => '#DCFCE7', 'style' => 'short'],
-        ['by' => 'Bea Lim', 'project' => 'Menu App Mockups', 'date' => '2026-02-18', 'stars' => 5,
-         'text' => 'Great client. Clear about what she wanted and responsive on chat.', 'bg' => '#DBEAFE', 'style' => 'long'],
-    ];
+    return tt_review_items((int) ((tt_current_user()['id'] ?? 0) ?? 0));
 }
 
 
@@ -943,7 +332,7 @@ function toptunity_current_client()
     if (!empty($_SESSION['user']) && $_SESSION['user']['role'] === 'client') {
         $me['name'] = $_SESSION['user']['name'];
         $me['avatar'] = tt_user_avatar_asset((int) $_SESSION['user']['id']);
-        if (!tt_is_demo_account()) {
+        if (!false) {
             $me['company'] = '';
             $me['bg'] = '#CCFBF1';
         }
@@ -960,7 +349,7 @@ function toptunity_current_client()
 function toptunity_client_projects()
 {
     $saved  = tt_saved_projects_for_current_user();
-    $sample = tt_is_demo_account() ? toptunity_client_projects_sample() : [];
+    $sample = false ? toptunity_client_projects_sample() : [];
     // Your own projects first, newest at the top, then the sample projects
     return array_reverse($saved, true) + $sample;
 }
@@ -1010,14 +399,8 @@ function tt_handle_uploads($field)
 
 /* ==========================================================================
    FREELANCER AREA
-   The demo freelancer is Miguel Reyes (miguel.reyes@example.com). Other accounts start empty.
+   The demo freelancer is Miguel Reyes (no sample data)
    ========================================================================== */
-
-function tt_is_demo_freelancer()
-{
-    return isset($_SESSION['user']) && $_SESSION['user']['role'] === 'freelancer'
-        && strcasecmp($_SESSION['user']['email'], 'miguel.reyes@example.com') === 0;
-}
 
 /** The signed-in freelancer, for the sidebar and profile. */
 function toptunity_current_freelancer()
@@ -1026,13 +409,6 @@ function toptunity_current_freelancer()
     if (!empty($_SESSION['user']) && $_SESSION['user']['role'] === 'freelancer') {
         $me['name'] = $_SESSION['user']['name'];
         $me['avatar'] = tt_user_avatar_asset((int) $_SESSION['user']['id']);
-    }
-    if (tt_is_demo_freelancer()) {
-        $f = toptunity_freelancer(1);
-        $me['title'] = $f['title'];
-        $me['bg']    = $f['bg'];
-        $me['hair']  = $f['hair'];
-        $me['style'] = $f['style'];
     }
     return $me;
 }
@@ -1066,25 +442,12 @@ function tt_skill_match($required, $skills)
 /** Reviews the freelancer has received (for My Reviews and the dashboard rating). */
 function toptunity_freelancer_reviews()
 {
-    if (!tt_is_demo_freelancer()) {
-        return ['avg' => 0, 'total' => 0, 'dist' => [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0], 'items' => []];
-    }
-    return [
-        'avg'   => 4.9,
-        'total' => 38,
-        'dist'  => [5 => 33, 4 => 4, 3 => 1, 2 => 0, 1 => 0],
-        'items' => [
-            ['by' => 'Grace Aquino', 'project' => 'Clinic Inventory Dashboard', 'date' => '2026-09-18', 'stars' => 5,
-             'text' => 'Miguel built our clinic inventory dashboard ahead of schedule. He explained every feature clearly and fixed small issues the same day.',
-             'bg' => '#FFEDD5', 'style' => 'bun'],
-            ['by' => 'Joy Bautista', 'project' => 'Sari-Sari Store POS System', 'date' => '2026-08-16', 'stars' => 5,
-             'text' => 'Our sari-sari store POS is so easy to use. Even my Lola can record sales now!',
-             'bg' => '#FEF9C3', 'style' => 'bun'],
-            ['by' => 'Ramon Villanueva', 'project' => 'Tuition Payment Tracker', 'date' => '2026-06-21', 'stars' => 4,
-             'text' => 'Good work on the payment tracking module. A few revisions were needed, but he handled them quickly.',
-             'bg' => '#CCFBF1', 'style' => 'short'],
-        ],
-    ];
+    $items = tt_review_items((int) ((tt_current_user()['id'] ?? 0) ?? 0));
+    $total = count($items);
+    $dist  = [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
+    foreach ($items as $i) { $dist[$i['stars']] = ($dist[$i['stars']] ?? 0) + 1; }
+    $avg = $total ? round(array_sum(array_column($items, 'stars')) / $total, 1) : 0;
+    return ['avg' => $avg, 'total' => $total, 'dist' => $dist, 'items' => $items];
 }
 
 /** Skills a freelancer can add (set by the administrator). */
@@ -1115,7 +478,7 @@ function toptunity_skill_catalog()
         db()->prepare("INSERT INTO settings (name, value) VALUES ('catalog_defaults_seeded', '1')
                        ON DUPLICATE KEY UPDATE value = '1'")->execute();
     }
-    if (tt_is_demo_admin()) {
+    if (false) {
         return tt_demo_admin_catalog_state()['skills'];
     }
     $rows = db()->query('SELECT s.name AS skill, c.name AS category FROM skills s LEFT JOIN categories c ON c.id = s.category_id ORDER BY s.name')->fetchAll();
@@ -1126,25 +489,13 @@ function toptunity_skill_catalog()
 }
 
 /* ==========================================================================
-   FREELANCER SAMPLE DATA (matches the freelancer designs; demo freelancer = Miguel Reyes)
+   FREELANCER SAMPLE DATA (no sample data)
    ========================================================================== */
 
 /** Proposals sent. status: pending | selected | not_selected | withdrawn. project_id is the public project id when there is one. */
 function toptunity_freelancer_proposals()
 {
-    if (!tt_is_demo_freelancer()) { return []; }
-    return [
-        ['id' => 1, 'project_id' => 1, 'title' => 'Online Ordering Website for a Coffee Shop', 'client' => 'Andrea Santos',
-         'category' => 'Web Development', 'type' => 'fixed', 'rate' => 0, 'offer' => 42000, 'days' => 21, 'status' => 'selected', 'sent' => '2026-10-02', 'match' => 95],
-        ['id' => 2, 'project_id' => 2, 'title' => 'Student Enrollment System for a Tutorial Center', 'client' => 'Ramon Villanueva',
-         'category' => 'Web Development', 'type' => 'hourly', 'rate' => 500, 'offer' => 500, 'days' => 30, 'status' => 'pending', 'sent' => '2026-10-02', 'match' => 95],
-        ['id' => 3, 'project_id' => 0, 'title' => 'Hotel Room Reservation Module', 'client' => 'Mark Francisco',
-         'category' => 'Web Development', 'type' => 'fixed', 'rate' => 0, 'offer' => 28000, 'days' => 18, 'status' => 'not_selected', 'sent' => '2026-09-24', 'match' => 80],
-        ['id' => 4, 'project_id' => 0, 'title' => 'Laravel API for a Delivery App', 'client' => 'Grace Aquino',
-         'category' => 'Web Development', 'type' => 'hourly', 'rate' => 700, 'offer' => 700, 'days' => 25, 'status' => 'pending', 'sent' => '2026-09-20', 'match' => 88],
-        ['id' => 5, 'project_id' => 0, 'title' => 'School Library Management System', 'client' => 'Ramon Villanueva',
-         'category' => 'Web Development', 'type' => 'fixed', 'rate' => 0, 'offer' => 35000, 'days' => 30, 'status' => 'withdrawn', 'sent' => '2026-09-12', 'match' => 90],
-    ];
+    return [];
 }
 
 /**
@@ -1153,24 +504,30 @@ function toptunity_freelancer_proposals()
  */
 function toptunity_freelancer_projects()
 {
-    $sample = tt_is_demo_freelancer() ? [
-        ['id' => 201, 'project_id' => 1, 'title' => 'Online Ordering Website for a Coffee Shop', 'client' => 'Andrea Santos',
-         'client_company' => 'Kapé Lokal Coffee Co.', 'category' => 'Web Development', 'status' => 'offer', 'type' => 'fixed',
-         'budget' => 42000, 'start' => '2026-10-08', 'deadline' => '2026-11-20', 'progress' => 0],
-        ['id' => 202, 'project_id' => 0, 'title' => 'Clinic Inventory Dashboard v2', 'client' => 'Grace Aquino',
-         'client_company' => 'Aquino Dental Clinic', 'category' => 'Web Development', 'status' => 'ongoing', 'type' => 'hourly',
-         'rate' => 650, 'max_hours' => 50, 'budget' => 32500, 'start' => '2026-09-21', 'deadline' => '2026-10-28', 'progress' => 63],
-        ['id' => 203, 'project_id' => 0, 'title' => 'Resort Booking Website Revamp', 'client' => 'Mark Francisco',
-         'client_company' => 'Resort Booking Co.', 'category' => 'Web Development', 'status' => 'ongoing', 'type' => 'fixed',
-         'budget' => 38000, 'start' => '2026-09-15', 'deadline' => '2026-10-18', 'progress' => 70],
-        ['id' => 204, 'project_id' => 0, 'title' => 'Tuition Payment Tracker', 'client' => 'Ramon Villanueva',
-         'client_company' => 'BrightPath Tutorial Center', 'category' => 'Web Development', 'status' => 'overdue', 'type' => 'fixed',
-         'budget' => 22000, 'start' => '2026-08-25', 'deadline' => '2026-09-30', 'progress' => 90],
-        ['id' => 205, 'project_id' => 0, 'title' => 'Sari-Sari Store POS System', 'client' => 'Joy Bautista',
-         'client_company' => 'Bautista Bakeshop', 'category' => 'Web Development', 'status' => 'completed', 'type' => 'fixed',
-         'budget' => 18000, 'start' => '2026-07-20', 'deadline' => '2026-08-15', 'progress' => 100],
-    ] : [];
-    return array_merge($sample, tt_freelancer_db_project_rows());
+    $u = tt_current_user();
+    if (!$u || $u['role'] !== 'freelancer') { return []; }
+    $stmt = db()->prepare("SELECT p.id, p.title, p.billing_type, p.budget, p.hourly_rate, p.max_hours, p.deadline, p.status, p.contract_status,
+                                  p.created_at, p.agreed_amount, c.name AS category, cl.name AS client
+                           FROM projects p
+                           JOIN users cl ON cl.id = p.client_id
+                           LEFT JOIN categories c ON c.id = p.category_id
+                           WHERE p.freelancer_id = ? ORDER BY p.id DESC");
+    $stmt->execute([(int) $u['id']]);
+    $out = [];
+    foreach ($stmt->fetchAll() as $r) {
+        if ($r['contract_status'] === 'pending')                       { $st = 'offer'; }
+        elseif (in_array($r['status'], ['completed'], true))            { $st = 'completed'; }
+        elseif (in_array($r['status'], ['ongoing', 'overdue'], true))  { $st = $r['status']; }
+        elseif ($r['contract_status'] === 'active')                     { $st = 'ongoing'; }
+        else                                                            { $st = 'waiting'; } // selected, contract not sent yet
+        $out[] = ['id' => 1000 + (int) $r['id'], 'project_id' => (int) $r['id'], 'title' => $r['title'], 'client' => $r['client'],
+                  'client_company' => '', 'category' => $r['category'] ?: 'Other', 'status' => $st,
+                  'type' => $r['billing_type'], 'rate' => (int) $r['hourly_rate'], 'max_hours' => (int) $r['max_hours'],
+                  'budget' => (int) ($r['agreed_amount'] ?: $r['budget']),
+                  'start' => date('Y-m-d', strtotime($r['created_at'])), 'deadline' => $r['deadline'],
+                  'contract_status' => $r['contract_status'], 'progress' => tt_project_progress((int) $r['id'], $r['contract_status'])];
+    }
+    return $out;
 }
 
 /** One project with its details: work log, revision request, submitted work and history. */
@@ -1178,50 +535,26 @@ function toptunity_freelancer_project($id)
 {
     foreach (toptunity_freelancer_projects() as $p) {
         if ((int) $p['id'] !== (int) $id) { continue; }
-        $p['worklog'] = [];
+        $pr = db()->prepare('SELECT hourly_rate, max_hours FROM projects WHERE id = ?');
+        $pr->execute([(int) $p['project_id']]);
+        $row = $pr->fetch() ?: ['hourly_rate' => 0, 'max_hours' => 0];
+        $sum = db()->prepare("SELECT COALESCE(SUM(CASE WHEN status <> 'rejected' THEN hours ELSE 0 END), 0) AS logged,
+                                     COALESCE(SUM(CASE WHEN status = 'approved' THEN hours ELSE 0 END), 0) AS approved
+                              FROM work_logs WHERE project_id = ?");
+        $sum->execute([(int) $p['project_id']]);
+        $tot = $sum->fetch();
+        $p['rate'] = (int) $row['hourly_rate'];
+        $p['max_hours'] = (int) $row['max_hours'];
+        $p['hours_logged'] = (float) $tot['logged'];
+        $p['hours_approved'] = (float) $tot['approved'];
+        $p['worklog'] = tt_project_work_logs($p['id']);
         $p['revision'] = null;
         $p['submitted'] = null;
-        $p['history'] = [];
-        $p['hours_logged'] = 0; $p['hours_approved'] = 0;
-        if ($id === 202) {
-            $p['worklog'] = [
-                ['date' => '2026-10-04', 'hours' => 4.0, 'task' => 'Monthly stock report export to Excel', 'status' => 'pending'],
-                ['date' => '2026-10-02', 'hours' => 5.5, 'task' => 'Supplier list and purchase order screens', 'status' => 'approved'],
-                ['date' => '2026-09-30', 'hours' => 6.0, 'task' => 'Batch and expiry date tracking for medicines', 'status' => 'approved'],
-                ['date' => '2026-09-28', 'hours' => 1.5, 'task' => 'Fixing unrelated printer driver issue', 'status' => 'rejected', 'note' => 'Outside the project requirements'],
-            ];
-            $p['hours_logged'] = 31.5; $p['hours_approved'] = 27.5;
-            $p['revision'] = ['date' => 'Oct 03, 2026', 'message' => 'Please add an Export to Excel button on the monthly stock report so our pharmacist can print it.'];
-            $p['submitted'] = ['message' => "Hi Ma'am Grace! I added the Export to Excel button on the monthly stock report. The file follows your pharmacy's template. Please check and let me know.",
-                               'files' => [['name' => 'clinic-inventory-v2.3.zip', 'size' => '5.1 MB']]];
-            $p['history'] = [
-                ['date' => 'Oct 04, 2026', 'status' => 'Hours logged', 'note' => '4.0 h · Pending'],
-                ['date' => 'Oct 03, 2026', 'status' => 'Revision requested', 'note' => 'Client'],
-                ['date' => 'Oct 02, 2026', 'status' => 'Hours approved', 'note' => '5.5 h · Client'],
-                ['date' => 'Sep 21, 2026', 'status' => 'Project started', 'note' => 'Payment held'],
-                ['date' => 'Sep 21, 2026', 'status' => 'Contract accepted', 'note' => 'Start date set'],
-                ['date' => 'Sep 20, 2026', 'status' => 'Freelancer selected', 'note' => 'Client'],
-            ];
-        }
-        if ($id === 201) {
-            $p['history'] = [['date' => 'Oct 07, 2026', 'status' => 'Freelancer selected', 'note' => 'Client']];
-        }
-        if (!empty($p['real']) && $p['type'] === 'hourly') {
-            $p['worklog'] = tt_project_work_logs($id);
-            $p['hours_logged'] = array_sum(array_column($p['worklog'], 'hours'));
-            $p['hours_approved'] = array_sum(array_map(function ($entry) {
-                return $entry['status'] === 'approved' ? (float) $entry['hours'] : 0;
-            }, $p['worklog']));
-        }
-        if (!empty($p['real'])) {
-            $submission = tt_project_submission($id);
-            $p['submitted'] = $submission ? ['message' => $submission['message'], 'status' => $submission['status'],
-                                              'review_note' => $submission['review_note'],
-                                              'files' => tt_attachments('deliverable', $id)] : null;
-            if ($submission && $submission['status'] === 'revision') {
-                $p['revision'] = ['date' => tt_date_label($submission['created_at']), 'message' => $submission['review_note']];
-            }
-        }
+        $rq = db()->prepare("SELECT COALESCE(SUM(amount),0) FROM payments WHERE project_id = ? AND type = 'release' AND status = 'released'");
+        $rq->execute([(int) $p['project_id']]);
+        $p['released'] = (int) $rq->fetchColumn();
+        $p['history'] = array_map(function ($h) { return ['date' => $h['when'], 'status' => $h['text'], 'note' => '']; },
+                                  tt_project_history((int) $p['project_id'], $p['start'] . ' 00:00:00', $p['deadline'], $p['status']));
         return $p;
     }
     return null;
@@ -1230,61 +563,13 @@ function toptunity_freelancer_project($id)
 /** Message threads. Each has messages with from = 'me' | 'them'. */
 function toptunity_freelancer_threads_demo_base()
 {
-    if (!tt_is_demo_freelancer()) { return []; }
-    return [
-        ['name' => 'Andrea Santos', 'project' => 'Online Ordering Website for a Coffee Shop', 'time' => '5m', 'unread' => true,
-         'preview' => 'Thanks, I will check it today.', 'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'long',
-         'messages' => [
-            ['from' => 'them', 'text' => 'Hi Miguel! Your proposal looks great. Before I send the contract, can you include a short training video for my staff?', 'time' => 'Oct 04, 9:12 AM'],
-            ['from' => 'me', 'text' => 'Hello po! Yes, I always include a 5-minute walkthrough video. I also attached the ordering flow draft.', 'time' => 'Oct 04, 9:20 AM · Seen'],
-            ['from' => 'me', 'file' => ['name' => 'ordering-flow-draft.pdf', 'size' => '820 KB'], 'text' => 'Attached the ordering flow for your review.', 'time' => 'Oct 04, 9:41 AM · Seen'],
-            ['from' => 'them', 'text' => 'Thanks, I will check it today.', 'time' => 'Oct 04, 9:45 AM'],
-         ]],
-        ['name' => 'Grace Aquino', 'project' => 'Clinic Inventory Dashboard v2', 'time' => '1h', 'unread' => true,
-         'preview' => 'Approved 5.5 hours for Oct 2. Thank you!', 'bg' => '#FFEDD5', 'hair' => '#1E293B', 'style' => 'bun',
-         'messages' => [
-            ['from' => 'them', 'text' => 'Approved 5.5 hours for Oct 2. Thank you!', 'time' => 'Oct 04, 10:02 AM'],
-         ]],
-        ['name' => 'Mark Francisco', 'project' => 'Resort Booking Website Revamp', 'time' => '1d', 'unread' => false,
-         'preview' => 'Can we add a GCash reference field?', 'bg' => '#DBEAFE', 'hair' => '#1E293B', 'style' => 'short',
-         'messages' => [
-            ['from' => 'them', 'text' => 'Can we add a GCash reference field?', 'time' => 'Oct 03, 4:15 PM'],
-         ]],
-        ['name' => 'Ramon Villanueva', 'project' => 'Tuition Payment Tracker', 'time' => '2d', 'unread' => false,
-         'preview' => 'Please send the final build when ready.', 'bg' => '#CCFBF1', 'hair' => '#1E293B', 'style' => 'glasses',
-         'messages' => [
-            ['from' => 'them', 'text' => 'Please send the final build when ready.', 'time' => 'Oct 02, 1:30 PM'],
-         ]],
-        ['name' => 'Joy Bautista', 'project' => 'Sari-Sari Store POS System', 'time' => '1w', 'unread' => false,
-         'preview' => 'The POS is working great, thank you!', 'bg' => '#FEF9C3', 'hair' => '#1E293B', 'style' => 'bun',
-         'messages' => [
-            ['from' => 'them', 'text' => 'The POS is working great, thank you!', 'time' => 'Sep 28, 8:00 AM'],
-         ]],
-    ];
+    return [];
 }
 
 /** Notifications. cat is used by the filter tabs. */
 function toptunity_freelancer_notifications_demo()
 {
-    if (!tt_is_demo_freelancer()) { return []; }
-    return [
-        ['cat' => 'offers', 'icon' => 'briefcase', 'tint' => 'orange', 'new' => true,
-         'title' => 'Project Offers', 'text' => 'Andrea Santos selected you and sent a contract for Online Ordering Website for a Coffee Shop.', 'time' => '1h ago'],
-        ['cat' => 'worklog', 'icon' => 'check-circle', 'tint' => 'teal', 'new' => true,
-         'title' => 'Work Log Updates', 'text' => 'Grace Aquino approved 5.5 hours on Clinic Inventory Dashboard v2.', 'time' => '3h ago'],
-        ['cat' => 'messages', 'icon' => 'message', 'tint' => 'blue', 'new' => true,
-         'title' => 'New Messages', 'text' => 'Mark Francisco: "Can we add a GCash reference field?"', 'time' => 'Yesterday'],
-        ['cat' => 'proposals', 'icon' => 'x-circle', 'tint' => 'slate', 'new' => false,
-         'title' => 'Proposal Results', 'text' => 'Your proposal for Hotel Room Reservation Module was not selected.', 'time' => 'Sep 26'],
-        ['cat' => 'revisions', 'icon' => 'refresh', 'tint' => 'orange', 'new' => false,
-         'title' => 'Revision Requests', 'text' => 'Mark Francisco requested a revision on Resort Booking Website Revamp.', 'time' => 'Sep 27'],
-        ['cat' => 'deadlines', 'icon' => 'alert', 'tint' => 'orange', 'new' => false,
-         'title' => 'Deadline Extensions and Overdue Alerts', 'text' => 'Tuition Payment Tracker passed its End Date and is now Overdue.', 'time' => 'Oct 01'],
-        ['cat' => 'payments', 'icon' => 'wallet', 'tint' => 'teal', 'new' => false,
-         'title' => 'Payments', 'text' => '₱16,200 (₱18,000 minus 10% fee) was released for Sari-Sari Store POS System.', 'time' => 'Aug 16'],
-        ['cat' => 'withdrawals', 'icon' => 'bank', 'tint' => 'blue', 'new' => false,
-         'title' => 'Withdrawal Updates', 'text' => 'Your withdrawal of ₱15,000 to GCash •••• 4821 was processed.', 'time' => 'Aug 18'],
-    ];
+    return [];
 }
 
 
@@ -1310,15 +595,7 @@ function toptunity_current_admin()
 /** Recent activity for the audit log. */
 function toptunity_admin_audit()
 {
-    if (!tt_is_demo_admin()) { return []; }
-    return [
-        ['when' => 'Oct 08, 2026 · 9:12 AM', 'who' => 'Andrea Santos', 'role' => 'client', 'action' => 'Posted a project', 'target' => 'Online Ordering Website for a Coffee Shop'],
-        ['when' => 'Oct 07, 2026 · 3:24 PM', 'who' => 'Miguel Reyes', 'role' => 'freelancer', 'action' => 'Submitted a proposal', 'target' => 'Online Ordering Website for a Coffee Shop'],
-        ['when' => 'Oct 06, 2026 · 4:40 PM', 'who' => 'Ramon Villanueva', 'role' => 'client', 'action' => 'Approved logged hours', 'target' => 'Tuition Payment Tracker'],
-        ['when' => 'Oct 04, 2026 · 6:42 PM', 'who' => 'Miguel Reyes', 'role' => 'freelancer', 'action' => 'Logged 3.0 hours', 'target' => 'Clinic Inventory Dashboard v2'],
-        ['when' => 'Oct 03, 2026 · 10:15 AM', 'who' => 'Admin', 'role' => 'admin', 'action' => 'Rejected a withdrawal', 'target' => 'W-2170 · Carlo Dizon'],
-        ['when' => 'Oct 02, 2026 · 9:02 AM', 'who' => 'Grace Aquino', 'role' => 'client', 'action' => 'Requested a revision', 'target' => 'Clinic Inventory Dashboard v2'],
-    ];
+    return [];
 }
 
 
@@ -1329,38 +606,18 @@ function toptunity_admin_audit()
 /** Every user: real accounts plus the sample users shown in the design. */
 function toptunity_admin_users()
 {
-    $rows = [];
-    foreach (tt_load_users() as $u) {
-        if (tt_is_demo_admin() && !tt_is_demo_user($u)) { continue; }
-        if (!tt_is_demo_admin() && (tt_is_demo_user($u) || tt_is_demo_admin($u))) { continue; }
-        $rows[] = ['id' => (int) $u['id'], 'name' => $u['name'], 'email' => $u['email'], 'role' => $u['role'],
-                   'status' => ucfirst($u['status']), 'joined' => date('M d, Y', strtotime($u['created_at']))];
+    $rows = db()->query("SELECT u.id, u.name, u.email, u.role, u.status, u.created_at, u.status_changed_at,
+                                (SELECT COUNT(*) FROM reports r WHERE r.reported_user_id = u.id) AS reported,
+                                (SELECT COUNT(*) FROM notifications n WHERE n.user_id = u.id AND n.title = 'Account warning') AS warnings
+                         FROM users u WHERE u.role <> 'admin' ORDER BY u.created_at DESC")->fetchAll();
+    $out = [];
+    foreach ($rows as $r) {
+        $out[] = ['id' => (int) $r['id'], 'name' => $r['name'], 'email' => $r['email'], 'role' => $r['role'],
+                  'status' => ucfirst($r['status']), 'joined' => date('M j, Y', strtotime($r['created_at'])),
+                  'suspended_on' => ($r['status'] === 'suspended' && $r['status_changed_at']) ? date('M d, Y', strtotime($r['status_changed_at'])) : '',
+                  'reported' => (int) $r['reported'], 'warnings' => (int) $r['warnings']];
     }
-    if (!tt_is_demo_admin()) { return $rows; }
-    $sample = [
-        ['id' => 2001, 'name' => 'Ramon Villanueva', 'email' => 'ramon@brightpath.edu.ph', 'role' => 'client', 'status' => 'Active', 'joined' => 'Feb 20, 2025'],
-        ['id' => 2002, 'name' => 'Rico Manalastas', 'email' => 'rico.manalastas@gmail.com', 'role' => 'client', 'status' => 'Suspended', 'joined' => 'Sep 14, 2026'],
-        ['id' => 2003, 'name' => 'Grace Aquino', 'email' => 'grace@aquinodental.ph', 'role' => 'client', 'status' => 'Active', 'joined' => 'Mar 03, 2025'],
-        ['id' => 2004, 'name' => 'Mark Francisco', 'email' => 'mark@islatravel.ph', 'role' => 'client', 'status' => 'Deactivated', 'joined' => 'Apr 18, 2025'],
-        ['id' => 2005, 'name' => 'Joy Bautista', 'email' => 'joy.bautista@gmail.com', 'role' => 'freelancer', 'status' => 'Active', 'joined' => 'Jun 09, 2026'],
-        ['id' => 2006, 'name' => 'Paolo Garcia', 'email' => 'paolo.garcia@gmail.com', 'role' => 'freelancer', 'status' => 'Active', 'joined' => 'Mar 11, 2025'],
-        ['id' => 2007, 'name' => 'Kevin Tan', 'email' => 'kevin.tan@gmail.com', 'role' => 'freelancer', 'status' => 'Active', 'joined' => 'Jul 22, 2026'],
-        ['id' => 2008, 'name' => 'Daniel Ocampo', 'email' => 'daniel.ocampo@example.com', 'role' => 'freelancer', 'status' => 'Active', 'joined' => 'Oct 02, 2026'],
-    ];
-    foreach (toptunity_freelancers() as $fid => $f) {
-        $sample[] = ['id' => 3000 + $fid, 'name' => $f['name'], 'email' => strtolower(str_replace(' ', '.', $f['name'])) . '@example.com',
-                     'role' => 'freelancer', 'status' => $f['available'] ? 'Active' : 'Inactive', 'joined' => $f['since']];
-    }
-    $names = array_map(function ($r) { return strtolower($r['name']); }, $rows);
-    foreach ($sample as $r) { if (!in_array(strtolower($r['name']), $names, true)) { $rows[] = $r; } }
-    foreach ($rows as &$row) {
-        if (isset($_SESSION['demo_admin_user_status'][(string) $row['id']])) {
-            $row['status'] = $_SESSION['demo_admin_user_status'][(string) $row['id']];
-        }
-        $row['warnings'] = count($_SESSION['demo_admin_user_warnings'][(string) $row['id']] ?? []);
-    }
-    unset($row);
-    return $rows;
+    return $out;
 }
 
 /** Change a client or freelancer status. Demo changes are isolated to the admin session. */
@@ -1371,7 +628,7 @@ function tt_admin_change_user_status($id, $action)
     $statuses = ['suspend' => 'Suspended', 'reactivate' => 'Active', 'deactivate' => 'Deactivated'];
     if (!isset($statuses[$action])) { return 'Choose a valid user action.'; }
 
-    if (tt_is_demo_admin($user)) {
+    if (false) {
         $target = null;
         foreach (toptunity_admin_users() as $candidate) {
             if ((int) $candidate['id'] === (int) $id && in_array($candidate['role'], ['client', 'freelancer'], true)) {
@@ -1385,7 +642,7 @@ function tt_admin_change_user_status($id, $action)
     }
 
     $status = ['suspend' => 'suspended', 'reactivate' => 'active', 'deactivate' => 'deactivated'][$action];
-    $stmt = db()->prepare("UPDATE users SET status = ? WHERE id = ? AND role IN ('client', 'freelancer')");
+    $stmt = db()->prepare("UPDATE users SET status = ?, status_changed_at = NOW() WHERE id = ? AND role IN ('client', 'freelancer')");
     $stmt->execute([$status, (int) $id]);
     if ($stmt->rowCount()) { return null; }
     $check = db()->prepare("SELECT status FROM users WHERE id = ? AND role IN ('client', 'freelancer')");
@@ -1396,59 +653,20 @@ function tt_admin_change_user_status($id, $action)
 /** Reports. status: pending | resolved | dismissed. type: User | Project | Review | Message */
 function toptunity_admin_reports()
 {
-    if (!tt_is_demo_admin()) {
-        $demo_ids = tt_demo_ids();
-        $sql = 'SELECT r.id, r.type, r.reason, r.details, r.status, r.created_at, r.reported_user_id,
-                       reporter.name AS reporter, reported.name AS reported_user
-                FROM reports r
-                JOIN users reporter ON reporter.id = r.reporter_id
-                LEFT JOIN users reported ON reported.id = r.reported_user_id';
-        if ($demo_ids) {
-            $ids = implode(',', array_map('intval', $demo_ids));
-            $sql .= " WHERE r.reporter_id NOT IN ($ids) AND (r.reported_user_id IS NULL OR r.reported_user_id NOT IN ($ids))";
-        }
-        $rows = [];
-        foreach (db()->query($sql . ' ORDER BY r.id DESC')->fetchAll() as $report) {
-            $reported = $report['reported_user'] ?: ucfirst($report['type']) . ' report #' . (int) $report['id'];
-            $rows[] = [
-                'id' => 'DB-' . (int) $report['id'],
-                'date' => tt_date_label($report['created_at']),
-                'reported' => $reported,
-                'type' => ucfirst($report['type']),
-                'reason' => $report['reason'],
-                'reporter' => $report['reporter'],
-                'status' => $report['status'],
-                'quote' => $report['details'],
-                'when' => date('M d, Y · g:i A', strtotime($report['created_at'])),
-                'reported_user_id' => $report['reported_user_id'] ? (int) $report['reported_user_id'] : null,
-                'real' => true,
-            ];
-        }
-        return $rows;
+    $rows = db()->query("SELECT r.id, r.type, r.reason, r.details, r.status, r.created_at, r.reported_user_id,
+                                ru.name AS reporter, cu.name AS reported
+                         FROM reports r
+                         JOIN users ru ON ru.id = r.reporter_id
+                         LEFT JOIN users cu ON cu.id = r.reported_user_id
+                         ORDER BY r.created_at DESC")->fetchAll();
+    $out = [];
+    foreach ($rows as $r) {
+        $out[] = ['id' => 'DB-' . $r['id'], 'reported_user_id' => $r['reported_user_id'] ? (int) $r['reported_user_id'] : null, 'date' => date('M j', strtotime($r['created_at'])),
+                  'reported' => $r['reported'] ?: '—', 'reporter' => $r['reporter'], 'type' => ucfirst($r['type']),
+                  'reason' => $r['reason'], 'status' => $r['status'], 'quote' => $r['details'],
+                  'when' => date('M j, Y · g:i A', strtotime($r['created_at']))];
     }
-    $rows = [
-        ['id' => 'R-311', 'date' => 'Oct 03', 'reported' => 'Rico Manalastas', 'type' => 'User', 'reason' => 'Scam / off-platform payment',
-         'reporter' => 'Miguel Reyes', 'status' => 'pending',
-         'quote' => 'Before I send the contract, please pay a ₱500 registration fee to my GCash 0998•••• so I know you\'re serious.', 'when' => 'Sep 30, 2026 · 3:14 PM'],
-        ['id' => 'R-310', 'date' => 'Oct 02', 'reported' => 'Daniel Ocampo', 'type' => 'User', 'reason' => 'Abusive messages',
-         'reporter' => 'Andrea Santos', 'status' => 'pending',
-         'quote' => 'After I chose another freelancer, this user sent me several rude messages and demanded I cancel my project.', 'when' => 'Oct 02, 2026 · 8:40 AM'],
-        ['id' => 'R-306', 'date' => 'Sep 30', 'reported' => 'Earn ₱5k Daily — Easy Typing Job', 'type' => 'Project', 'reason' => 'Fake or misleading posting',
-         'reporter' => 'Kevin Tan', 'status' => 'pending',
-         'quote' => 'The posting promises daily income for typing and asks for a registration fee.', 'when' => 'Sep 30, 2026 · 10:02 AM'],
-        ['id' => 'R-301', 'date' => 'Sep 27', 'reported' => 'Review on Paolo Garcia', 'type' => 'Review', 'reason' => 'Fake review',
-         'reporter' => 'Paolo Garcia', 'status' => 'resolved',
-         'quote' => 'The review was removed after checking the contract history.', 'when' => 'Sep 27, 2026 · 1:20 PM'],
-        ['id' => 'R-296', 'date' => 'Sep 25', 'reported' => 'Leo Santiago', 'type' => 'User', 'reason' => 'Spam proposals',
-         'reporter' => 'Grace Aquino', 'status' => 'dismissed',
-         'quote' => 'Several identical proposals were sent to unrelated projects.', 'when' => 'Sep 25, 2026 · 4:45 PM'],
-    ];
-    foreach ($rows as &$row) {
-        $state = $_SESSION['demo_admin_report_actions'][$row['id']] ?? null;
-        if ($state) { $row['status'] = $state['status']; }
-    }
-    unset($row);
-    return $rows;
+    return $out;
 }
 
 /** Record report review actions against live records or session-only demo fixtures. */
@@ -1459,10 +677,10 @@ function tt_admin_review_report($report_id, $action)
     if (!in_array($action, ['dismiss', 'warn', 'remove', 'suspend'], true)) { return 'Choose a valid report action.'; }
     $status = $action === 'dismiss' ? 'dismissed' : 'resolved';
 
-    if (tt_is_demo_admin($user)) {
+    if (false) {
         $report = null;
         foreach (toptunity_admin_reports() as $candidate) {
-            if ($candidate['id'] === $report_id) { $report = $candidate; break; }
+            if ((string) $candidate['id'] === (string) $report_id) { $report = $candidate; break; }
         }
         if (!$report || $report['status'] !== 'pending') { return 'That report is no longer pending.'; }
         if (in_array($action, ['warn', 'suspend'], true) && strcasecmp($report['type'], 'User') !== 0) {
@@ -1497,7 +715,7 @@ function tt_admin_review_report($report_id, $action)
         if (strcasecmp($report['type'], 'user') !== 0) { return 'Warnings and account suspensions are only available for user reports.'; }
         if (!$report['reported_user_id']) { return 'This report is not linked to a user account.'; }
         if ($action === 'suspend') {
-            $pdo->prepare("UPDATE users SET status = 'suspended' WHERE id = ? AND role IN ('client', 'freelancer')")
+            $pdo->prepare("UPDATE users SET status = 'suspended', status_changed_at = NOW() WHERE id = ? AND role IN ('client', 'freelancer')")
                 ->execute([(int) $report['reported_user_id']]);
         } else {
             tt_notify((int) $report['reported_user_id'], 'reports', 'Account warning',
@@ -1511,59 +729,84 @@ function tt_admin_review_report($report_id, $action)
 /** Projects for moderation. status: open | ongoing | overdue | completed | past | closed | cancelled */
 function toptunity_admin_projects()
 {
-    $rows = tt_is_demo_admin() ? [
-        ['id' => 'P-1', 'title' => 'Point-of-Sale and Inventory Dashboard', 'client' => 'Andrea Santos', 'type' => 'hourly', 'amount' => 600,
-         'deadline' => '2026-10-31', 'status' => 'ongoing', 'proposals' => 9, 'freelancer' => 'Janelle Cruz', 'billing' => 'Hourly ₱600/hr'],
-        ['id' => 'P-2', 'title' => '30-Second Promo Video for Opening Week', 'client' => 'Andrea Santos', 'type' => 'fixed', 'amount' => 9000,
-         'deadline' => '2026-09-25', 'status' => 'past', 'proposals' => 4, 'freelancer' => '', 'billing' => 'Fixed · ₱9,000'],
-        ['id' => 'P-3', 'title' => 'Student Enrollment System for a Tutorial Center', 'client' => 'Ramon Villanueva', 'type' => 'hourly', 'amount' => 500,
-         'deadline' => '2026-12-05', 'status' => 'open', 'proposals' => 8, 'freelancer' => '', 'billing' => 'Hourly ₱500/hr'],
-        ['id' => 'P-4', 'title' => 'Tuition Payment Tracker', 'client' => 'Ramon Villanueva', 'type' => 'fixed', 'amount' => 22000,
-         'deadline' => '2026-09-30', 'status' => 'overdue', 'proposals' => 5, 'freelancer' => 'Miguel Reyes', 'billing' => 'Fixed · ₱22,000'],
-        ['id' => 'P-5', 'title' => 'Product Data Encoding for 1,200 Items', 'client' => 'Grace Aquino', 'type' => 'hourly', 'amount' => 200,
-         'deadline' => '2026-10-30', 'status' => 'completed', 'proposals' => 14, 'freelancer' => 'Kevin Tan', 'billing' => 'Hourly ₱200/hr'],
-        ['id' => 'P-6', 'title' => 'Barista Training Manual Layout', 'client' => 'Andrea Santos', 'type' => 'fixed', 'amount' => 4000,
-         'deadline' => '2026-08-30', 'status' => 'cancelled', 'proposals' => 6, 'freelancer' => '', 'billing' => 'Fixed · ₱4,000'],
-    ] : [];
-    $client_name = db()->prepare('SELECT name FROM users WHERE id = ?');
-    $demo_ids = tt_demo_ids();
-    foreach (tt_load_saved_projects() as $p) {
-        if (tt_is_demo_admin() && !in_array((int) $p['owner'], $demo_ids, true)) { continue; }
-        if (!tt_is_demo_admin() && (in_array((int) $p['owner'], $demo_ids, true)
-            || in_array((int) ($p['freelancer_id'] ?? 0), $demo_ids, true))) { continue; }
-        $client_name->execute([(int) $p['owner']]);
-        $display_status = $p['status'] === 'open' && $p['deadline'] < date('Y-m-d') ? 'past' : $p['status'];
-        $rows[] = ['id' => 'DB-' . $p['id'], 'site_id' => (int) $p['id'], 'real' => true,
-                   'title' => $p['title'], 'client' => $client_name->fetchColumn() ?: 'Client',
-                   'type' => $p['type'], 'amount' => $p['type'] === 'hourly' ? $p['rate'] : $p['budget'],
-                   'deadline' => $p['deadline'], 'status' => $display_status, 'proposals' => (int) $p['proposals'],
-                   'contract_status' => $p['contract_status'], 'freelancer' => $p['freelancer'] ?: '', 'billing' => $p['type'] === 'hourly'
-                       ? 'Hourly ₱' . number_format($p['rate']) . '/hr' : 'Fixed · ₱' . number_format($p['budget'])];
+    $rows = db()->query("SELECT p.id, p.title, p.status, p.billing_type, p.budget, p.hourly_rate, p.deadline, p.contract_status, p.created_at,
+                                c.name AS client, f.name AS freelancer,
+                                (SELECT COUNT(*) FROM proposals pr WHERE pr.project_id = p.id) AS proposals
+                         FROM projects p
+                         JOIN users c ON c.id = p.client_id
+                         LEFT JOIN users f ON f.id = p.freelancer_id
+                         ORDER BY p.created_at DESC")->fetchAll();
+    $out = [];
+    foreach ($rows as $r) {
+        $hourly = $r['billing_type'] === 'hourly';
+        $out[] = ['id' => 1000 + (int) $r['id'], 'site_id' => 1000 + (int) $r['id'], 'title' => $r['title'], 'client' => $r['client'],
+                  'freelancer' => $r['freelancer'] ?: '—', 'status' => $r['status'], 'contract_status' => $r['contract_status'], 'has_freelancer' => !empty($r['freelancer']), 'deadline' => $r['deadline'],
+                  'type' => $r['billing_type'], 'billing' => $hourly ? 'Hourly ₱' . number_format((int) $r['hourly_rate']) . '/hr' : 'Fixed · ₱' . number_format((int) $r['budget']),
+                  'proposals' => (int) $r['proposals'], 'contract_status' => $r['contract_status'], 'real' => true,
+                  'history' => tt_project_history((int) $r['id'], $r['created_at'], $r['deadline'], $r['status'])];
     }
-    if (tt_is_demo_admin()) {
-        foreach ($rows as $index => &$row) {
-            if (!empty($row['real'])) { continue; }
-            $state = $_SESSION['demo_admin_project_actions'][$row['id']] ?? null;
-            if (!empty($state['removed'])) {
-                unset($rows[$index]);
-                continue;
-            }
-            if (!empty($state['status'])) { $row['status'] = $state['status']; }
-            $row['contract_status'] = 'none';
-        }
-        unset($row);
-        $rows = array_values($rows);
+    return $out;
+}
+
+/**
+ * Real history of one project, newest first: posted, proposals, freelancer selection, contract steps,
+ * payments and an overdue deadline. Built from the database only; nothing is typed in.
+ */
+function tt_project_history($project_id, $created_at, $deadline, $status)
+{
+    $events = [];
+    $site = 1000 + (int) $project_id;
+    $events[] = ['when' => $created_at, 'text' => 'Project posted (client)'];
+
+    $pq = db()->prepare("SELECT pr.offer, pr.created_at, u.name FROM proposals pr JOIN users u ON u.id = pr.freelancer_id WHERE pr.project_id = ?");
+    $pq->execute([(int) $project_id]);
+    foreach ($pq->fetchAll() as $pr) {
+        $events[] = ['when' => $pr['created_at'], 'text' => 'Proposal from ' . $pr['name'] . ' · ₱' . number_format((int) $pr['offer'])];
     }
-    return $rows;
+
+    // Audit entries store the project as "project #<db id>" or "project #<site id>"
+    $aq = db()->prepare("SELECT action, target, created_at FROM audit_logs
+                         WHERE target REGEXP ? AND action NOT IN ('submit proposal')
+                         ORDER BY created_at");
+    $aq->execute(['^project #(' . (int) $project_id . '|' . $site . ')(\\s|$)']);
+    $labels = ['select freelancer' => 'Freelancer selected', 'send contract' => 'Contract sent',
+               'accept contract' => 'Freelancer accepted the contract', 'decline contract' => 'Freelancer declined the contract',
+               'post project' => null];
+    foreach ($aq->fetchAll() as $a) {
+        $label = array_key_exists($a['action'], $labels) ? $labels[$a['action']] : ucfirst($a['action']);
+        if ($label === null) { continue; }
+        $events[] = ['when' => $a['created_at'], 'text' => $label . ' · ' . trim(preg_replace('/^project #\d+\s*/', '', $a['target']))];
+    }
+
+    $sq = db()->prepare("SELECT status, created_at FROM project_submissions WHERE project_id = ? ORDER BY id");
+    $sq->execute([(int) $project_id]);
+    $sub_labels = ['pending' => 'Work submitted for review', 'approved' => 'Work approved by client', 'rejected' => 'Revision requested'];
+    foreach ($sq->fetchAll() as $sb) {
+        $events[] = ['when' => $sb['created_at'], 'text' => $sub_labels[$sb['status']] ?? ucfirst($sb['status'])];
+    }
+    $pq2 = db()->prepare("SELECT type, amount, created_at FROM payments WHERE project_id = ? ORDER BY id");
+    $pq2->execute([(int) $project_id]);
+    foreach ($pq2->fetchAll() as $pm) {
+        $events[] = ['when' => $pm['created_at'], 'text' => ($pm['type'] === 'release' ? 'Payment released' : 'Payment deposited') . ' · ₱' . number_format((int) $pm['amount'])];
+    }
+
+    if (!empty($deadline) && strtotime($deadline) < strtotime('today') && in_array($status, ['open', 'ongoing'], true)) {
+        $events[] = ['when' => $deadline . ' 23:59:00', 'text' => 'Deadline passed (' . date('M j, Y', strtotime($deadline)) . ')'];
+    }
+
+    usort($events, function ($a, $b) { return strtotime($b['when']) <=> strtotime($a['when']); });
+    return array_map(function ($e) {
+        return ['when' => date('M j, Y', strtotime($e['when'])), 'text' => $e['text']];
+    }, $events);
 }
 
 /** Apply a moderation action to an isolated demo project fixture. */
 function tt_admin_moderate_demo_project($project_id, $action)
 {
-    if (!tt_is_demo_admin()) { return 'This action is only available to the demo administrator.'; }
+    if (!false) { return 'This action is only available to the demo administrator.'; }
     $project = null;
     foreach (toptunity_admin_projects() as $candidate) {
-        if ($candidate['id'] === $project_id && empty($candidate['real'])) { $project = $candidate; break; }
+        if ((string) $candidate['id'] === (string) $project_id && empty($candidate['real'])) { $project = $candidate; break; }
     }
     if (!$project) { return 'This sample project could not be found.'; }
     $allowed = [
@@ -1593,7 +836,7 @@ function tt_admin_moderate_project($site_id, $action)
     if (!$user || $user['role'] !== 'admin') { return 'Administrator access is required.'; }
     $project = tt_db_project($site_id);
     if (!$project) { return 'This project could not be found.'; }
-    if (tt_is_demo_admin($user) && !in_array((int) $project['client_id'], tt_demo_ids(), true)) {
+    if (false && !in_array((int) $project['client_id'], tt_demo_ids(), true)) {
         return 'The demo administrator can only moderate projects belonging to demo accounts.';
     }
     $pdo = db();
@@ -1614,8 +857,8 @@ function tt_admin_moderate_project($site_id, $action)
         $files = $stmt->fetchAll(PDO::FETCH_COLUMN);
         $pdo->beginTransaction();
         $pdo->prepare("DELETE FROM attachments WHERE owner_type IN ('project','deliverable') AND owner_id = ?")->execute([(int) $site_id]);
-        $pdo->prepare('DELETE FROM work_logs WHERE project_id = ?')->execute([(int) $site_id]);
-        $pdo->prepare('DELETE FROM project_submissions WHERE project_id = ?')->execute([(int) $site_id]);
+        $pdo->prepare('DELETE FROM work_logs WHERE project_id = ?')->execute([(int) $project['id']]);
+        $pdo->prepare('DELETE FROM project_submissions WHERE project_id = ?')->execute([(int) $project['id']]);
         $pdo->prepare('DELETE FROM projects WHERE id = ?')->execute([(int) $project['id']]);
         $pdo->commit();
         $upload_dir = dirname(__DIR__) . '/storage/uploads/';
@@ -1659,14 +902,14 @@ function tt_admin_resolve_dispute($dispute_id, $decision, $to_freelancer, $to_cl
 
     $dispute = null;
     foreach (toptunity_admin_disputes() as $candidate) {
-        if ($candidate['id'] === $dispute_id && $candidate['status'] === 'open') { $dispute = $candidate; break; }
+        if ((string) $candidate['id'] === (string) $dispute_id && $candidate['status'] === 'open') { $dispute = $candidate; break; }
     }
     if (!$dispute) { return 'That open dispute could not be found.'; }
     if ($decision === 'split' && ((int) $to_freelancer + (int) $to_client) !== (int) $dispute['held']) {
         return 'The two amounts must add up to ₱' . number_format($dispute['held']) . '.';
     }
 
-    if (tt_is_demo_admin($user)) {
+    if (false) {
         $_SESSION['demo_admin_dispute_decisions'][$dispute_id] = [
             'decision' => $decision, 'notes' => $notes, 'to_freelancer' => (int) $to_freelancer,
             'to_client' => (int) $to_client,
@@ -1687,7 +930,7 @@ function tt_admin_resolve_dispute($dispute_id, $decision, $to_freelancer, $to_cl
 /** Catalog snapshot used only by the demo administrator's session. */
 function tt_demo_admin_catalog_state()
 {
-    if (!tt_is_demo_admin()) { return ['skills' => [], 'categories' => []]; }
+    if (!false) { return ['skills' => [], 'categories' => []]; }
     if (!isset($_SESSION['demo_admin_catalog'])) {
         $rows = db()->query('SELECT s.name AS skill, c.name AS category FROM skills s LEFT JOIN categories c ON c.id = s.category_id ORDER BY s.name')->fetchAll();
         $skills = [];
@@ -1716,7 +959,7 @@ function tt_admin_catalog_change($action, $kind, $name, $new_name = '')
     }
     if (!in_array($action, ['add', 'rename', 'remove'], true)) { return 'Choose a valid catalog action.'; }
 
-    if (tt_is_demo_admin($user)) {
+    if (false) {
         $state = tt_demo_admin_catalog_state();
         $items = $kind === 'skill' ? $state['skills'] : array_fill_keys($state['categories'], true);
         $exists = array_key_exists($name, $items);
@@ -1793,85 +1036,50 @@ function tt_admin_catalog_change($action, $kind, $name, $new_name = '')
 /** Disputes. status: open | resolved. */
 function toptunity_admin_disputes()
 {
-    if (!tt_is_demo_admin()) {
-        $demo_ids = tt_demo_ids();
-        $sql = "SELECT d.id, d.filed_by, d.reason, d.details, d.status, d.created_at,
-                       p.title, p.deadline, p.billing_type, p.hourly_rate, p.max_hours, p.budget,
-                       p.agreed_amount, p.start_date, p.client_id, p.freelancer_id,
-                       client.name AS client, freelancer.name AS freelancer,
-                       (SELECT COALESCE(SUM(pay.amount), 0) FROM payments pay
-                        WHERE pay.project_id = p.id AND pay.status = 'held') AS held,
-                       (SELECT COALESCE(SUM(pay.service_fee), 0) FROM payments pay
-                        WHERE pay.project_id = p.id AND pay.status = 'held') AS fee
-                FROM disputes d
-                JOIN projects p ON p.id = d.project_id
-                JOIN users client ON client.id = p.client_id
-                LEFT JOIN users freelancer ON freelancer.id = p.freelancer_id
-                JOIN users filer ON filer.id = d.filed_by";
-        if ($demo_ids) {
-            $ids = implode(',', array_map('intval', $demo_ids));
-            $sql .= " WHERE d.filed_by NOT IN ($ids) AND p.client_id NOT IN ($ids)
-                      AND (p.freelancer_id IS NULL OR p.freelancer_id NOT IN ($ids))";
-        }
-        $rows = [];
-        foreach (db()->query($sql . ' ORDER BY d.id DESC')->fetchAll() as $dispute) {
-            $billing = $dispute['billing_type'] === 'hourly'
-                ? 'Hourly · ₱' . number_format((int) $dispute['hourly_rate']) . '/hr · max ' . (int) $dispute['max_hours'] . ' h'
-                : 'Fixed · ₱' . number_format((int) ($dispute['agreed_amount'] ?: $dispute['budget']));
-            $rows[] = [
-                'id' => 'DB-' . (int) $dispute['id'],
-                'date' => tt_date_label($dispute['created_at']),
-                'project' => $dispute['title'],
-                'billing' => $dispute['billing_type'] === 'hourly' ? 'Hourly' : 'Fixed Price',
-                'filed_by' => (int) $dispute['filed_by'] === (int) $dispute['client_id'] ? 'Client' : 'Freelancer',
-                'reason' => $dispute['reason'],
-                'status' => $dispute['status'],
-                'held' => (int) $dispute['held'],
-                'fee' => (int) $dispute['fee'],
-                'deadline' => $dispute['deadline'],
-                'client' => $dispute['client'],
-                'freelancer' => $dispute['freelancer'] ?: 'Unassigned',
-                'contract' => $billing,
-                'dates' => ($dispute['start_date'] ?: 'Not started') . ' – ' . $dispute['deadline'],
-                'history' => [tt_date_label($dispute['created_at']) . ' · Dispute filed: ' . $dispute['details']],
-                'files' => [],
-                'chat' => [],
-                'real' => true,
-            ];
-        }
-        return $rows;
+    $rows = db()->query("SELECT d.id, d.project_id, d.reason, d.details, d.status, d.decision, d.created_at, d.filed_by,
+                                p.title, p.budget, p.hourly_rate, p.max_hours, p.billing_type, p.deadline, p.created_at AS posted,
+                                p.agreed_amount, p.freelancer_id,
+                                fu.name AS filed_name, fu.role AS filed_role,
+                                cu.name AS client_name, fl.name AS freelancer_name
+                         FROM disputes d
+                         JOIN projects p ON p.id = d.project_id
+                         JOIN users fu ON fu.id = d.filed_by
+                         JOIN users cu ON cu.id = p.client_id
+                         LEFT JOIN users fl ON fl.id = p.freelancer_id
+                         ORDER BY d.created_at DESC")->fetchAll();
+    $out = [];
+    foreach ($rows as $r) {
+        $pid  = (int) $r['project_id'];
+        $site = 1000 + $pid;
+        $hold = db()->prepare("SELECT COALESCE(SUM(amount), 0) FROM payments WHERE project_id = ? AND type = 'escrow' AND status = 'held'");
+        $hold->execute([$pid]);
+        $held = (int) $hold->fetchColumn();
+        $fq = db()->prepare("SELECT original_name, size_label FROM attachments WHERE owner_type = 'deliverable' AND owner_id = ? ORDER BY id");
+        $fq->execute([$site]);
+        $files = [];
+        foreach ($fq->fetchAll() as $f) { $files[] = ['name' => $f['original_name'], 'size' => $f['size_label']]; }
+        $cq = db()->prepare("SELECT u.name AS sender, m.body FROM messages m JOIN users u ON u.id = m.sender_id WHERE m.project_id = ? ORDER BY m.id DESC LIMIT 30");
+        $cq->execute([$pid]);
+        $chat = [];
+        foreach (array_reverse($cq->fetchAll()) as $c) { $chat[] = ['from' => $c['sender'], 'text' => $c['body']]; }
+        $hourly   = $r['billing_type'] === 'hourly';
+        $deadline = $r['deadline'] ? date('M j, Y', strtotime($r['deadline'])) : '—';
+        $history  = ['Filed by ' . $r['filed_name'] . ' on ' . date('M j, Y', strtotime($r['created_at'])) . ': ' . $r['reason']];
+        if ($r['status'] === 'resolved') { $history[] = 'Decision: ' . ($r['decision'] ?: 'recorded'); }
+        $out[] = [
+            'id' => 'DB-' . $r['id'], 'project_id' => $site,
+            'date' => date('M j, Y', strtotime($r['created_at'])), 'project' => $r['title'],
+            'billing' => $hourly ? 'Hourly' : 'Fixed Price', 'filed_by' => ucfirst((string) $r['filed_role']),
+            'reason' => $r['reason'], 'status' => $r['status'], 'details' => $r['details'], 'decision' => $r['decision'],
+            'client' => $r['client_name'], 'freelancer' => $r['freelancer_name'] ?: '—',
+            'contract' => $hourly ? 'Hourly ₱' . number_format((int) $r['hourly_rate']) . '/hr, up to ' . (int) $r['max_hours'] . ' hours'
+                                  : 'Fixed ₱' . number_format((int) ($r['agreed_amount'] ?: $r['budget'])),
+            'dates' => 'Posted ' . date('M j, Y', strtotime($r['posted'])) . ' · Deadline ' . $deadline,
+            'deadline' => $deadline, 'held' => $held, 'fee' => tt_fee_for($held),
+            'files' => $files, 'chat' => $chat, 'history' => $history,
+        ];
     }
-    $rows = [
-        ['id' => 'D-1041', 'date' => 'Oct 03, 2026', 'project' => 'Clinic Inventory Dashboard v2', 'billing' => 'Hourly', 'filed_by' => 'Freelancer',
-         'reason' => 'Hours rejected unfairly', 'status' => 'open', 'held' => 32500, 'fee' => 3250, 'deadline' => 'Oct 28, 2026',
-         'client' => 'Grace Aquino', 'freelancer' => 'Miguel Reyes', 'contract' => 'Hourly · ₱650/hr · max 50 h', 'dates' => 'Sep 21 – Oct 28',
-         'history' => ['Sep 21 · Project started (payment held)', 'Oct 01 · Hours logged 4.0', 'Oct 02 · Hours partly rejected', 'Oct 03 · Dispute filed'],
-         'files' => [['name' => 'clinic-inventory-v2.3.zip', 'size' => '5.1 MB']],
-         'chat' => [['from' => 'Grace', 'text' => 'Please reject the printer driver hours; that was outside scope.'], ['from' => 'Miguel', 'text' => 'The driver issue blocked the report export, so I logged it.']]],
-        ['id' => 'D-1038', 'date' => 'Oct 02, 2026', 'project' => 'Menu Board and Cup Sleeve Design', 'billing' => 'Fixed Price', 'filed_by' => 'Client',
-         'reason' => 'Work not delivered', 'status' => 'open', 'held' => 6500, 'fee' => 650, 'deadline' => 'Oct 01, 2026',
-         'client' => 'Andrea Santos', 'freelancer' => 'Paolo Garcia', 'contract' => 'Fixed · ₱6,500', 'dates' => 'Sep 10 – Oct 01',
-         'history' => ['Sep 10 · Project started (payment held)', 'Sep 24 · Draft submitted', 'Sep 26 · Revision requested', 'Oct 01 · Marked overdue', 'Oct 02 · Dispute filed'],
-         'files' => [['name' => 'menu-board-draft.pdf', 'size' => '1.2 MB'], ['name' => 'cup-sleeve-v1.ai', 'size' => '3.4 MB']],
-         'chat' => [['from' => 'Andrea', 'text' => 'The final files were due Oct 1. Any update?'], ['from' => 'Paolo', 'text' => 'Sorry for the delay, sending the files tonight.'], ['from' => 'Andrea', 'text' => 'Still nothing received as of Oct 2, 6 PM.']]],
-        ['id' => 'D-1029', 'date' => 'Sep 21, 2026', 'project' => 'Hotel Room Reservation Module', 'billing' => 'Fixed Price', 'filed_by' => 'Client',
-         'reason' => 'Work does not match requirements', 'status' => 'resolved', 'held' => 28000, 'fee' => 2800, 'deadline' => 'Sep 30, 2026',
-         'client' => 'Mark Francisco', 'freelancer' => 'Miguel Reyes', 'contract' => 'Fixed · ₱28,000', 'dates' => 'Aug 25 – Sep 30',
-         'history' => ['Aug 25 · Project started', 'Sep 21 · Dispute filed', 'Sep 22 · Resolved: split 50/50'],
-         'files' => [], 'chat' => [['from' => 'Mark', 'text' => 'The booking calendar does not match the agreed spec.']]],
-    ];
-    foreach ($rows as &$row) {
-        $decision = $_SESSION['demo_admin_dispute_decisions'][$row['id']] ?? null;
-        if ($decision) {
-            $row['status'] = 'resolved';
-            $split = $decision['decision'] === 'split'
-                ? ' · ₱' . number_format($decision['to_freelancer']) . ' to freelancer / ₱' . number_format($decision['to_client']) . ' to client'
-                : '';
-            $row['history'][] = 'Resolved: ' . $decision['decision'] . $split . ' · ' . $decision['notes'];
-        }
-    }
-    unset($row);
-    return $rows;
+    return $out;
 }
 
 
@@ -1879,39 +1087,14 @@ function toptunity_admin_disputes()
 /** Platform reviews. status: new | published | hidden */
 function toptunity_admin_reviews()
 {
-    if (!tt_is_demo_admin()) {
-        $demo_ids = tt_demo_ids();
-        $sql = 'SELECT pr.id, pr.rating, pr.body, pr.status, pr.created_at, u.name, u.role
-                FROM platform_reviews pr JOIN users u ON u.id = pr.user_id';
-        if ($demo_ids) {
-            $sql .= ' WHERE pr.user_id NOT IN (' . implode(',', array_map('intval', $demo_ids)) . ')';
-        }
-        $rows = [];
-        foreach (db()->query($sql . ' ORDER BY pr.id DESC')->fetchAll() as $review) {
-            $rows[] = ['id' => 'DB-' . (int) $review['id'], 'date' => tt_date_label($review['created_at']),
-                       'user' => $review['name'], 'role' => ucfirst($review['role']),
-                       'rating' => (int) $review['rating'], 'status' => $review['status'],
-                       'text' => $review['body'], 'real' => true];
-        }
-        return $rows;
+    $rows = db()->query("SELECT pr.id, pr.rating, pr.body, pr.status, pr.created_at, u.name, u.role
+                         FROM platform_reviews pr JOIN users u ON u.id = pr.user_id ORDER BY pr.created_at DESC")->fetchAll();
+    $out = [];
+    foreach ($rows as $r) {
+        $out[] = ['id' => 'DB-' . $r['id'], 'date' => date('M j, Y', strtotime($r['created_at'])), 'user' => $r['name'],
+                  'role' => ucfirst($r['role']), 'rating' => (int) $r['rating'], 'status' => $r['status'], 'text' => $r['body']];
     }
-    $rows = [
-        ['id' => 'V-1', 'date' => 'Oct 03, 2026', 'user' => 'Kevin Tan', 'role' => 'Freelancer', 'rating' => 4, 'status' => 'new',
-         'text' => 'Great for small, steady projects. Hours are logged per day, and I can see which ones the client already approved.'],
-        ['id' => 'V-2', 'date' => 'Sep 28, 2026', 'user' => 'Andrea Santos', 'role' => 'Client', 'rating' => 5, 'status' => 'published',
-         'text' => 'The proposal process is clear and the 10% fee is shown upfront. Withdrawing to GCash is simple.'],
-        ['id' => 'V-3', 'date' => 'Sep 25, 2026', 'user' => 'Rhea Mendoza', 'role' => 'Freelancer', 'rating' => 5, 'status' => 'published',
-         'text' => 'Recommended Projects shows me jobs that actually match my skills. Most of my repeat clients found me here.'],
-        ['id' => 'V-4', 'date' => 'Sep 19, 2026', 'user' => 'Leo Santiago', 'role' => 'Freelancer', 'rating' => 1, 'status' => 'hidden',
-         'text' => 'The site was slow and I could not submit my proposal on time.'],
-    ];
-    foreach ($rows as &$row) {
-        if (isset($_SESSION['demo_admin_review_status'][$row['id']])) {
-            $row['status'] = $_SESSION['demo_admin_review_status'][$row['id']];
-        }
-    }
-    unset($row);
-    return $rows;
+    return $out;
 }
 
 /** Publish or hide a platform review. */
@@ -1923,11 +1106,11 @@ function tt_admin_set_review_status($review_id, $action)
     if (!$status) { return 'Choose a valid review action.'; }
     $review = null;
     foreach (toptunity_admin_reviews() as $candidate) {
-        if ($candidate['id'] === $review_id) { $review = $candidate; break; }
+        if ((string) $candidate['id'] === (string) $review_id) { $review = $candidate; break; }
     }
     if (!$review) { return 'That review could not be found.'; }
 
-    if (tt_is_demo_admin($user)) {
+    if (false) {
         $_SESSION['demo_admin_review_status'][$review_id] = $status;
         return null;
     }
@@ -1943,32 +1126,13 @@ function tt_admin_set_review_status($review_id, $action)
 /** Contact messages. status: new | responded */
 function toptunity_admin_inquiries()
 {
-    $rows = tt_is_demo_admin() ? [
-        ['id' => 'I-1', 'date' => 'Oct 04, 2026', 'name' => 'Joy Bautista', 'email' => 'joy.bautista@gmail.com', 'subject' => 'Question about payments and refunds', 'status' => 'new',
-         'message' => 'Hi! If I cancel my project before a freelancer accepts the contract, will my deposit be refunded automatically? Thank you.'],
-        ['id' => 'I-2', 'date' => 'Oct 01, 2026', 'name' => 'Carmela Reyes', 'email' => 'carmela@school.edu.ph', 'subject' => 'Partnership with our school', 'status' => 'responded',
-         'message' => 'We would like to talk about a partnership for our students\' internship projects.'],
-        ['id' => 'I-3', 'date' => 'Sep 29, 2026', 'name' => 'Arnel Dizon', 'email' => 'arnel.dizon@gmail.com', 'subject' => 'Cannot reset my password', 'status' => 'new',
-         'message' => 'The reset link does not arrive in my email. Please help.'],
-    ] : [];
-    $real = tt_is_demo_admin()
-        ? []
-        : db()->query('SELECT id, name, email, subject, message, reply, status, created_at
-                       FROM contact_inquiries ORDER BY id DESC')->fetchAll();
-    foreach ($real as $inquiry) {
-        $rows[] = ['id' => 'R-' . (int) $inquiry['id'], 'date' => tt_date_label($inquiry['created_at']),
-                   'name' => $inquiry['name'], 'email' => $inquiry['email'], 'subject' => $inquiry['subject'],
-                   'message' => $inquiry['message'], 'reply' => $inquiry['reply'], 'status' => $inquiry['status'],
-                   'real' => true];
+    $rows = db()->query("SELECT id, name, email, subject, message, status, created_at FROM contact_inquiries ORDER BY created_at DESC")->fetchAll();
+    $out = [];
+    foreach ($rows as $r) {
+        $out[] = ['id' => 'I-' . $r['id'], 'date' => date('M j, Y', strtotime($r['created_at'])), 'name' => $r['name'],
+                  'email' => $r['email'], 'subject' => $r['subject'], 'message' => $r['message'], 'status' => $r['status'], 'reply' => ''];
     }
-    if (tt_is_demo_admin()) {
-        foreach ($rows as &$row) {
-            $reply = $_SESSION['demo_admin_inquiry_replies'][$row['id']] ?? null;
-            if ($reply !== null) { $row['reply'] = $reply; $row['status'] = 'responded'; }
-        }
-        unset($row);
-    }
-    return $rows;
+    return $out;
 }
 
 /** Save a public contact inquiry. Returns null on success or an error message. */
@@ -1989,7 +1153,7 @@ function tt_save_contact_inquiry($name, $email, $subject, $message)
 /** Save an administrator's response to a real contact inquiry. */
 function tt_reply_contact_inquiry($id, $reply)
 {
-    if (tt_is_demo_admin()) { return 'The demo administrator can only reply to sample inquiries.'; }
+    if (false) { return 'The demo administrator can only reply to sample inquiries.'; }
     $reply = trim($reply);
     if (mb_strlen($reply) < 10 || mb_strlen($reply) > 3000) { return 'Write a reply between 10 and 3,000 characters.'; }
     $stmt = db()->prepare("UPDATE contact_inquiries SET reply = ?, status = 'responded', responded_at = CURRENT_TIMESTAMP WHERE id = ?");
@@ -2002,21 +1166,7 @@ function tt_reply_contact_inquiry($id, $reply)
 /** Admin notifications. cat is used by the filter tabs. */
 function toptunity_admin_notifications_base()
 {
-    if (!tt_is_demo_admin()) { return []; }
-    return [
-        ['cat' => 'past', 'icon' => 'calendar', 'tint' => 'orange', 'new' => true, 'title' => 'Projects Past Deadline',
-         'text' => '30-Second Promo Video for Opening Week reached its deadline with no freelancer selected.', 'time' => '1h ago'],
-        ['cat' => 'reports', 'icon' => 'flag', 'tint' => 'orange', 'new' => true, 'title' => 'New Reports',
-         'text' => 'Miguel Reyes reported Rico Manalastas for an off-platform payment request.', 'time' => '3h ago'],
-        ['cat' => 'disputes', 'icon' => 'alert', 'tint' => 'orange', 'new' => true, 'title' => 'Disputes',
-         'text' => 'Andrea Santos filed a dispute on Menu Board and Cup Sleeve Design.', 'time' => 'Yesterday'],
-        ['cat' => 'withdrawals', 'icon' => 'wallet', 'tint' => 'teal', 'new' => false, 'title' => 'Withdrawal Requests',
-         'text' => 'Miguel Reyes requested a ₱5,000 withdrawal to GCash.', 'time' => 'Yesterday'],
-        ['cat' => 'inquiries', 'icon' => 'message', 'tint' => 'blue', 'new' => false, 'title' => 'Inquiries',
-         'text' => 'New inquiry from Joy Bautista: Question about payments and refunds.', 'time' => 'Oct 04'],
-        ['cat' => 'reviews', 'icon' => 'star', 'tint' => 'orange', 'new' => false, 'title' => 'New Platform Reviews',
-         'text' => 'Kevin Tan submitted a 4-star platform review.', 'time' => 'Oct 03'],
-    ];
+    return [];
 }
 
 /** The service fee (percent), saved in storage/settings.json. Default 10. */
@@ -2024,7 +1174,7 @@ function tt_settings_file() { return dirname(__DIR__) . '/storage/settings.json'
 
 function tt_service_fee()
 {
-    if (tt_is_demo_admin()) {
+    if (false) {
         return isset($_SESSION['demo_admin_service_fee']) ? (int) $_SESSION['demo_admin_service_fee'] : 10;
     }
     $f = tt_settings_file();
@@ -2034,7 +1184,7 @@ function tt_service_fee()
 
 function tt_save_service_fee($pct)
 {
-    if (tt_is_demo_admin()) {
+    if (false) {
         $_SESSION['demo_admin_service_fee'] = (int) $pct;
         return;
     }
@@ -2146,6 +1296,10 @@ function tt_add_saved_project($fields)
     tt_write_project_details($id, $fields);
     $pdo->commit();
     tt_audit('post project', (string) ($fields['title'] ?? ''));
+    $is_hourly = $fields['type'] === 'hourly';
+    tt_risk_check('project', ['billing_type' => $fields['type'], 'budget' => (int) $fields['budget'], 'hourly_rate' => (int) $fields['rate'],
+                              'max_hours' => (int) $fields['max_hours'], 'deadline' => $fields['deadline'], 'title' => $fields['title']],
+                  $id, (int) $user['id'], $is_hourly ? (int) $fields['rate'] * (int) $fields['max_hours'] : (int) $fields['budget']);
     return 1000 + $id;
 }
 
@@ -2195,7 +1349,7 @@ function tt_project_work_logs($site_id)
 {
     $stmt = db()->prepare('SELECT id, work_date AS date, hours, task, status, review_note AS note
                            FROM work_logs WHERE project_id = ? ORDER BY work_date DESC, id DESC');
-    $stmt->execute([(int) $site_id]);
+    $stmt->execute([(int) $site_id - 1000]);
     return array_map(function ($row) {
         $row['hours'] = (float) $row['hours'];
         return $row;
@@ -2220,12 +1374,12 @@ function tt_db_log_hours($site_id, $work_date, $hours, $task)
         return 'Hours can only be logged between the project start date and the allowed work date.';
     }
     $stmt = db()->prepare("SELECT COALESCE(SUM(hours), 0) FROM work_logs WHERE project_id = ? AND status <> 'rejected'");
-    $stmt->execute([(int) $site_id]);
+    $stmt->execute([(int) $site_id - 1000]);
     if ((float) $stmt->fetchColumn() + (float) $hours > (int) $project['max_hours']) {
         return 'Logging these hours would exceed the project maximum.';
     }
     db()->prepare('INSERT INTO work_logs (project_id, freelancer_id, work_date, hours, task) VALUES (?, ?, ?, ?, ?)')
-        ->execute([(int) $site_id, (int) $user['id'], $work_date, (float) $hours, $task]);
+        ->execute([(int) $site_id - 1000, (int) $user['id'], $work_date, (float) $hours, $task]);
     tt_notify((int) $project['client_id'], 'worklog', 'Hours submitted', $user['name'] . ' logged ' . number_format((float) $hours, 1) . ' hours for ' . $project['title'] . '.');
     return null;
 }
@@ -2242,7 +1396,7 @@ function tt_db_review_work_log($site_id, $log_id, $decision, $note = '')
     if ($decision === 'rejected' && mb_strlen(trim($note)) < 10) { return 'Give a reason for rejecting (at least 10 characters).'; }
     $stmt = db()->prepare("UPDATE work_logs SET status = ?, review_note = ?
                            WHERE id = ? AND project_id = ? AND status = 'pending'");
-    $stmt->execute([$decision, $decision === 'rejected' ? trim($note) : null, (int) $log_id, (int) $site_id]);
+    $stmt->execute([$decision, $decision === 'rejected' ? trim($note) : null, (int) $log_id, (int) $site_id - 1000]);
     if (!$stmt->rowCount()) { return 'That pending work log was not found.'; }
     tt_notify((int) $project['freelancer_id'], 'worklog', $decision === 'approved' ? 'Hours approved' : 'Hours rejected',
               $user['name'] . ' ' . $decision . ' a work log for ' . $project['title'] . '.');
@@ -2253,7 +1407,7 @@ function tt_db_review_work_log($site_id, $log_id, $decision, $note = '')
 function tt_project_submission($site_id)
 {
     $stmt = db()->prepare('SELECT id, message, status, review_note, created_at FROM project_submissions WHERE project_id = ? ORDER BY id DESC LIMIT 1');
-    $stmt->execute([(int) $site_id]);
+    $stmt->execute([(int) $site_id - 1000]);
     return $stmt->fetch() ?: null;
 }
 
@@ -2275,7 +1429,7 @@ function tt_db_submit_work($site_id, $message)
     $latest = tt_project_submission($site_id);
     if ($latest && $latest['status'] === 'pending') { return 'Your latest submission is still waiting for client review.'; }
     db()->prepare('INSERT INTO project_submissions (project_id, freelancer_id, message) VALUES (?, ?, ?)')
-        ->execute([(int) $site_id, (int) $user['id'], $message]);
+        ->execute([(int) $site_id - 1000, (int) $user['id'], $message]);
     tt_notify((int) $project['client_id'], 'work', 'Work submitted', $user['name'] . ' submitted work for ' . $project['title'] . '.');
     tt_audit('submit work', 'project #' . $site_id);
     return null;
@@ -2369,6 +1523,7 @@ function tt_db_submit_proposal($site_id, $offer, $days, $letter)
         if ((int) $e->getCode() === 23000) { return 'You already sent a proposal for this project.'; }
         throw $e;
     }
+    tt_risk_check('proposal', $project, (int) $project['id'], (int) $user['id'], (int) $offer);
     tt_notify($project['client_id'], 'proposals', 'New proposal',
               $user['name'] . ' sent a proposal for ' . $project['title'] . '.');
     tt_audit('submit proposal', 'project #' . $site_id . ' ₱' . number_format((int) $offer));
@@ -2468,7 +1623,7 @@ function tt_db_hire_freelancer($site_id, $freelancer_id, $agreed_amount)
 }
 
 /** Client sends the contract. Returns null or an error. */
-function tt_db_send_contract($site_id, $agreed_amount)
+function tt_db_send_contract($site_id, $agreed_amount, $hourly_rate = null, $max_hours = null)
 {
     $user = tt_current_user();
     if (!$user || $user['role'] !== 'client') { return 'Only clients can send contracts.'; }
@@ -2477,11 +1632,14 @@ function tt_db_send_contract($site_id, $agreed_amount)
     if ($project['status'] !== 'open') { return 'This project is no longer accepting contracts.'; }
     if (empty($project['freelancer_id']))                             { return 'Select a freelancer before sending the contract.'; }
     if ($project['contract_status'] !== 'none')                       { return 'The contract has already been sent.'; }
-    if ((int) $agreed_amount < 1)                                     { return 'Enter the agreed amount.'; }
-    if ($project['billing_type'] === 'hourly'
-        && (int) $agreed_amount !== (int) $project['hourly_rate'] * (int) $project['max_hours']) {
-        return 'For hourly projects, the agreed amount must match the hourly rate multiplied by maximum hours.';
+    if ($project['billing_type'] === 'hourly' && $hourly_rate !== null && $max_hours !== null) {
+        if ((int) $hourly_rate < 1)  { return 'Enter a valid hourly rate.'; }
+        if ((int) $max_hours < 1)    { return 'Enter a valid number of maximum hours.'; }
+        $agreed_amount = (int) $hourly_rate * (int) $max_hours;
+        db()->prepare('UPDATE projects SET hourly_rate = ?, max_hours = ?, budget = ? WHERE id = ?')
+             ->execute([(int) $hourly_rate, (int) $max_hours, $agreed_amount, (int) $project['id']]);
     }
+    if ((int) $agreed_amount < 1) { return 'Enter the agreed amount.'; }
     $stmt = db()->prepare("UPDATE projects SET contract_status = 'pending', agreed_amount = ?, contract_sent_at = NOW()
                            WHERE id = ? AND status = 'open' AND contract_status = 'none' AND freelancer_id IS NOT NULL");
     $stmt->execute([(int) $agreed_amount, (int) $project['id']]);
@@ -2489,6 +1647,7 @@ function tt_db_send_contract($site_id, $agreed_amount)
     tt_notify($project['freelancer_id'], 'offers', 'Project offer',
               $user['name'] . ' sent you a contract for ' . $project['title'] . '.');
     tt_audit('send contract', 'project #' . $project['id'] . ' ₱' . number_format((int) $agreed_amount));
+    tt_risk_check('contract', $project, (int) $project['id'], (int) $user['id'], (int) $agreed_amount, (int) $agreed_amount);
     return null;
 }
 
@@ -2511,6 +1670,7 @@ function tt_db_respond_contract($site_id, $accept)
             $pdo->rollBack();
             return 'This project is closed or suspended and cannot be contracted.';
         }
+        // The accepted state is shown from the project's contract status (the proposals table has no 'accepted' value)
         tt_notify($project['client_id'], 'responses', 'Contract accepted',
                   $user['name'] . ' accepted the contract for ' . $project['title'] . '. Please deposit the amount.');
     } else {
@@ -2636,10 +1796,10 @@ function toptunity_category_catalog()
 {
     if (in_array(tt_current_user()['role'] ?? '', ['client', 'freelancer'], true)
         && !empty($_SESSION['demo_admin_catalog'])
-        && (tt_is_demo_account() || tt_is_demo_freelancer())) {
+        && (false || false)) {
         return array_values(array_unique($_SESSION['demo_admin_catalog']['categories']));
     }
-    if (tt_is_demo_admin()) {
+    if (false) {
         return array_values(array_unique(tt_demo_admin_catalog_state()['categories']));
     }
     toptunity_skill_catalog();
@@ -2663,7 +1823,7 @@ function tt_client_billing_projects()
 }
 
 /** Client deposits the agreed amount for an active contract. Returns null or an error. */
-function tt_db_deposit($site_id)
+function tt_db_deposit($site_id, $method = '', $transfer_ref = '')
 {
     $u = tt_current_user();
     $pdo = db();
@@ -2680,15 +1840,25 @@ function tt_db_deposit($site_id)
         if ((int) $stmt->fetchColumn() > 0)                              { $pdo->rollBack(); return 'This project has already been deposited.'; }
         $amount = (int) $project['agreed_amount'];
         if ($amount < 1) { $pdo->rollBack(); return 'The contract amount is invalid.'; }
-        $pdo->prepare("INSERT INTO payments (project_id, type, amount, service_fee, status) VALUES (?, 'escrow', ?, ?, 'held')")
-            ->execute([(int) $project['id'], $amount, tt_fee_for($amount)]);
+        if (!in_array($method, ['gcash', 'bank'], true)) { $pdo->rollBack(); return 'Choose how you paid: GCash or bank transfer.'; }
+        $transfer_ref = strtoupper(trim($transfer_ref));
+        if (mb_strlen($transfer_ref) < 4) { $pdo->rollBack(); return 'Enter the reference number from your GCash or bank transfer.'; }
+        $dup = $pdo->prepare("SELECT COUNT(*) FROM payments WHERE transfer_ref = ?");
+        $dup->execute([$transfer_ref]);
+        if ((int) $dup->fetchColumn() > 0) { $pdo->rollBack(); return 'That payment reference was already used for another deposit.'; }
+        // The fee is charged when the payment is released, so the deposit itself carries no fee
+        $pdo->prepare("INSERT INTO payments (project_id, type, amount, service_fee, status, method, transfer_ref) VALUES (?, 'escrow', ?, 0, 'held', ?, ?)")
+            ->execute([(int) $project['id'], $amount, $method, $transfer_ref]);
+        $payment_id = (int) $pdo->lastInsertId();
+        $reference = 'TTP-' . str_pad((string) $payment_id, 6, '0', STR_PAD_LEFT);
+        $pdo->prepare("UPDATE payments SET reference = ? WHERE id = ?")->execute([$reference, $payment_id]);
         $pdo->commit();
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) { $pdo->rollBack(); }
         return 'The deposit could not be saved. Please try again.';
     }
     tt_notify($project['freelancer_id'], 'payments', 'Payment held',
-              '₱' . number_format($amount) . ' was deposited for ' . $project['title'] . '. It is released when the client approves the work.');
+              '₱' . number_format($amount) . ' was deposited for ' . $project['title'] . '. Reference ' . $reference . '. It is released when the client approves the work.');
     tt_audit('deposit', 'project #' . $project['id'] . ' ₱' . number_format($amount), $u['id']);
     return null;
 }
@@ -2710,7 +1880,9 @@ function tt_db_release($site_id)
         $stmt->execute([(int) $project['id']]);
         $escrow = $stmt->fetch();
         if (!$escrow) { $pdo->rollBack(); return 'There is no held payment to release.'; }
-        $pdo->prepare("UPDATE payments SET status = 'released' WHERE id = ?")->execute([(int) $escrow['id']]);
+        // The fee is worked out when the payment is released, from the current service fee setting
+        $escrow['service_fee'] = tt_fee_for((int) $escrow['amount']);
+        $pdo->prepare("UPDATE payments SET status = 'released', service_fee = ? WHERE id = ?")->execute([(int) $escrow['service_fee'], (int) $escrow['id']]);
         $pdo->prepare("UPDATE projects SET status = 'completed', contract_status = 'completed' WHERE id = ?")->execute([(int) $project['id']]);
         $pdo->commit();
     } catch (Throwable $e) {
@@ -2718,8 +1890,10 @@ function tt_db_release($site_id)
         return 'The payment could not be released. Please try again.';
     }
     $net = (int) $escrow['amount'] - (int) $escrow['service_fee'];
-    tt_notify($project['freelancer_id'], 'payments', 'Payment released',
-              '₱' . number_format($net) . ' was released to you for ' . $project['title'] . ' (after the service fee).');
+    if (!empty($project['freelancer_id'])) {
+        tt_notify((int) $project['freelancer_id'], 'payments', 'Payment released',
+                  '₱' . number_format($net) . ' was released to you for ' . $project['title'] . ' (after the service fee).');
+    }
     tt_audit('release payment', 'project #' . $project['id'] . ' ₱' . number_format($net), $u['id']);
     return null;
 }
@@ -2730,6 +1904,12 @@ function tt_db_settle_hourly_project($site_id)
     $user = tt_current_user();
     $project = tt_db_project($site_id);
     if (!$project || (int) $project['client_id'] !== (int) ($user['id'] ?? 0)) { return 'This project is not yours.'; }
+    return tt_settle_hourly_core($project);
+}
+
+/** Settles one hourly project on or after its End Date. Used by the client page and the scheduled job. */
+function tt_settle_hourly_core($project)
+{
     if ($project['billing_type'] !== 'hourly') { return 'This is not an hourly project.'; }
     if ($project['deadline'] > date('Y-m-d')) { return 'Hourly billing is due on the project End Date.'; }
 
@@ -2746,10 +1926,10 @@ function tt_db_settle_hourly_project($site_id)
 
         $logs = $pdo->prepare("UPDATE work_logs SET status = 'approved', review_note = NULL
                                WHERE project_id = ? AND status = 'pending'");
-        $logs->execute([(int) $site_id]);
+        $logs->execute([(int) $project['id']]);
         $hours = $pdo->prepare("SELECT COALESCE(SUM(hours), 0) FROM work_logs
                                 WHERE project_id = ? AND status = 'approved'");
-        $hours->execute([(int) $site_id]);
+        $hours->execute([(int) $project['id']]);
         $approved_hours = min((float) $project['max_hours'], (float) $hours->fetchColumn());
         $gross = min((int) $escrow['amount'], (int) round($approved_hours * (int) $project['hourly_rate']));
         $fee = tt_fee_for($gross);
@@ -2795,9 +1975,67 @@ function tt_settle_due_hourly_projects()
                            WHERE p.client_id = ? AND p.billing_type = 'hourly' AND p.deadline <= CURDATE()");
     $stmt->execute([(int) $user['id']]);
     foreach ($stmt->fetchAll(PDO::FETCH_COLUMN) as $project_id) {
-        $error = tt_db_settle_hourly_project(1000 + (int) $project_id);
+        $error = tt_settle_hourly_core(tt_db_project(1000 + (int) $project_id));
         if ($error) { error_log('TopTunity hourly settlement failed: ' . $error); }
     }
+}
+
+/** Settles every hourly project whose End Date has passed, for all clients. Run once a day by the scheduled job. */
+function tt_settle_all_due_hourly()
+{
+    $stmt = db()->query("SELECT DISTINCT p.id FROM projects p
+                         JOIN payments e ON e.project_id = p.id AND e.type = 'escrow' AND e.status = 'held'
+                         WHERE p.billing_type = 'hourly' AND p.deadline <= CURDATE()");
+    $done = 0;
+    foreach ($stmt->fetchAll(PDO::FETCH_COLUMN) as $project_id) {
+        $error = tt_settle_hourly_core(tt_db_project(1000 + (int) $project_id));
+        if ($error) { error_log('TopTunity hourly settlement failed: ' . $error); } else { $done++; }
+    }
+    return $done;
+}
+
+/**
+ * Cancels a project the client owns. Allowed only before any work is submitted.
+ * The held deposit is refunded in full; after work is submitted, the client must file a dispute.
+ */
+function tt_db_cancel_project($site_id)
+{
+    $user = tt_current_user();
+    $project = tt_db_project($site_id);
+    if (!$project || (int) $project['client_id'] !== (int) ($user['id'] ?? 0)) { return 'This project is not yours.'; }
+    if (in_array($project['status'], ['completed', 'cancelled'], true)) { return 'This project can no longer be cancelled.'; }
+
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        $sub = $pdo->prepare('SELECT COUNT(*) FROM project_submissions WHERE project_id = ?');
+        $sub->execute([(int) $project['id']]);
+        if ((int) $sub->fetchColumn() > 0) { $pdo->rollBack(); return 'Work has already been submitted, so the project cannot be cancelled. File a dispute instead.'; }
+
+        $lock = $pdo->prepare("SELECT * FROM payments WHERE project_id = ? AND type = 'escrow' AND status = 'held' ORDER BY id DESC LIMIT 1 FOR UPDATE");
+        $lock->execute([(int) $project['id']]);
+        $escrow = $lock->fetch();
+        $refunded = 0;
+        if ($escrow) {
+            $pdo->prepare("UPDATE payments SET status = 'refunded' WHERE id = ?")->execute([(int) $escrow['id']]);
+            $pdo->prepare("INSERT INTO payments (project_id, type, amount, service_fee, status) VALUES (?, 'refund', ?, 0, 'refunded')")
+                ->execute([(int) $project['id'], (int) $escrow['amount']]);
+            $refunded = (int) $escrow['amount'];
+        }
+        $pdo->prepare("UPDATE projects SET status = 'cancelled' WHERE id = ?")->execute([(int) $project['id']]);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) { $pdo->rollBack(); }
+        error_log('TopTunity cancel project failed: ' . $e->getMessage());
+        return 'The project could not be cancelled. Please try again.';
+    }
+    if (!empty($project['freelancer_id'])) {
+        tt_notify((int) $project['freelancer_id'], 'projects', 'Project cancelled', $project['title'] . ' was cancelled by the client.');
+    }
+    tt_notify((int) $project['client_id'], 'payments', 'Project cancelled',
+              $project['title'] . ($refunded > 0 ? ' was cancelled. ₱' . number_format($refunded) . ' was refunded.' : ' was cancelled.'));
+    tt_audit('cancel project', 'project #' . $project['id'] . ($refunded > 0 ? ' refund ₱' . number_format($refunded) : ''), $user['id']);
+    return null;
 }
 
 /** Client payment history (deposits and releases on their projects). */
@@ -2876,7 +2114,7 @@ function tt_admin_withdrawals_db()
 {
     $sql = "SELECT w.*, u.name AS freelancer FROM withdrawals w JOIN users u ON u.id = w.freelancer_id";
     $demo_ids = tt_demo_ids();
-    if (tt_is_demo_admin()) {
+    if (false) {
         if (!$demo_ids) { return []; }
         $sql .= ' WHERE w.freelancer_id IN (' . implode(',', array_map('intval', $demo_ids)) . ')';
     } elseif ($demo_ids) {
@@ -2886,7 +2124,7 @@ function tt_admin_withdrawals_db()
 }
 
 /** Admin marks a withdrawal processed or rejected. Returns null or an error. */
-function tt_db_process_withdrawal($id, $action, $reason = '')
+function tt_db_process_withdrawal($id, $action, $reason = '', $reference = '')
 {
     $pdo = db();
     $pdo->beginTransaction();
@@ -2895,21 +2133,32 @@ function tt_db_process_withdrawal($id, $action, $reason = '')
         $stmt->execute([(int) $id]);
         $w = $stmt->fetch();
         if (!$w)                            { $pdo->rollBack(); return 'That request was not found.'; }
-        if (tt_is_demo_admin() && !in_array((int) $w['freelancer_id'], tt_demo_ids(), true)) {
+        if (false && !in_array((int) $w['freelancer_id'], tt_demo_ids(), true)) {
             $pdo->rollBack();
             return 'The demo administrator can only process withdrawals for demo accounts.';
         }
         if ($w['status'] !== 'pending')     { $pdo->rollBack(); return 'This request has already been handled.'; }
         if ($action === 'reject' && mb_strlen(trim($reason)) < 10) { $pdo->rollBack(); return 'Give a reason for rejecting (at least 10 characters).'; }
+        $reference = strtoupper(trim($reference));
+        if ($action === 'process') {
+            if (mb_strlen($reference) < 4) { $pdo->rollBack(); return 'Enter the transfer reference from your GCash or bank transfer.'; }
+            $dup = $pdo->prepare('SELECT COUNT(*) FROM withdrawals WHERE reference = ?');
+            $dup->execute([$reference]);
+            if ((int) $dup->fetchColumn() > 0) { $pdo->rollBack(); return 'That transfer reference was already used for another withdrawal.'; }
+        }
         $new = $action === 'process' ? 'processed' : 'rejected';
-        $pdo->prepare('UPDATE withdrawals SET status = ? WHERE id = ?')->execute([$new, (int) $w['id']]);
+        if ($new === 'processed') {
+            $pdo->prepare('UPDATE withdrawals SET status = ?, processed_at = NOW(), reference = ? WHERE id = ?')->execute([$new, $reference, (int) $w['id']]);
+        } else {
+            $pdo->prepare('UPDATE withdrawals SET status = ? WHERE id = ?')->execute([$new, (int) $w['id']]);
+        }
         $pdo->commit();
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) { $pdo->rollBack(); }
         return 'The request could not be updated. Please try again.';
     }
     tt_notify($w['freelancer_id'], 'payments', $new === 'processed' ? 'Withdrawal sent' : 'Withdrawal rejected',
-              $new === 'processed' ? '₱' . number_format($w['amount']) . ' was sent to your ' . $w['method'] . ' account.'
+              $new === 'processed' ? '₱' . number_format($w['amount']) . ' was sent to your ' . $w['method'] . ' account. Reference ' . $reference . '.'
                                    : '₱' . number_format($w['amount']) . ' was returned to your balance. Reason: ' . $reason);
     tt_audit('withdrawal ' . $new, 'request #' . $w['id'] . ' ₱' . number_format($w['amount']));
     return null;
@@ -2920,7 +2169,7 @@ function tt_admin_payments_db()
 {
     $sql = "SELECT pay.*, p.title, p.billing_type, p.client_id, p.freelancer_id
             FROM payments pay JOIN projects p ON p.id = pay.project_id";
-    if (tt_is_demo_admin()) {
+    if (false) {
         $demo_ids = tt_demo_ids();
         if (!$demo_ids) { return [[], ['held' => 0, 'released' => 0, 'fees' => 0]]; }
         $ids = implode(',', array_map('intval', $demo_ids));
@@ -2957,76 +2206,43 @@ function tt_date_label($datetime)
 /** Freelancer money: demo sample figures plus real balances and records. */
 function toptunity_freelancer_earnings()
 {
-    $sample = [
-        'available' => 10400, 'on_hold' => 5000, 'net' => 50400, 'fee' => 5600,
-        'completed' => [
-            ['date' => 'Sep 18, 2026', 'project' => 'Clinic Inventory Dashboard', 'billing' => 'Hourly · ₱650/hr', 'payment' => 26000, 'fee' => 2600, 'net' => 23400, 'sample' => true],
-            ['date' => 'Sep 02, 2026', 'project' => 'Café Menu Landing Page', 'billing' => 'Fixed Price', 'payment' => 12000, 'fee' => 1200, 'net' => 10800, 'sample' => true],
-            ['date' => 'Aug 15, 2026', 'project' => 'Sari-Sari Store POS System', 'billing' => 'Fixed Price', 'payment' => 18000, 'fee' => 1800, 'net' => 16200, 'sample' => true],
-        ],
-        'withdrawals' => [
-            ['date' => 'Oct 03, 2026', 'method' => 'GCash •••• 4821', 'amount' => 5000, 'status' => 'pending', 'sample' => true],
-            ['date' => 'Sep 20, 2026', 'method' => 'BPI •••• 0937', 'amount' => 20000, 'status' => 'processed', 'sample' => true],
-            ['date' => 'Sep 05, 2026', 'method' => 'BPI •••• 0937', 'amount' => 3000, 'status' => 'rejected', 'sample' => true],
-            ['date' => 'Aug 18, 2026', 'method' => 'GCash •••• 4821', 'amount' => 15000, 'status' => 'processed', 'sample' => true],
-        ],
-    ];
-    if (!tt_is_demo_freelancer()) {
-        $sample = ['available' => 0, 'on_hold' => 0, 'net' => 0, 'fee' => 0, 'completed' => [], 'withdrawals' => []];
+    $money = tt_freelancer_money();
+    $fee = 0; $completed = [];
+    foreach ($money['escrow'] as $row) {
+        if ($row['status'] === 'released') {
+            $fee += (int) $row['service_fee'];
+            $completed[] = ['date' => date('M j, Y', strtotime($row['created_at'])), 'project' => $row['title'],
+                            'billing' => $row['billing_type'] === 'hourly' ? 'Hourly' : 'Fixed Price',
+                            'payment' => (int) $row['amount'], 'fee' => (int) $row['service_fee'], 'net' => (int) $row['net'], 'sample' => false];
+        }
     }
-    $real = tt_freelancer_money();
-
-    $completed = [];
-    $real_fee = 0;
-    foreach ($real['escrow'] as $e) {
-        if ($e['status'] !== 'released') { continue; }
-        $billing = $e['billing_type'] === 'hourly' ? 'Hourly · ₱' . number_format($e['hourly_rate']) . '/hr' : 'Fixed Price';
-        $completed[] = ['date' => tt_date_label($e['created_at']), 'project' => $e['title'], 'billing' => $billing,
-                        'payment' => (int) $e['amount'], 'fee' => (int) $e['service_fee'], 'net' => (int) $e['net'], 'sample' => false];
-        $real_fee += (int) $e['service_fee'];
-    }
-    $withdrawals = [];
-    foreach ($real['withdrawals'] as $w) {
-        $withdrawals[] = ['id' => (int) $w['id'], 'date' => tt_date_label($w['created_at']),
-                          'method' => ($w['method'] === 'gcash' ? 'GCash' : 'Bank Account') . ' · ' . $w['account'],
-                          'amount' => (int) $w['amount'], 'status' => $w['status'], 'sample' => false];
-    }
-
-    return [
-        'available'   => $sample['available'] + $real['available'],
-        'on_hold'     => $sample['on_hold'] + $real['on_hold'],
-        'net'         => $sample['net'] + $real['earned'],
-        'fee'         => $sample['fee'] + $real_fee,
-        'completed'   => array_merge($completed, $sample['completed']),
-        'withdrawals' => array_merge($withdrawals, $sample['withdrawals']),
-        'real_available' => $real['available'],
-    ];
+    return ['available' => $money['available'], 'on_hold' => $money['on_hold'], 'net' => $money['earned'], 'fee' => $fee,
+            'completed' => $completed, 'sample' => false,
+            'withdrawals' => array_map(function ($w) {
+                return ['id' => (int) $w['id'], 'date' => date('M j, Y', strtotime($w['created_at'])),
+                        'method' => $w['method'] === 'gcash' ? 'GCash' : 'Bank', 'account' => $w['account'],
+                        'amount' => (int) $w['amount'], 'status' => $w['status'], 'sample' => false,
+                        'processed' => $w['processed_at'] ? date('M j, Y · g:i A', strtotime($w['processed_at'])) : '',
+                        'reference' => (string) ($w['reference'] ?? '')];
+            }, $money['withdrawals'])];
 }
 
 /** Client payments: demo sample rows plus the real deposits and releases. */
 function toptunity_client_payments()
 {
-    $sample = [];
-    if (tt_is_demo_account()) {
-        $sample = [
-            ['date' => '2026-10-02', 'project' => 'Monthly Social Media Content Calendar', 'type' => 'Deposit', 'amount' => 14000, 'fee' => 0, 'status' => 'pending', 'sample' => true],
-            ['date' => '2026-09-14', 'project' => 'Point-of-Sale and Inventory Dashboard', 'type' => 'Deposit', 'amount' => 36000, 'fee' => 0, 'status' => 'held', 'sample' => true],
-            ['date' => '2026-09-10', 'project' => 'Menu Board and Cup Sleeve Design', 'type' => 'Deposit', 'amount' => 6500, 'fee' => 0, 'status' => 'held', 'sample' => true],
-            ['date' => '2026-09-04', 'project' => 'Product Photo Retouching', 'type' => 'Deposit', 'amount' => 5000, 'fee' => 500, 'status' => 'released', 'sample' => true],
-            ['date' => '2026-08-31', 'project' => 'Barista Training Manual Layout', 'type' => 'Refund', 'amount' => 4000, 'fee' => 0, 'status' => 'refunded', 'sample' => true],
-            ['date' => '2026-07-31', 'project' => 'Weekly Menu Social Posts (July)', 'type' => 'Hourly Billing', 'amount' => 8400, 'fee' => 0, 'status' => 'paid', 'sample' => true],
-        ];
+    $u = tt_current_user();
+    if (!$u || $u['role'] !== 'client') { return []; }
+    $stmt = db()->prepare("SELECT pay.id, pay.type, pay.amount, pay.service_fee, pay.status, pay.created_at, pay.reference, pay.method, pay.transfer_ref, p.title
+                           FROM payments pay JOIN projects p ON p.id = pay.project_id
+                           WHERE p.client_id = ? ORDER BY pay.id DESC");
+    $stmt->execute([(int) $u['id']]);
+    $out = [];
+    foreach ($stmt->fetchAll() as $r) {
+        $out[] = ['id' => (int) $r['id'], 'reference' => (string) $r['reference'], 'method' => (string) $r['method'], 'transfer_ref' => (string) $r['transfer_ref'], 'date' => date('Y-m-d', strtotime($r['created_at'])), 'project' => $r['title'],
+                  'type' => ['release' => 'Release', 'refund' => 'Refund'][$r['type']] ?? 'Deposit', 'amount' => (int) $r['amount'],
+                  'fee' => (int) $r['service_fee'], 'status' => $r['status'], 'sample' => false];
     }
-    $real = [];
-    foreach (tt_client_payment_history() as $h) {
-        if ($h['type'] === 'escrow' && $h['status'] === 'paid') { continue; }
-        $type = ['escrow' => 'Deposit', 'release' => 'Release', 'refund' => 'Refund',
-                 'hourly_billing' => 'Hourly Billing'][$h['type']] ?? 'Deposit';
-        $real[] = ['id' => (int) $h['id'], 'date' => date('Y-m-d', strtotime($h['created_at'])), 'project' => $h['title'],
-                   'type' => $type, 'amount' => (int) $h['amount'],
-                   'fee' => (int) $h['service_fee'], 'status' => $h['status'], 'sample' => false];
-    }
-    return array_merge($real, $sample);
+    return $out;
 }
 
 /** Admin payments: demo sample rows plus the real records. */
@@ -3038,15 +2254,10 @@ function toptunity_admin_payments()
         $real[] = ['date' => tt_date_label($r['created_at']), 'project' => $r['title'],
                    'billing' => $r['billing_type'] === 'hourly' ? 'Hourly' : 'Fixed Price',
                    'type' => $r['status'] === 'released' ? 'Release' : 'Escrow',
-                   'amount' => (int) $r['amount'], 'fee' => (int) $r['service_fee'], 'status' => $r['status'], 'sample' => false];
+                   'amount' => (int) $r['amount'], 'fee' => (int) $r['service_fee'], 'status' => $r['status'], 'sample' => false,
+                   'reference' => (string) ($r['reference'] ?? ''), 'method' => (string) ($r['method'] ?? ''), 'transfer_ref' => (string) ($r['transfer_ref'] ?? '')];
     }
-    $sample = tt_is_demo_admin() ? [
-        ['date' => 'Oct 03, 2026', 'project' => 'Monthly Social Media Content Calendar', 'billing' => 'Hourly', 'type' => 'Escrow', 'amount' => 14000, 'fee' => 1400, 'status' => 'held', 'sample' => true],
-        ['date' => 'Oct 02, 2026', 'project' => 'Clinic Inventory Dashboard', 'billing' => 'Hourly · 40 h × ₱650', 'type' => 'Hourly Billing', 'amount' => 26000, 'fee' => 2000, 'status' => 'paid', 'sample' => true],
-        ['date' => 'Sep 04, 2026', 'project' => 'Product Photo Retouching', 'billing' => 'Fixed Price', 'type' => 'Release', 'amount' => 5000, 'fee' => 500, 'status' => 'released', 'sample' => true],
-        ['date' => 'Aug 31, 2026', 'project' => 'Weekly Menu Social Posts (July)', 'billing' => 'Hourly', 'type' => 'Refund', 'amount' => 1400, 'fee' => 0, 'status' => 'refunded', 'sample' => true],
-        ['date' => 'Aug 31, 2026', 'project' => 'Barista Training Manual Layout', 'billing' => 'Fixed Price', 'type' => 'Refund', 'amount' => 4000, 'fee' => 0, 'status' => 'refunded', 'sample' => true],
-    ] : [];
+    $sample = [];
     return array_merge($real, $sample);
 }
 
@@ -3057,7 +2268,7 @@ function toptunity_admin_money_totals()
     $held_projects = 0;
     foreach ($rows as $r) { if ($r['status'] === 'held') { $held_projects++; } }
     $pending_withdrawals = count(array_filter(tt_admin_withdrawals_db(), function ($w) { return $w['status'] === 'pending'; }));
-    $sample = tt_is_demo_admin();
+    $sample = false;
     return [
         'held'         => ($sample ? 486500 : 0) + $real['held'],
         'released'     => ($sample ? 1284300 : 0) + $real['released'],
@@ -3070,35 +2281,26 @@ function toptunity_admin_money_totals()
 /** Withdrawal requests: real requests first, then the demo sample rows. */
 function toptunity_admin_withdrawals()
 {
-    $real = [];
-    foreach (tt_admin_withdrawals_db() as $w) {
-        $real[] = ['id' => (int) $w['id'], 'date' => tt_date_label($w['created_at']), 'freelancer' => $w['freelancer'],
-                   'method' => $w['method'] === 'gcash' ? 'GCash' : 'Bank Account', 'account' => $w['account'],
-                   'amount' => (int) $w['amount'], 'balance_after' => null, 'status' => $w['status'], 'sample' => false];
+    $rows = db()->query("SELECT w.id, w.method, w.account, w.amount, w.status, w.created_at, w.processed_at, w.reference, u.name AS freelancer
+                         FROM withdrawals w JOIN users u ON u.id = w.freelancer_id ORDER BY w.created_at DESC")->fetchAll();
+    $out = [];
+    foreach ($rows as $r) {
+        $out[] = ['id' => 'W-' . $r['id'], 'date' => date('M j, Y', strtotime($r['created_at'])), 'freelancer' => $r['freelancer'],
+                  'method' => $r['method'] === 'gcash' ? 'GCash' : 'Bank Account', 'account' => $r['account'],
+                  'amount' => (int) $r['amount'], 'status' => $r['status'], 'sample' => false,
+                  'processed' => $r['processed_at'] ? date('M j, Y · g:i A', strtotime($r['processed_at'])) : '', 'reference' => (string) ($r['reference'] ?? '')];
     }
-    $sample = tt_is_demo_admin() ? [
-        ['id' => 'W-2201', 'date' => 'Oct 03, 2026', 'freelancer' => 'Miguel Reyes', 'method' => 'GCash', 'account' => '0917 •••• 4821', 'amount' => 5000, 'balance_after' => 10400, 'status' => 'pending', 'sample' => true],
-        ['id' => 'W-2200', 'date' => 'Oct 03, 2026', 'freelancer' => 'Rhea Mendoza', 'method' => 'Bank Account', 'account' => 'BPI •••• 0937', 'amount' => 12500, 'balance_after' => 8200, 'status' => 'pending', 'sample' => true],
-        ['id' => 'W-2196', 'date' => 'Oct 02, 2026', 'freelancer' => 'Kevin Tan', 'method' => 'GCash', 'account' => '0918 •••• 1190', 'amount' => 3800, 'balance_after' => 4100, 'status' => 'pending', 'sample' => true],
-        ['id' => 'W-2188', 'date' => 'Sep 20, 2026', 'freelancer' => 'Miguel Reyes', 'method' => 'Bank Account', 'account' => 'BPI •••• 0937', 'amount' => 20000, 'balance_after' => 15400, 'status' => 'processed', 'sample' => true],
-    ] : [];
-    foreach ($sample as &$row) {
-        if (isset($_SESSION['demo_admin_withdrawal_status'][$row['id']])) {
-            $row['status'] = $_SESSION['demo_admin_withdrawal_status'][$row['id']];
-        }
-    }
-    unset($row);
-    return array_merge($real, $sample);
+    return $out;
 }
 
 /** Process a sample withdrawal without changing real balances or database rows. */
 function tt_admin_process_demo_withdrawal($id, $action, $reason = '')
 {
-    if (!tt_is_demo_admin()) { return 'This action is only available to the demo administrator.'; }
+    if (!false) { return 'This action is only available to the demo administrator.'; }
     if (!in_array($action, ['process', 'reject'], true)) { return 'Choose a valid withdrawal action.'; }
     $request = null;
     foreach (toptunity_admin_withdrawals() as $candidate) {
-        if ($candidate['id'] === $id && !empty($candidate['sample'])) { $request = $candidate; break; }
+        if ((string) $candidate['id'] === (string) $id && !empty($candidate['sample'])) { $request = $candidate; break; }
     }
     if (!$request) { return 'That sample withdrawal could not be found.'; }
     if ($request['status'] !== 'pending') { return 'This request has already been handled.'; }
@@ -3156,7 +2358,7 @@ function tt_save_client_profile($data)
     $u = tt_current_user();
     $name = trim($data['full_name'] ?? '');
     if ($name === '') { return 'Enter your full name.'; }
-    if (!tt_is_demo_user($u)) { db()->prepare('UPDATE users SET name = ? WHERE id = ?')->execute([$name, (int) $u['id']]); }
+    if (!false) { db()->prepare('UPDATE users SET name = ? WHERE id = ?')->execute([$name, (int) $u['id']]); }
     $_SESSION['user']['name'] = $name;
     db()->prepare('INSERT INTO client_profiles (user_id, company, location, phone, about, address, tin)
                    VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -3174,10 +2376,10 @@ function tt_update_account($name, $email)
     $name = trim($name); $email = trim($email);
     if ($name === '')                                   { return 'Enter your name.'; }
     if (!filter_var($email, FILTER_VALIDATE_EMAIL))     { return 'Enter a valid email address.'; }
-    if (tt_is_demo_account() && strcasecmp($email, $u['email']) !== 0) { return 'The demo account email cannot be changed.'; }
+    if (false && strcasecmp($email, $u['email']) !== 0) { return 'The demo account email cannot be changed.'; }
     $other = tt_find_user_by_email($email);
     if ($other && (int) $other['id'] !== (int) $u['id']) { return 'Another account already uses that email.'; }
-    if (!tt_is_demo_user($u)) { db()->prepare('UPDATE users SET name = ?, email = ? WHERE id = ?')->execute([$name, $email, (int) $u['id']]); }
+    if (!false) { db()->prepare('UPDATE users SET name = ?, email = ? WHERE id = ?')->execute([$name, $email, (int) $u['id']]); }
     $_SESSION['user']['name'] = $name;
     $_SESSION['user']['email'] = $email;
     return null;
@@ -3193,7 +2395,7 @@ function tt_change_password($current, $new, $confirm)
     if (!password_verify($current, $hash))                 { return 'Your current password is not correct.'; }
     if (strlen($new) < 8 || !preg_match('/\d/', $new))     { return 'The new password must be at least 8 characters and include a number.'; }
     if ($new !== $confirm)                                 { return 'The new passwords do not match.'; }
-    if (!tt_is_demo_user($u)) { db()->prepare('UPDATE users SET password_hash = ? WHERE id = ?')->execute([password_hash($new, PASSWORD_DEFAULT), (int) $u['id']]); }
+    if (!false) { db()->prepare('UPDATE users SET password_hash = ? WHERE id = ?')->execute([password_hash($new, PASSWORD_DEFAULT), (int) $u['id']]); }
     return null;
 }
 
@@ -3408,12 +2610,12 @@ function toptunity_freelancer_threads()
 
 function toptunity_client_notifications_all()
 {
-    return array_merge(tt_real_notifications(), tt_apply_demo_notification_read(tt_is_demo_account() ? toptunity_client_notifications_all_demo() : []));
+    return array_merge(tt_real_notifications(), tt_apply_demo_notification_read(false ? toptunity_client_notifications_all_demo() : []));
 }
 
 function toptunity_freelancer_notifications()
 {
-    return array_merge(tt_real_notifications(), tt_apply_demo_notification_read(tt_is_demo_freelancer() ? toptunity_freelancer_notifications_demo() : []));
+    return array_merge(tt_real_notifications(), tt_apply_demo_notification_read(false ? toptunity_freelancer_notifications_demo() : []));
 }
 
 /** Read state of the demo conversations for this session (not saved to the database). */
@@ -3570,6 +2772,7 @@ function tt_notification_link($role, $cat)
         'admin' => [
             'past' => 'project-moderation.php', 'reports' => 'reported-content.php', 'disputes' => 'dispute-management.php',
             'withdrawals' => 'withdrawal-requests.php', 'inquiries' => 'contact-inquiries.php', 'reviews' => 'platform-reviews.php',
+            'alert' => 'risk-alerts.php',
         ],
     ];
     return $map[$role][$cat] ?? '';
@@ -3584,7 +2787,7 @@ function tt_notification_key($n)
 
 function toptunity_admin_notifications()
 {
-    $demo_notifications = tt_is_demo_admin() ? toptunity_admin_notifications_base() : [];
+    $demo_notifications = false ? toptunity_admin_notifications_base() : [];
     return tt_apply_demo_notification_read(array_merge(tt_real_notifications(), $demo_notifications));
 }
 
@@ -3597,7 +2800,7 @@ function tt_open_notification($key, $role)
         if (tt_notification_key($n) !== $key) { continue; }
         if (!empty($n['real']) && isset($n['id'])) {
             db()->prepare('UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?')
-                ->execute([(int) $n['id'], (int) tt_current_user()['id']]);
+                ->execute([(int) $n['id'], (int) (tt_current_user()['id'] ?? 0)]);
         } else {
             $_SESSION[tt_demo_session_key()]['notif_read'][$key] = true;
         }
@@ -3612,7 +2815,7 @@ function tt_freelancer_db_proposal_rows()
     $u = tt_current_user();
     if (!$u || $u['role'] !== 'freelancer') { return []; }
     $stmt = db()->prepare("SELECT pr.id, pr.days, pr.offer, pr.status, pr.created_at, p.id AS pid, p.title, p.billing_type,
-                                  p.client_id, u.name AS client
+                                  p.client_id, p.contract_status, u.name AS client
                            FROM proposals pr JOIN projects p ON p.id = pr.project_id JOIN users u ON u.id = p.client_id
                            WHERE pr.freelancer_id = ? ORDER BY pr.id DESC");
     $stmt->execute([(int) $u['id']]);
@@ -3620,7 +2823,8 @@ function tt_freelancer_db_proposal_rows()
     foreach ($stmt->fetchAll() as $r) {
         $out[] = ['key' => 'r' . $r['id'], 'id' => (int) $r['id'], 'project_id' => 1000 + (int) $r['pid'], 'client_id' => (int) $r['client_id'],
                   'title' => $r['title'], 'client' => $r['client'], 'type' => $r['billing_type'], 'offer' => (int) $r['offer'],
-                  'days' => (int) $r['days'], 'status' => $r['status'], 'sent' => $r['created_at'], 'real' => true];
+                  'days' => (int) $r['days'], 'status' => tt_proposal_stage($r['status'], $r['contract_status']), 'sent' => $r['created_at'], 'real' => true,
+                  'contract_status' => $r['contract_status']];
     }
     return $out;
 }
@@ -3714,7 +2918,7 @@ function tt_save_freelancer_profile($d)
     $u = tt_current_user();
     $name = trim($d['name'] ?? '');
     if ($name !== '') {
-        if (!tt_is_demo_user($u)) { db()->prepare('UPDATE users SET name = ? WHERE id = ?')->execute([$name, (int) $u['id']]); }
+        if (!false) { db()->prepare('UPDATE users SET name = ? WHERE id = ?')->execute([$name, (int) $u['id']]); }
         $_SESSION['user']['name'] = $name;
     }
     db()->prepare('INSERT INTO freelancer_profiles (user_id, title, location, phone, hourly_rate, languages, about)
@@ -3786,8 +2990,7 @@ function tt_portfolio_update_real($id, $title, $category)
 /** True when the sample data may be shown: visitors and the demo accounts. */
 function tt_show_sample()
 {
-    $u = tt_current_user();
-    return !$u || tt_is_demo_user($u);
+    return false;
 }
 
 /** Real freelancers (keys are 5000 + user id so they never clash with the sample ids). */
@@ -3795,9 +2998,8 @@ function tt_real_freelancers()
 {
     $palette = [['#CCFBF1', '#1E293B', 'short'], ['#FFEDD5', '#1E293B', 'long'], ['#E0E7FF', '#1E293B', 'short'], ['#FEF9C3', '#1E293B', 'long']];
     // the demo accounts are shown only to the demo accounts
-    $demo_mail = "'andrea.santos@kapelokal.ph','miguel.reyes@example.com'";
-    $hide = tt_is_demo_user(tt_current_user()) || !tt_current_user() ? '' : " AND u.email NOT IN ($demo_mail)";
-    $rows = db()->query("SELECT u.id, u.name, u.avatar, fp.title, fp.location, fp.hourly_rate, fp.about, fp.languages, fp.photo,
+    $hide = '';
+    $rows = db()->query("SELECT u.id, u.name, u.avatar, u.created_at, fp.title, fp.location, fp.hourly_rate, fp.about, fp.languages, fp.photo, fp.available,
                                 (SELECT COUNT(*) FROM projects p WHERE p.freelancer_id = u.id AND p.status = 'completed') AS completed
                          FROM users u LEFT JOIN freelancer_profiles fp ON fp.user_id = u.id
                          WHERE u.role = 'freelancer' AND u.status = 'active'$hide ORDER BY u.id")->fetchAll();
@@ -3805,6 +3007,9 @@ function tt_real_freelancers()
     foreach ($rows as $r) {
         $skills = db()->prepare('SELECT s.name FROM freelancer_skills fs JOIN skills s ON s.id = fs.skill_id WHERE fs.freelancer_id = ? ORDER BY s.name');
         $skills->execute([(int) $r['id']]);
+        $grp = db()->prepare('SELECT DISTINCT c.work_group FROM freelancer_skills fs JOIN skills s ON s.id = fs.skill_id JOIN categories c ON c.id = s.category_id WHERE fs.freelancer_id = ? AND c.work_group IS NOT NULL');
+        $grp->execute([(int) $r['id']]);
+        $groups = $grp->fetchAll(PDO::FETCH_COLUMN);
         $pal = $palette[((int) $r['id']) % 4];
         $key = 5000 + (int) $r['id'];
         $portfolio = [];
@@ -3817,14 +3022,28 @@ function tt_real_freelancers()
                 'image' => $item['type'] === 'image',
             ];
         }
+        // Rating, review count and reviews come from the reviews table
+        $reviews = tt_review_items((int) $r['id']);
+        $rating  = $reviews ? round(array_sum(array_column($reviews, 'stars')) / count($reviews), 1) : 0;
+        // On-time delivery: finished projects whose last submitted work was on or before the deadline
+        $ot = db()->prepare("SELECT COUNT(*) AS total,
+                                    SUM(CASE WHEN DATE(sub.last_sent) <= p.deadline THEN 1 ELSE 0 END) AS on_time
+                             FROM projects p
+                             JOIN (SELECT project_id, MAX(created_at) AS last_sent FROM project_submissions GROUP BY project_id) sub ON sub.project_id = p.id
+                             WHERE p.freelancer_id = ? AND p.status = 'completed'");
+        $ot->execute([(int) $r['id']]);
+        $ot = $ot->fetch();
+        $ontime = ($ot && (int) $ot['total'] > 0) ? round(((int) $ot['on_time'] / (int) $ot['total']) * 100) . '%' : 'Not rated';
         $out[$key] = ['id' => $key, 'user_id' => (int) $r['id'], 'name' => $r['name'], 'title' => $r['title'] ?: 'Freelancer',
-                      'location' => $r['location'] ?: '', 'rating' => 0, 'reviews' => 0,
-                      'completed' => (int) $r['completed'], 'ontime' => 'Not rated',
+                      'location' => $r['location'] ?: '', 'rating' => $rating, 'reviews' => count($reviews),
+                      'completed' => (int) $r['completed'], 'ontime' => $ontime,
                       'rate' => (int) ($r['hourly_rate'] ?: 0),
-                      'skills' => array_column($skills->fetchAll(), 'name'),
+                      'skills' => array_column($skills->fetchAll(), 'name'), 'groups' => $groups,
                       'about' => preg_split('/\R+/', trim((string) $r['about']), -1, PREG_SPLIT_NO_EMPTY),
-                      'bio' => trim((string) $r['about']), 'portfolio' => $portfolio, 'reviews' => [], 'feedback' => [], 'available' => true,
-                      'since' => 'Registered', 'bg' => $pal[0], 'hair' => $pal[1], 'style' => $pal[2],
+                      'bio' => trim((string) $r['about']), 'portfolio' => $portfolio, 'feedback' => $reviews, 'available' => (bool) ($r['available'] ?? 1),
+                      'languages' => (string) ($r['languages'] ?? ''),
+                      'since' => $r['created_at'] ? date('M j, Y', strtotime($r['created_at'])) : '—',
+                      'bg' => $pal[0], 'hair' => $pal[1], 'style' => $pal[2],
                       'photo' => $r['photo'] ?: null, 'avatar' => $r['avatar'] ?: null, 'real' => true];
     }
     return $out;
@@ -3839,13 +3058,30 @@ function toptunity_freelancers()
 /** Real open projects in the listing shape. */
 function tt_real_listing()
 {
+    // Open projects from the database, newest first, with the signals the ranking needs
+    $rows = db()->query("SELECT p.id, p.title, p.description, p.billing_type, p.budget, p.hourly_rate, p.max_hours,
+                                p.deadline, p.created_at, c.name AS category, c.work_group, u.name AS client_name,
+                                (SELECT COUNT(*) FROM proposals pr WHERE pr.project_id = p.id) AS proposals,
+                                (SELECT COUNT(*) FROM projects d WHERE d.client_id = p.client_id AND d.status = 'completed') AS client_done
+                         FROM projects p
+                         LEFT JOIN categories c ON c.id = p.category_id
+                         JOIN users u ON u.id = p.client_id
+                         WHERE p.status = 'open' AND p.freelancer_id IS NULL AND p.contract_status = 'none'
+                         ORDER BY p.id DESC LIMIT 200")->fetchAll();
     $out = [];
-    foreach (tt_load_saved_projects() as $sp) {
-        if ($sp['status'] !== 'open') { continue; }
-        $out[$sp['id']] = ['id' => $sp['id'], 'title' => $sp['title'], 'category' => $sp['category'], 'client' => 'Client',
-                           'type' => $sp['type'], 'amount' => $sp['type'] === 'hourly' ? $sp['rate'] : $sp['budget'],
-                           'deadline' => $sp['deadline'], 'proposals' => $sp['proposals'], 'status' => 'open', 'age_h' => 0,
-                           'match' => 0, 'skills' => $sp['skills'], 'desc' => $sp['intro'], 'real' => true];
+    foreach ($rows as $r) {
+        $sk = db()->prepare('SELECT s.name FROM project_skills ps JOIN skills s ON s.id = ps.skill_id WHERE ps.project_id = ?');
+        $sk->execute([(int) $r['id']]);
+        $out[1000 + (int) $r['id']] = [
+            'id' => 1000 + (int) $r['id'], 'title' => $r['title'], 'category' => $r['category'] ?: 'Other',
+            'group' => $r['work_group'] ?: 'Other',
+            'client' => $r['client_name'], 'type' => $r['billing_type'],
+            'amount' => $r['billing_type'] === 'hourly' ? (int) $r['hourly_rate'] : (int) $r['budget'],
+            'max_hours' => (int) $r['max_hours'], 'deadline' => $r['deadline'], 'proposals' => (int) $r['proposals'],
+            'status' => 'open', 'age_h' => max(0, (int) floor((time() - strtotime($r['created_at'])) / 3600)),
+            'match' => 0, 'skills' => array_column($sk->fetchAll(), 'name'), 'desc' => (string) $r['description'],
+            'client_done' => (int) $r['client_done'], 'real' => true,
+        ];
     }
     return $out;
 }
@@ -3859,12 +3095,12 @@ function toptunity_listing()
 /** Sample threads only for the demo accounts; real accounts get their real conversations only. */
 function toptunity_client_threads_demo()
 {
-    return tt_is_demo_account() ? toptunity_client_threads_demo_base() : [];
+    return false ? toptunity_client_threads_demo_base() : [];
 }
 
 function toptunity_freelancer_threads_demo()
 {
-    return tt_is_demo_freelancer() ? toptunity_freelancer_threads_demo_base() : [];
+    return false ? toptunity_freelancer_threads_demo_base() : [];
 }
 
 /** A single freelancer: sample ids, or a real one (5000 + user id). */
@@ -4004,4 +3240,242 @@ function tt_withdraw_real_proposal($id)
     $u = tt_current_user();
     db()->prepare("UPDATE proposals SET status = 'withdrawn' WHERE id = ? AND freelancer_id = ? AND status = 'pending'")
         ->execute([(int) $id, (int) $u['id']]);
+}
+
+/**
+ * Project ranking score (0 to about 1). Higher = shown first.
+ *  relevance   (0.30): how well the search words match the title (x3), skills (x2) and description (x1)
+ *  skill match (0.25): neutral for visitors (no freelancer profile)
+ *  freshness   (0.25): halves every 48 hours, so new projects rise and older ones drift down
+ *  client trust(0.10): completed projects by the client, up to 5
+ *  competition (0.10): fewer proposals scores higher
+ *  penalty     (-0.10): description shorter than 20 characters
+ */
+function tt_project_score($p, $query = '')
+{
+    $rel = 0.5;
+    $q = trim((string) $query);
+    if ($q !== '') {
+        $hits = 0; $max = 0;
+        foreach (preg_split('/\s+/', mb_strtolower($q)) as $term) {
+            if ($term === '') { continue; }
+            $max += 6;
+            if (mb_stripos((string) $p['title'], $term) !== false) { $hits += 3; }
+            if (mb_stripos(implode(' ', (array) ($p['skills'] ?? [])), $term) !== false) { $hits += 2; }
+            if (mb_stripos((string) ($p['desc'] ?? ''), $term) !== false) { $hits += 1; }
+        }
+        $rel = $max ? min(1, $hits / $max) : 0.5;
+    }
+    $skill   = 0.5;
+    $fresh   = pow(0.5, max(0, (int) ($p['age_h'] ?? 0)) / 48);
+    $trust   = isset($p['client_done']) ? min(1, $p['client_done'] / 5) : 0.5;
+    $compete = 1 / (1 + max(0, (int) ($p['proposals'] ?? 0)));
+    $score = 0.30 * $rel + 0.25 * $skill + 0.25 * $fresh + 0.10 * $trust + 0.10 * $compete;
+    if (mb_strlen(trim((string) ($p['desc'] ?? ''))) < 20) { $score -= 0.10; }
+    return round($score, 4);
+}
+
+/** Reviews a user has received, from the reviews table (newest first). */
+function tt_review_items($user_id)
+{
+    $stmt = db()->prepare("SELECT r.rating, r.body, r.created_at, r.reviewer_id, u.name AS reviewer, p.title AS project
+                           FROM reviews r
+                           JOIN users u ON u.id = r.reviewer_id
+                           LEFT JOIN projects p ON p.id = r.project_id
+                           WHERE r.reviewee_id = ? ORDER BY r.created_at DESC");
+    $stmt->execute([(int) $user_id]);
+    $pal   = [['#CCFBF1', 'long'], ['#FFEDD5', 'short'], ['#DBEAFE', 'bun'], ['#FEF9C3', 'glasses']];
+    $items = [];
+    foreach ($stmt->fetchAll() as $r) {
+        $c = $pal[((int) $r['reviewer_id']) % 4];
+        $items[] = ['by' => $r['reviewer'], 'bg' => $c[0], 'style' => $c[1], 'stars' => (int) $r['rating'],
+                    'date' => date('M j, Y', strtotime($r['created_at'])), 'project' => $r['project'] ?: '—', 'text' => (string) $r['body']];
+    }
+    return $items;
+}
+
+/** Limits that send an admin risk alert. They do not block anything; the contract still goes through. */
+function tt_risk_limits()
+{
+    return ['fixed_amount' => 100000, 'hourly_rate' => 3000, 'max_hours' => 200, 'hourly_total' => 200000,
+            'deadline_days' => 180, 'offer_high' => 1.5, 'offer_low' => 0.3, 'agreed_drift' => 0.5];
+}
+
+/** Reasons a project, proposal or contract looks unusual. Empty list = normal. */
+function tt_risk_reasons($source, $project, $amount, $agreed = null)
+{
+    $L = tt_risk_limits();
+    $reasons = [];
+    $hourly = ($project['billing_type'] ?? '') === 'hourly';
+    $budget = (int) ($project['budget'] ?? 0);
+    if (!$hourly && $amount >= $L['fixed_amount']) {
+        $reasons[] = 'High fixed amount (₱' . number_format($amount) . ')';
+    }
+    if ($hourly) {
+        $rate  = (int) ($project['hourly_rate'] ?? 0);
+        $hours = (int) ($project['max_hours'] ?? 0);
+        if ($rate > $L['hourly_rate']) { $reasons[] = 'High hourly rate (₱' . number_format($rate) . '/hr)'; }
+        if ($hours > $L['max_hours'])  { $reasons[] = 'Very long working hours (' . $hours . ' h)'; }
+        if ($rate * $hours > $L['hourly_total']) { $reasons[] = 'High maximum total (₱' . number_format($rate * $hours) . ')'; }
+    }
+    if (!empty($project['deadline'])) {
+        $days = (int) floor((strtotime($project['deadline']) - time()) / 86400);
+        if ($days > $L['deadline_days']) { $reasons[] = 'Very long timeline (' . $days . ' days to the deadline)'; }
+    }
+    if ($source === 'proposal' && !$hourly && $budget > 0) {
+        if ($amount > $budget * $L['offer_high']) { $reasons[] = 'Offer is more than 150% of the budget'; }
+        if ($amount < $budget * $L['offer_low'])  { $reasons[] = 'Offer is below 30% of the budget'; }
+    }
+    if ($source === 'contract' && $agreed !== null && !$hourly && $budget > 0) {
+        if (abs($agreed - $budget) > $budget * $L['agreed_drift']) { $reasons[] = 'Agreed amount differs from the budget by more than 50%'; }
+    }
+    return $reasons;
+}
+
+/** Records a risk alert and tells every active administrator. Never blocks the action. */
+function tt_risk_check($source, $project, $project_id, $user_id, $amount, $agreed = null)
+{
+    $reasons = tt_risk_reasons($source, $project, (int) $amount, $agreed === null ? null : (int) $agreed);
+    if (!$reasons) { return; }
+    $text = implode('; ', $reasons);
+    db()->prepare('INSERT INTO risk_alerts (source, project_id, user_id, amount, reason) VALUES (?, ?, ?, ?, ?)')
+        ->execute([$source, (int) $project_id, (int) $user_id, (int) $amount, mb_substr($text, 0, 255)]);
+    $label = ['project' => 'New project', 'proposal' => 'Proposal', 'contract' => 'Contract'][$source];
+    $admins = db()->query("SELECT id FROM users WHERE role = 'admin' AND status = 'active'")->fetchAll(PDO::FETCH_COLUMN);
+    foreach ($admins as $admin_id) {
+        tt_notify((int) $admin_id, 'alert', $label . ' flagged for review', $text . ' · ' . ($project['title'] ?? 'Project'));
+    }
+}
+
+/** Risk alerts for the admin page (newest first). */
+function tt_admin_risk_alerts($status = '')
+{
+    $sql = "SELECT ra.id, ra.source, ra.amount, ra.reason, ra.status, ra.created_at, u.name, u.role, p.title, p.id AS pid
+            FROM risk_alerts ra
+            LEFT JOIN users u ON u.id = ra.user_id
+            LEFT JOIN projects p ON p.id = ra.project_id";
+    $params = [];
+    if ($status === 'new' || $status === 'reviewed') { $sql .= ' WHERE ra.status = ?'; $params[] = $status; }
+    $stmt = db()->prepare($sql . ' ORDER BY ra.id DESC LIMIT 200');
+    $stmt->execute($params);
+    $out = [];
+    foreach ($stmt->fetchAll() as $r) {
+        $out[] = ['id' => (int) $r['id'], 'source' => ucfirst($r['source']), 'user' => $r['name'] ?: '—', 'role' => ucfirst((string) $r['role']),
+                  'project' => $r['title'] ?: '—', 'site_id' => $r['pid'] ? 1000 + (int) $r['pid'] : null,
+                  'amount' => (int) $r['amount'], 'reason' => $r['reason'], 'status' => $r['status'],
+                  'date' => date('M j, Y · g:i A', strtotime($r['created_at']))];
+    }
+    return $out;
+}
+
+/** Marks an alert as reviewed by the administrator. */
+function tt_admin_mark_alert($alert_id)
+{
+    $user = tt_current_user();
+    if (!$user || $user['role'] !== 'admin') { return 'Administrator access is required.'; }
+    db()->prepare("UPDATE risk_alerts SET status = 'reviewed' WHERE id = ?")->execute([(int) $alert_id]);
+    tt_audit('review risk alert', 'alert #' . (int) $alert_id);
+    return null;
+}
+
+/** Plain-language work groups (Programmer, Designer, ...) in a fixed display order. */
+function tt_work_groups()
+{
+    $order = ['Programmer', 'Designer', 'Editor', 'Writer', 'Marketer', 'Admin Assistant'];
+    $found = db()->query("SELECT DISTINCT work_group FROM categories WHERE work_group IS NOT NULL")->fetchAll(PDO::FETCH_COLUMN);
+    $found = array_values(array_intersect($order, $found));
+    return $found;
+}
+
+/**
+ * Shows where a freelancer's proposal really is. A selected proposal becomes an offer when the
+ * contract is sent, ongoing when accepted and completed when finished. Nothing is typed in.
+ */
+function tt_proposal_stage($proposal_status, $contract_status)
+{
+    if ($proposal_status !== 'selected') { return $proposal_status; }
+    if ($contract_status === 'pending')   { return 'offer'; }
+    if ($contract_status === 'active')    { return 'ongoing'; }
+    if ($contract_status === 'completed') { return 'completed'; }
+    return 'selected';
+}
+
+/** Progress from the real stage: 0 before a contract, then up to 100 once the work is approved and finished. */
+function tt_project_progress($project_id, $contract_status)
+{
+    if ($contract_status === 'completed') { return 100; }
+    if ($contract_status !== 'active')    { return 0; }
+    $sub = tt_project_submission(1000 + (int) $project_id);
+    if ($sub && $sub['status'] === 'pending') { return 86; }
+    if ($sub) { return 71; }
+    return 57;
+}
+
+/** True when this user has already written their review for the project (site id). */
+function tt_review_done($project_id, $reviewer_id)
+{
+    // Accepts either the site project ID (1000 + database ID) or the plain database ID
+    $db_id = (int) $project_id >= 1000 ? (int) $project_id - 1000 : (int) $project_id;
+    $q = db()->prepare('SELECT COUNT(*) FROM reviews WHERE reviewer_id = ? AND project_id = ?');
+    $q->execute([(int) $reviewer_id, $db_id]);
+    return (int) $q->fetchColumn() > 0;
+}
+
+/**
+ * The status a client, freelancer or admin sees for a project. It is worked out from the database
+ * (status, contract and whether a freelancer is chosen), so every page shows the same status.
+ * Returns [label, css class].
+ */
+function tt_project_status_view($status, $contract_status, $has_freelancer)
+{
+    if ($status === 'cancelled') { return ['Cancelled', 'cancelled']; }
+    if ($status === 'completed') { return ['Completed', 'completed']; }
+    if ($status === 'ongoing')   { return ['Ongoing', 'ongoing']; }
+    if ($status === 'overdue')   { return ['Overdue', 'overdue']; }
+    if ($status === 'open' && $has_freelancer) {
+        if ($contract_status === 'pending') { return ['Contract Sent', 'open']; }
+        if ($contract_status === 'active')  { return ['Ongoing', 'ongoing']; }
+        return ['Freelancer Selected', 'open'];
+    }
+    return [toptunity_status_label($status), $status ?: 'open'];
+}
+
+/**
+ * The client rates the freelancer after a project is completed. Once per project.
+ * Saved to the same reviews table, so the rating shows on the freelancer's profile.
+ */
+function tt_save_freelancer_review($project_id, $rating, $body)
+{
+    $u = tt_current_user();
+    if (!$u || $u['role'] !== 'client') { return 'Only the client can rate the freelancer.'; }
+    $db_id = (int) $project_id >= 1000 ? (int) $project_id - 1000 : (int) $project_id;
+    $q = db()->prepare("SELECT id, client_id, freelancer_id, status, title FROM projects WHERE id = ?");
+    $q->execute([$db_id]);
+    $project = $q->fetch();
+    if (!$project || (int) $project['client_id'] !== (int) $u['id']) { return 'This project is not yours.'; }
+    if ($project['status'] !== 'completed') { return 'You can rate the freelancer after the project is completed.'; }
+    if (empty($project['freelancer_id'])) { return 'This project has no freelancer to rate.'; }
+    if ($rating < 1 || $rating > 5) { return 'Choose a rating from 1 to 5.'; }
+    if (mb_strlen(trim($body)) < 10) { return 'Write a review of at least 10 characters.'; }
+    $check = db()->prepare('SELECT COUNT(*) FROM reviews WHERE reviewer_id = ? AND project_id = ? AND reviewee_id = ?');
+    $check->execute([(int) $u['id'], $db_id, (int) $project['freelancer_id']]);
+    if ((int) $check->fetchColumn() > 0) { return 'You already rated this freelancer for this project.'; }
+    db()->prepare('INSERT INTO reviews (reviewer_id, reviewee_id, project_id, rating, body) VALUES (?, ?, ?, ?, ?)')
+        ->execute([(int) $u['id'], (int) $project['freelancer_id'], $db_id, (int) $rating, trim($body)]);
+    tt_notify((int) $project['freelancer_id'], 'feedback', 'New rating from a client', $project['title'] . ' was rated ' . (int) $rating . ' out of 5.');
+    tt_audit('rate freelancer', 'project #' . $db_id . ' rating ' . (int) $rating, $u['id']);
+    return null;
+}
+
+/**
+ * Keeps the project status in step with the deadline, without anyone clicking anything:
+ * an active fixed-price project past its deadline becomes Overdue, and goes back to Ongoing when the deadline is extended.
+ * Runs on the dashboards and in the daily job.
+ */
+function tt_refresh_project_statuses()
+{
+    db()->exec("UPDATE projects SET status = 'overdue'
+                WHERE status = 'ongoing' AND billing_type = 'fixed' AND contract_status = 'active' AND deadline < CURDATE()");
+    db()->exec("UPDATE projects SET status = 'ongoing'
+                WHERE status = 'overdue' AND contract_status = 'active' AND deadline >= CURDATE()");
 }
