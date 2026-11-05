@@ -30,8 +30,8 @@ $counts = ['all' => count($all)];
 foreach ($all as $p) { $bucket = in_array($p['status'], ['offer', 'selected'], true) ? 'selected' : $p['status']; $counts[$bucket] = ($counts[$bucket] ?? 0) + 1; }
 $rows = array_values(array_filter($all, function ($p) use ($status) { return $status === 'all' || (in_array($p['status'], ['offer', 'selected'], true) ? 'selected' : $p['status']) === $status; }));
 
-$label = ['pending' => 'Pending', 'selected' => 'Selected', 'offer' => 'Offer sent', 'ongoing' => 'Ongoing', 'completed' => 'Completed', 'not_selected' => 'Not Selected', 'withdrawn' => 'Withdrawn', 'accepted' => 'Accepted'];
-$cls   = ['pending' => 'pending', 'selected' => 'released', 'offer' => 'pending', 'ongoing' => 'ongoing', 'completed' => 'released', 'not_selected' => 'cancelled', 'withdrawn' => 'cancelled', 'accepted' => 'ongoing'];
+$label = ['pending' => 'Pending', 'selected' => 'Selected', 'offer' => 'Offer sent', 'ongoing' => 'Ongoing', 'completed' => 'Completed', 'not_selected' => 'Not Selected', 'withdrawn' => 'Withdrawn', 'declined' => 'Declined', 'accepted' => 'Accepted'];
+$cls   = ['pending' => 'pending', 'selected' => 'released', 'offer' => 'pending', 'ongoing' => 'ongoing', 'completed' => 'released', 'not_selected' => 'cancelled', 'withdrawn' => 'cancelled', 'declined' => 'cancelled', 'accepted' => 'ongoing'];
 
 $page_title = "My Proposals";
 include '../includes/header.php';

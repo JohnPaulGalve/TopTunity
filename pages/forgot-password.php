@@ -19,9 +19,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_reset'])) {
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors[] = 'Enter a valid email address.';
     } else {
-        tt_request_password_reset($email, $base_url);
-        header('Location: ' . $base_url . 'pages/forgot-password.php?sent=1');
-        exit;
+        // Cooldown: one reset request per email address every 60 seconds (logged for every address, registered or not)
+        $recent = db()->prepare("SELECT COUNT(*) FROM audit_logs WHERE action = 'reset requested' AND target = ? AND created_at > (NOW() - INTERVAL 60 SECOND)");
+        $recent->execute([substr(strtolower($email), 0, 120)]);
+        if ((int) $recent->fetchColumn() > 0) {
+            $errors[] = 'Please wait 60 seconds before requesting another reset link.';
+        } else {
+            tt_audit('reset requested', substr(strtolower($email), 0, 120));
+            tt_request_password_reset($email, $base_url);
+            header('Location: ' . $base_url . 'pages/forgot-password.php?sent=1');
+            exit;
+        }
     }
 }
 
@@ -61,7 +69,10 @@ include '../includes/nav.php';
         <p>We'll send a one-time reset link if an account exists for that email.</p>
         <?php if ($reset_requested): ?>
           <p class="note-box" role="status">If the address belongs to an account, and email delivery is configured, a reset link will arrive within a few minutes. The link expires after 30 minutes.</p>
-        <?php else: ?>
+          <?php if (!empty($_SESSION['local_reset_link'])): ?>
+          <p class="note-box" role="status"><strong>Local testing:</strong> this server could not send email, so the reset link is shown here: <a href="<?= e($_SESSION['local_reset_link']) ?>"><?= e($_SESSION['local_reset_link']) ?></a> <span class="muted">(Turn off TT_LOCAL_SHOW_RESET_LINK in includes/auth.php before the site goes live.)</span></p>
+          <?php unset($_SESSION['local_reset_link']); endif; ?>
+        <?php endif; ?>
           <form method="post" action="forgot-password.php">
             <div class="field">
               <label for="reset-email">Email Address</label>
@@ -70,9 +81,8 @@ include '../includes/nav.php';
                 <input type="email" id="reset-email" name="email" value="<?= e($email) ?>" placeholder="you@example.com" autocomplete="email" required>
               </div>
             </div>
-            <button type="submit" name="request_reset" value="1" class="btn btn--primary btn--full">Send Reset Link</button>
+            <button type="submit" name="request_reset" value="1" class="btn btn--primary btn--full"><?= $reset_requested ? 'Resend Reset Link' : 'Send Reset Link' ?></button>
           </form>
-        <?php endif; ?>
         <a href="login.php" class="auth-back">← Back to Login</a>
       </section>
 
@@ -81,7 +91,6 @@ include '../includes/nav.php';
         <h2>Check Your Email</h2>
         <p>Open the reset link from your email. For security, this page does not reveal whether an account exists.</p>
         <div class="reset-art" aria-hidden="true"><div class="reset-art__icon"><?= icon('mail', 30) ?></div></div>
-        <a href="forgot-password.php" class="btn btn--outline">Request Another Link</a>
         <a href="login.php" class="auth-back">← Back to Login</a>
       </section>
 
@@ -109,7 +118,7 @@ include '../includes/nav.php';
         <?php else: ?>
           <h2>Set New Password</h2>
           <p>Open a valid, unexpired reset link from your email to choose a new password.</p>
-          <a href="forgot-password.php" class="btn btn--outline">Request a Reset Link</a>
+          <p class="muted" style="font-size:0.8rem;">Use the form in Step 1 to request a link.</p>
         <?php endif; ?>
       </section>
     </div>

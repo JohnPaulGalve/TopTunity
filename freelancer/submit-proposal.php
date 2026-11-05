@@ -50,7 +50,7 @@ $sent    = false;
 // A project stops taking proposals once a freelancer is selected, or its status is no longer Open
 $closed_label = null;
 if ($db_project && ($db_project['status'] !== 'open' || !empty($db_project['freelancer_id']) || ($db_project['contract_status'] ?? 'none') !== 'none')) {
-    $closed_label = ['ongoing' => 'Ongoing', 'overdue' => 'Overdue', 'completed' => 'Completed', 'cancelled' => 'Cancelled', 'closed' => 'Closed']
+    $closed_label = ['ongoing' => 'Ongoing', 'overdue' => 'Overdue', 'completed' => 'Completed', 'cancelled' => 'Cancelled', 'removed' => 'Removed', 'closed' => 'Closed']
                     [$db_project['status']] ?? (!empty($db_project['freelancer_id']) ? 'Freelancer selected' : 'Closed');
 }
 if ($db_project) {

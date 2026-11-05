@@ -14,7 +14,15 @@ $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $p  = toptunity_freelancer_project($id);
 
 $steps   = ['Project Posted', 'Proposals Submitted', 'Freelancer Selected', 'Contract Accepted', 'Project Started', 'Work Submitted', 'Client Review', 'Completed'];
-$current = $p ? ($p['status'] === 'completed' ? 8 : ($p['status'] === 'offer' ? 3 : 5)) : 0;
+// Progress step from the real stage of the project (1 = posted ... 8 = completed)
+$current = 0;
+if ($p) {
+    $tracking_now = toptunity_project_tracking($id);   // real stages once a contract is active
+    if ($p['status'] === 'completed')                 { $current = 8; }
+    elseif ($tracking_now)                            { $current = $tracking_now['current_step'] + 1; }
+    elseif (in_array($p['status'], ['offer', 'waiting'], true)) { $current = 3; }   // freelancer selected
+    else                                              { $current = 2; }            // proposals stage
+}
 
 $errors = [];
 $log    = ['date' => date('Y-m-d'), 'hours' => '', 'task' => ''];
@@ -74,6 +82,9 @@ include '../includes/header.php';
 include '../includes/client-nav.php';
 ?>
 
+<?php if ($p && ($p['status'] ?? '') === 'removed'): ?>
+<div class="notice-bar" role="status" style="margin-bottom:1rem;"><?= icon('info', 15) ?> This project was removed by an administrator. It is kept for your records, and no new actions can be taken on it.</div>
+<?php endif; ?>
 <nav class="crumbs" aria-label="Breadcrumb">
   <a href="my-projects.php">My Projects</a><span>/</span><span aria-current="page">Project Details</span>
 </nav>
@@ -83,7 +94,7 @@ include '../includes/client-nav.php';
 <?php else:
   $is_hourly = $p['type'] === 'hourly';
   $days_left = max(0, (int) ceil((strtotime($p['deadline']) - strtotime(date('Y-m-d'))) / 86400));
-  $status_label = ['ongoing' => 'Ongoing', 'overdue' => 'Overdue', 'completed' => 'Completed', 'offer' => 'Project Offer', 'waiting' => 'Waiting for contract', 'cancelled' => 'Cancelled'][$p['status']] ?? 'Waiting for contract';
+  $status_label = ['ongoing' => 'Ongoing', 'overdue' => 'Overdue', 'completed' => 'Completed', 'offer' => 'Project Offer', 'waiting' => 'Waiting for contract', 'cancelled' => 'Cancelled', 'removed' => 'Removed'][$p['status']] ?? 'Waiting for contract';
 ?>
 
 <div class="head-row">

@@ -21,7 +21,7 @@ $tabs = [
     'overdue'   => 'Overdue',
     'completed' => 'Completed',
     'closed'    => 'Closed',
-    'cancelled' => 'Cancelled',
+    'cancelled' => 'Cancelled', 'removed' => 'Removed',
 ];
 
 $status = isset($_GET['status']) ? $_GET['status'] : 'all';

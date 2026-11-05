@@ -104,12 +104,6 @@ function toptunity_freelancers_sample()
     return [];
 }
 
-/** One freelancer by id, or null. */
-function toptunity_freelancer_unused_old($id)
-{
-    $all = toptunity_freelancers_sample();
-    return isset($all[$id]) ? $all[$id] : null;
-}
 
 /** Find a freelancer by full name (used by links from the homepage). */
 function toptunity_freelancer_by_name($name)
@@ -191,17 +185,12 @@ function toptunity_status_label($status)
     $labels = [
         'open' => 'Open', 'ongoing' => 'Ongoing', 'overdue' => 'Overdue',
         'completed' => 'Completed', 'past' => 'Past Deadline', 'closed' => 'Closed',
-        'suspended' => 'Suspended', 'cancelled' => 'Cancelled', 'waiting' => 'Waiting for contract',
+        'suspended' => 'Suspended', 'cancelled' => 'Cancelled', 'removed' => 'Removed', 'waiting' => 'Waiting for contract',
     ];
     return isset($labels[$status]) ? $labels[$status] : ucfirst($status);
 }
 
 
-/** Recent notifications for the dashboard and notifications page. */
-function toptunity_client_notifications()
-{
-    return [];
-}
 
 /** Recent conversations for the dashboard and messages page. */
 function toptunity_client_messages()
@@ -256,14 +245,6 @@ function toptunity_project_tracking($id)
     ];
 }
 
-/**
- * Details for a CLIENT project. Client IDs don't always match public IDs,
- * so match by title first; otherwise build the details from the client project itself.
- */
-function toptunity_client_detail($id)
-{
-    return [];
-}
 
 /* ==========================================================================
    CLIENT: SAVED FREELANCERS, NOTIFICATIONS (full list), MESSAGES, BILLING
@@ -348,10 +329,9 @@ function toptunity_current_client()
 /** Every project the signed-in client can see: the demo projects (demo account only) plus their own. */
 function toptunity_client_projects()
 {
-    $saved  = tt_saved_projects_for_current_user();
-    $sample = false ? toptunity_client_projects_sample() : [];
-    // Your own projects first, newest at the top, then the sample projects
-    return array_reverse($saved, true) + $sample;
+    $saved = tt_saved_projects_for_current_user();
+    // Keep only the real projects for the current signed-in client.
+    return array_reverse($saved, true);
 }
 
 
@@ -381,8 +361,11 @@ function tt_handle_uploads($field)
     if (!is_dir($dir)) { @mkdir($dir, 0775, true); }
     if (!is_dir($dir) || !is_writable($dir)) { return ['files' => [], 'errors' => [tt_storage_message($dir)]]; }
 
-    foreach ($_FILES[$field]['name'] as $i => $name) {
-        $code = $_FILES[$field]['error'][$i];
+    // Accept one file sent as a plain field as well as several sent as an array
+    $fields = $_FILES[$field];
+    if (!is_array($fields['name'])) { $fields = ['name' => [$fields['name']], 'tmp_name' => [$fields['tmp_name']], 'error' => [$fields['error']], 'size' => [$fields['size']]]; }
+    foreach ($fields['name'] as $i => $name) {
+        $code = $fields['error'][$i];
         if ($name === '' || $code === UPLOAD_ERR_NO_FILE) { continue; }
         if ($code === UPLOAD_ERR_INI_SIZE || $code === UPLOAD_ERR_FORM_SIZE) { $errors[] = "$name is larger than the server allows (" . ini_get('upload_max_filesize') . ")."; continue; }
         if ($code !== UPLOAD_ERR_OK) { $errors[] = "Could not upload $name."; continue; }
@@ -477,9 +460,6 @@ function toptunity_skill_catalog()
         }
         db()->prepare("INSERT INTO settings (name, value) VALUES ('catalog_defaults_seeded', '1')
                        ON DUPLICATE KEY UPDATE value = '1'")->execute();
-    }
-    if (false) {
-        return tt_demo_admin_catalog_state()['skills'];
     }
     $rows = db()->query('SELECT s.name AS skill, c.name AS category FROM skills s LEFT JOIN categories c ON c.id = s.category_id ORDER BY s.name')->fetchAll();
     if (!$rows) { return $defaults; }
@@ -592,11 +572,6 @@ function toptunity_current_admin()
 
 
 
-/** Recent activity for the audit log. */
-function toptunity_admin_audit()
-{
-    return [];
-}
 
 
 /* ==========================================================================
@@ -628,18 +603,6 @@ function tt_admin_change_user_status($id, $action)
     $statuses = ['suspend' => 'Suspended', 'reactivate' => 'Active', 'deactivate' => 'Deactivated'];
     if (!isset($statuses[$action])) { return 'Choose a valid user action.'; }
 
-    if (false) {
-        $target = null;
-        foreach (toptunity_admin_users() as $candidate) {
-            if ((int) $candidate['id'] === (int) $id && in_array($candidate['role'], ['client', 'freelancer'], true)) {
-                $target = $candidate;
-                break;
-            }
-        }
-        if (!$target) { return 'That demo user could not be found.'; }
-        $_SESSION['demo_admin_user_status'][(string) $id] = $statuses[$action];
-        return null;
-    }
 
     $status = ['suspend' => 'suspended', 'reactivate' => 'active', 'deactivate' => 'deactivated'][$action];
     $stmt = db()->prepare("UPDATE users SET status = ?, status_changed_at = NOW() WHERE id = ? AND role IN ('client', 'freelancer')");
@@ -677,37 +640,10 @@ function tt_admin_review_report($report_id, $action)
     if (!in_array($action, ['dismiss', 'warn', 'remove', 'suspend'], true)) { return 'Choose a valid report action.'; }
     $status = $action === 'dismiss' ? 'dismissed' : 'resolved';
 
-    if (false) {
-        $report = null;
-        foreach (toptunity_admin_reports() as $candidate) {
-            if ((string) $candidate['id'] === (string) $report_id) { $report = $candidate; break; }
-        }
-        if (!$report || $report['status'] !== 'pending') { return 'That report is no longer pending.'; }
-        if (in_array($action, ['warn', 'suspend'], true) && strcasecmp($report['type'], 'User') !== 0) {
-            return 'Warnings and account suspensions are only available for user reports.';
-        }
-        if (in_array($action, ['warn', 'suspend'], true) && strcasecmp($report['type'], 'User') === 0) {
-            $target_user = null;
-            foreach (toptunity_admin_users() as $target) {
-                if (strcasecmp($target['name'], $report['reported']) === 0) {
-                    $target_user = $target;
-                    break;
-                }
-            }
-            if (!$target_user) { return 'The reported demo user could not be found.'; }
-            if ($action === 'suspend') {
-                $_SESSION['demo_admin_user_status'][(string) $target_user['id']] = 'Suspended';
-            } else {
-                $_SESSION['demo_admin_user_warnings'][(string) $target_user['id']][] = $report_id;
-            }
-        }
-        $_SESSION['demo_admin_report_actions'][$report_id] = ['status' => $status, 'action' => $action];
-        return null;
-    }
 
     if (!preg_match('/^DB-(\d+)$/', (string) $report_id, $match)) { return 'That report could not be found.'; }
     $pdo = db();
-    $stmt = $pdo->prepare('SELECT reported_user_id, status FROM reports WHERE id = ?');
+    $stmt = $pdo->prepare('SELECT reported_user_id, status, type FROM reports WHERE id = ?');
     $stmt->execute([(int) $match[1]]);
     $report = $stmt->fetch();
     if (!$report || $report['status'] !== 'pending') { return 'That report is no longer pending.'; }
@@ -801,35 +737,13 @@ function tt_project_history($project_id, $created_at, $deadline, $status)
 }
 
 /** Apply a moderation action to an isolated demo project fixture. */
-function tt_admin_moderate_demo_project($project_id, $action)
+/** Apply a moderation action to a real database project. */
+/** True when an administrator has removed the project. Removed projects keep their history but take no new actions. */
+function tt_project_is_removed($project)
 {
-    if (!false) { return 'This action is only available to the demo administrator.'; }
-    $project = null;
-    foreach (toptunity_admin_projects() as $candidate) {
-        if ((string) $candidate['id'] === (string) $project_id && empty($candidate['real'])) { $project = $candidate; break; }
-    }
-    if (!$project) { return 'This sample project could not be found.'; }
-    $allowed = [
-        'close' => ['from' => ['open', 'past', 'overdue'], 'to' => 'closed'],
-        'suspend' => ['from' => ['open', 'past'], 'to' => 'suspended'],
-        'reopen' => ['from' => ['closed', 'suspended'], 'to' => 'open'],
-        'remove' => ['from' => ['open', 'past', 'closed', 'suspended', 'cancelled'], 'to' => null],
-    ];
-    if (!isset($allowed[$action]) || !in_array($project['status'], $allowed[$action]['from'], true)) {
-        return 'This project is not eligible for that action.';
-    }
-    if ($action === 'reopen' && $project['deadline'] < date('Y-m-d')) {
-        return 'A project with a past deadline cannot be reopened.';
-    }
-    if ($action === 'remove') {
-        $_SESSION['demo_admin_project_actions'][$project_id] = ['removed' => true];
-    } else {
-        $_SESSION['demo_admin_project_actions'][$project_id] = ['status' => $allowed[$action]['to']];
-    }
-    return null;
+    return is_array($project) && ($project['status'] ?? '') === 'removed';
 }
 
-/** Apply a moderation action to a real database project. */
 function tt_admin_moderate_project($site_id, $action)
 {
     $user = tt_current_user();
@@ -846,29 +760,28 @@ function tt_admin_moderate_project($site_id, $action)
             || !in_array($project['contract_status'], ['none', 'declined'], true)) {
             return 'Active projects cannot be removed. Close or resolve the contract first.';
         }
-        $stmt = $pdo->prepare('SELECT COUNT(*) FROM payments WHERE project_id = ?');
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM payments WHERE project_id = ? AND status = 'held'");
         $stmt->execute([(int) $project['id']]);
-        if ((int) $stmt->fetchColumn() > 0) { return 'Projects with payment history cannot be removed.'; }
-        $stmt = $pdo->prepare('SELECT COUNT(*) FROM disputes WHERE project_id = ?');
-        $stmt->execute([(int) $project['id']]);
-        if ((int) $stmt->fetchColumn() > 0) { return 'Projects with dispute history cannot be removed.'; }
-        $stmt = $pdo->prepare("SELECT stored_name FROM attachments WHERE owner_type IN ('project','deliverable') AND owner_id = ?");
-        $stmt->execute([(int) $site_id]);
-        $files = $stmt->fetchAll(PDO::FETCH_COLUMN);
-        $pdo->beginTransaction();
-        $pdo->prepare("DELETE FROM attachments WHERE owner_type IN ('project','deliverable') AND owner_id = ?")->execute([(int) $site_id]);
-        $pdo->prepare('DELETE FROM work_logs WHERE project_id = ?')->execute([(int) $project['id']]);
-        $pdo->prepare('DELETE FROM project_submissions WHERE project_id = ?')->execute([(int) $project['id']]);
-        $pdo->prepare('DELETE FROM projects WHERE id = ?')->execute([(int) $project['id']]);
-        $pdo->commit();
-        $upload_dir = dirname(__DIR__) . '/storage/uploads/';
-        foreach ($files as $file) {
-            if (basename($file) === $file && is_file($upload_dir . $file) && !unlink($upload_dir . $file)) {
-                error_log('TopTunity could not remove uploaded project file: ' . $file);
-            }
-        }
-        tt_notify((int) $project['client_id'], 'project', 'Project removed',
-                  'Your project "' . $project['title'] . '" was removed by an administrator.');
+        if ((int) $stmt->fetchColumn() > 0) { return 'Money is still held for this project. Resolve the payment first.'; }
+        // Nothing is deleted: the project keeps its payments, proposals, work and history
+        $pdo->prepare("UPDATE projects SET removed_from_status = status, removed_at = NOW(), status = 'removed' WHERE id = ?")
+            ->execute([(int) $project['id']]);
+        $note = 'Your project \"' . $project['title'] . '\" was removed by an administrator. It stays in your records, but no new actions can be taken on it.';
+        tt_notify((int) $project['client_id'], 'project', 'Project removed', $note);
+        if (!empty($project['freelancer_id'])) { tt_notify((int) $project['freelancer_id'], 'project', 'Project removed', $note); }
+        tt_audit('remove project', 'project #' . $project['id'], $user['id']);
+        return null;
+    }
+
+    if ($action === 'restore') {
+        if ($project['status'] !== 'removed') { return 'Only a removed project can be restored.'; }
+        $back = $project['removed_from_status'] ?: 'open';
+        $pdo->prepare('UPDATE projects SET status = ?, removed_from_status = NULL, removed_at = NULL WHERE id = ?')
+            ->execute([$back, (int) $project['id']]);
+        $note = 'Your project \"' . $project['title'] . '\" was restored by an administrator.';
+        tt_notify((int) $project['client_id'], 'project', 'Project restored', $note);
+        if (!empty($project['freelancer_id'])) { tt_notify((int) $project['freelancer_id'], 'project', 'Project restored', $note); }
+        tt_audit('restore project', 'project #' . $project['id'], $user['id']);
         return null;
     }
 
@@ -909,37 +822,65 @@ function tt_admin_resolve_dispute($dispute_id, $decision, $to_freelancer, $to_cl
         return 'The two amounts must add up to ₱' . number_format($dispute['held']) . '.';
     }
 
-    if (false) {
-        $_SESSION['demo_admin_dispute_decisions'][$dispute_id] = [
-            'decision' => $decision, 'notes' => $notes, 'to_freelancer' => (int) $to_freelancer,
-            'to_client' => (int) $to_client,
-        ];
-        return null;
-    }
 
     if (!preg_match('/^DB-(\d+)$/', (string) $dispute_id, $match)) { return 'That dispute could not be found.'; }
     $result = $decision === 'split'
         ? 'split:' . (int) $to_freelancer . ':' . (int) $to_client
         : $decision;
-    $stmt = db()->prepare("UPDATE disputes SET status = 'resolved', decision = ?, details = CONCAT(details, '\\n\\nAdmin decision: ', ?)
-                           WHERE id = ? AND status = 'open'");
-    $stmt->execute([$result, $notes, (int) $match[1]]);
-    return $stmt->rowCount() ? null : 'That dispute was already resolved.';
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        $d = $pdo->prepare("SELECT id, project_id FROM disputes WHERE id = ? AND status = 'open' FOR UPDATE");
+        $d->execute([(int) $match[1]]);
+        $row = $d->fetch();
+        if (!$row) { $pdo->rollBack(); return 'That dispute was already resolved.'; }
+        $project_id = (int) $row['project_id'];
+
+        // Move the held money according to the decision
+        $e = $pdo->prepare("SELECT id, amount FROM payments WHERE project_id = ? AND type = 'escrow' AND status = 'held' ORDER BY id DESC LIMIT 1 FOR UPDATE");
+        $e->execute([$project_id]);
+        $escrow = $e->fetch();
+        $held = $escrow ? (int) $escrow['amount'] : 0;
+        $to_free = $decision === 'release' ? $held : ($decision === 'split' ? (int) $to_freelancer : 0);
+        $to_cli  = $decision === 'refund'  ? $held : ($decision === 'split' ? (int) $to_client : 0);
+        if ($escrow) {
+            if ($to_cli === 0 && $to_free === $held) {
+                // Full release: the same record a normal approval creates, with the fee taken on it
+                $pdo->prepare("UPDATE payments SET status = 'released', service_fee = ? WHERE id = ?")
+                    ->execute([tt_fee_for($held), (int) $escrow['id']]);
+            } else {
+                // Split or refund: the deposit is settled, and each share is its own record
+                $pdo->prepare("UPDATE payments SET status = 'refunded' WHERE id = ?")->execute([(int) $escrow['id']]);
+                if ($to_free > 0) {
+                    $pdo->prepare("INSERT INTO payments (project_id, type, amount, service_fee, status) VALUES (?, 'release', ?, ?, 'released')")
+                        ->execute([$project_id, $to_free, tt_fee_for($to_free)]);
+                }
+                if ($to_cli > 0) {
+                    $pdo->prepare("INSERT INTO payments (project_id, type, amount, service_fee, status) VALUES (?, 'refund', ?, 0, 'refunded')")
+                        ->execute([$project_id, $to_cli]);
+                }
+            }
+        }
+        $pdo->prepare("UPDATE projects SET status = ? WHERE id = ?")->execute([$to_free > 0 ? 'completed' : 'cancelled', $project_id]);
+        if ($to_free > 0) { $pdo->prepare("UPDATE projects SET contract_status = 'completed' WHERE id = ? AND contract_status = 'active'")->execute([$project_id]); }
+
+        $pdo->prepare("UPDATE disputes SET status = 'resolved', decision = ?, details = CONCAT(details, '\\n\\nAdmin decision: ', ?) WHERE id = ?")
+            ->execute([$result, $notes, (int) $row['id']]);
+        $pdo->commit();
+    } catch (Throwable $ex) {
+        if ($pdo->inTransaction()) { $pdo->rollBack(); }
+        error_log('TopTunity dispute decision failed: ' . $ex->getMessage());
+        return 'The decision could not be saved. Please try again.';
+    }
+    $pr = tt_db_project(1000 + $project_id);
+    if ($pr) {
+        if (!empty($pr['freelancer_id'])) { tt_notify((int) $pr['freelancer_id'], 'disputes', 'Dispute decided', $pr['title'] . ': ' . ($to_free > 0 ? '₱' . number_format($to_free) . ' released to you (after the service fee).' : 'no amount released to you.')); }
+        tt_notify((int) $pr['client_id'], 'disputes', 'Dispute decided', $pr['title'] . ': ' . ($to_cli > 0 ? '₱' . number_format($to_cli) . ' refunded to you.' : 'no amount refunded to you.'));
+    }
+    tt_audit('resolve dispute', 'dispute #' . $match[1] . ' ' . $result, $user['id']);
+    return null;
 }
 
-/** Catalog snapshot used only by the demo administrator's session. */
-function tt_demo_admin_catalog_state()
-{
-    if (!false) { return ['skills' => [], 'categories' => []]; }
-    if (!isset($_SESSION['demo_admin_catalog'])) {
-        $rows = db()->query('SELECT s.name AS skill, c.name AS category FROM skills s LEFT JOIN categories c ON c.id = s.category_id ORDER BY s.name')->fetchAll();
-        $skills = [];
-        foreach ($rows as $row) { $skills[$row['skill']] = $row['category'] ?: 'Other'; }
-        $categories = db()->query('SELECT name FROM categories ORDER BY name')->fetchAll(PDO::FETCH_COLUMN);
-        $_SESSION['demo_admin_catalog'] = ['skills' => $skills, 'categories' => $categories];
-    }
-    return $_SESSION['demo_admin_catalog'];
-}
 
 /** Add, rename, or remove an administrator-managed catalog item. */
 function tt_admin_catalog_change($action, $kind, $name, $new_name = '')
@@ -959,51 +900,6 @@ function tt_admin_catalog_change($action, $kind, $name, $new_name = '')
     }
     if (!in_array($action, ['add', 'rename', 'remove'], true)) { return 'Choose a valid catalog action.'; }
 
-    if (false) {
-        $state = tt_demo_admin_catalog_state();
-        $items = $kind === 'skill' ? $state['skills'] : array_fill_keys($state['categories'], true);
-        $exists = array_key_exists($name, $items);
-        $matches = static function ($candidate, $items) {
-            foreach ($items as $item => $_) {
-                if (strcasecmp($item, $candidate) === 0) { return true; }
-            }
-            return false;
-        };
-        if ($action === 'add') {
-            if ($matches($name, $items)) { return 'That name already exists.'; }
-            if ($kind === 'skill') { $state['skills'][$name] = 'Other'; }
-            else { $state['categories'][] = $name; }
-        } elseif (!$exists) {
-            return 'That catalog item could not be found.';
-        } elseif ($action === 'rename') {
-            if ($name !== $new_name && $matches($new_name, $items)) { return 'That name already exists.'; }
-            if ($kind === 'skill') {
-                $state['skills'][$new_name] = $state['skills'][$name];
-                unset($state['skills'][$name]);
-            } else {
-                $state['categories'] = array_map(static function ($category) use ($name, $new_name) {
-                    return $category === $name ? $new_name : $category;
-                }, $state['categories']);
-                foreach ($state['skills'] as &$category) {
-                    if ($category === $name) { $category = $new_name; }
-                }
-                unset($category);
-            }
-        } else {
-            if ($kind === 'skill') { unset($state['skills'][$name]); }
-            else {
-                $state['categories'] = array_values(array_filter($state['categories'], static function ($category) use ($name) {
-                    return $category !== $name;
-                }));
-                foreach ($state['skills'] as &$category) {
-                    if ($category === $name) { $category = 'Other'; }
-                }
-                unset($category);
-            }
-        }
-        $_SESSION['demo_admin_catalog'] = $state;
-        return null;
-    }
 
     $table = $kind === 'skill' ? 'skills' : 'categories';
     if ($action === 'add') {
@@ -1110,10 +1006,6 @@ function tt_admin_set_review_status($review_id, $action)
     }
     if (!$review) { return 'That review could not be found.'; }
 
-    if (false) {
-        $_SESSION['demo_admin_review_status'][$review_id] = $status;
-        return null;
-    }
     if (!preg_match('/^DB-(\d+)$/', (string) $review_id, $match)) { return 'That review could not be found.'; }
     $stmt = db()->prepare('UPDATE platform_reviews SET status = ? WHERE id = ?');
     $stmt->execute([$status, (int) $match[1]]);
@@ -1126,11 +1018,12 @@ function tt_admin_set_review_status($review_id, $action)
 /** Contact messages. status: new | responded */
 function toptunity_admin_inquiries()
 {
-    $rows = db()->query("SELECT id, name, email, subject, message, status, created_at FROM contact_inquiries ORDER BY created_at DESC")->fetchAll();
+    $rows = db()->query("SELECT id, name, email, subject, message, status, reply, created_at FROM contact_inquiries ORDER BY created_at DESC")->fetchAll();
     $out = [];
     foreach ($rows as $r) {
         $out[] = ['id' => 'I-' . $r['id'], 'date' => date('M j, Y', strtotime($r['created_at'])), 'name' => $r['name'],
-                  'email' => $r['email'], 'subject' => $r['subject'], 'message' => $r['message'], 'status' => $r['status'], 'reply' => ''];
+                  'email' => $r['email'], 'subject' => $r['subject'], 'message' => $r['message'], 'status' => $r['status'],
+                  'reply' => (string) ($r['reply'] ?? ''), 'real' => true];
     }
     return $out;
 }
@@ -1153,7 +1046,6 @@ function tt_save_contact_inquiry($name, $email, $subject, $message)
 /** Save an administrator's response to a real contact inquiry. */
 function tt_reply_contact_inquiry($id, $reply)
 {
-    if (false) { return 'The demo administrator can only reply to sample inquiries.'; }
     $reply = trim($reply);
     if (mb_strlen($reply) < 10 || mb_strlen($reply) > 3000) { return 'Write a reply between 10 and 3,000 characters.'; }
     $stmt = db()->prepare("UPDATE contact_inquiries SET reply = ?, status = 'responded', responded_at = CURRENT_TIMESTAMP WHERE id = ?");
@@ -1174,9 +1066,6 @@ function tt_settings_file() { return dirname(__DIR__) . '/storage/settings.json'
 
 function tt_service_fee()
 {
-    if (false) {
-        return isset($_SESSION['demo_admin_service_fee']) ? (int) $_SESSION['demo_admin_service_fee'] : 10;
-    }
     $f = tt_settings_file();
     $d = file_exists($f) ? json_decode((string) file_get_contents($f), true) : null;
     return isset($d['service_fee']) ? (int) $d['service_fee'] : 10;
@@ -1184,10 +1073,6 @@ function tt_service_fee()
 
 function tt_save_service_fee($pct)
 {
-    if (false) {
-        $_SESSION['demo_admin_service_fee'] = (int) $pct;
-        return;
-    }
     if (!is_dir(dirname(tt_settings_file()))) { mkdir(dirname(tt_settings_file()), 0775, true); }
     file_put_contents(tt_settings_file(), json_encode(['service_fee' => (int) $pct, 'since' => date('Y-m-d')]), LOCK_EX);
 }
@@ -1361,6 +1246,7 @@ function tt_db_log_hours($site_id, $work_date, $hours, $task)
 {
     $user = tt_current_user();
     $project = tt_db_project($site_id);
+    if (tt_project_is_removed($project)) { return 'This project was removed by an administrator, so it cannot be changed.'; }
     $past_deadline = $project && $project['deadline'] < date('Y-m-d');
     if (!$user || $user['role'] !== 'freelancer' || !$project
         || (int) $project['freelancer_id'] !== (int) $user['id']
@@ -1389,6 +1275,7 @@ function tt_db_review_work_log($site_id, $log_id, $decision, $note = '')
 {
     $user = tt_current_user();
     $project = tt_db_project($site_id);
+    if (tt_project_is_removed($project)) { return 'This project was removed by an administrator, so it cannot be changed.'; }
     if (!$user || $user['role'] !== 'client' || !$project || (int) $project['client_id'] !== (int) $user['id']) {
         return 'This project is not yours.';
     }
@@ -1416,6 +1303,7 @@ function tt_db_submit_work($site_id, $message)
 {
     $user = tt_current_user();
     $project = tt_db_project($site_id);
+    if (tt_project_is_removed($project)) { return 'This project was removed by an administrator, so it cannot be changed.'; }
     $message = trim($message);
     $past_deadline = $project && $project['deadline'] < date('Y-m-d');
     if (!$user || $user['role'] !== 'freelancer' || !$project
@@ -1440,6 +1328,7 @@ function tt_db_review_submission($site_id, $decision, $note = '')
 {
     $user = tt_current_user();
     $project = tt_db_project($site_id);
+    if (tt_project_is_removed($project)) { return 'This project was removed by an administrator, so it cannot be changed.'; }
     if (!$user || $user['role'] !== 'client' || !$project || (int) $project['client_id'] !== (int) $user['id']) {
         return 'This project is not yours.';
     }
@@ -1466,6 +1355,7 @@ function tt_db_extend_deadline($site_id, $deadline)
 {
     $user = tt_current_user();
     $project = tt_db_project($site_id);
+    if (tt_project_is_removed($project)) { return 'This project was removed by an administrator, so it cannot be changed.'; }
     $date = DateTime::createFromFormat('Y-m-d', $deadline);
     if (!$user || $user['role'] !== 'client' || !$project || (int) $project['client_id'] !== (int) $user['id']) {
         return 'This project is not yours.';
@@ -1486,6 +1376,7 @@ function tt_db_allow_late_work($site_id)
 {
     $user = tt_current_user();
     $project = tt_db_project($site_id);
+    if (tt_project_is_removed($project)) { return 'This project was removed by an administrator, so it cannot be changed.'; }
     if (!$user || $user['role'] !== 'client' || !$project || (int) $project['client_id'] !== (int) $user['id']) {
         return 'This project is not yours.';
     }
@@ -1536,6 +1427,7 @@ function tt_db_select_freelancer($site_id, $proposal_id)
     $user = tt_current_user();
     if (!$user || $user['role'] !== 'client') { return 'Only clients can select a freelancer.'; }
     $project = tt_db_project($site_id);
+    if (tt_project_is_removed($project)) { return 'This project was removed by an administrator, so it cannot be changed.'; }
     if (!$project || (int) $project['client_id'] !== (int) ($user['id'] ?? 0)) { return 'This project is not yours.'; }
     if ($project['status'] !== 'open') { return 'This project is no longer accepting contracts.'; }
     if ($project['contract_status'] !== 'none') { return 'A contract is already in progress for this project.'; }
@@ -1571,6 +1463,7 @@ function tt_db_hire_freelancer($site_id, $freelancer_id, $agreed_amount)
 
     $project_id = (int) $site_id - 1000;
     $freelancer_user_id = (int) $freelancer_id - 5000;
+    if (tt_project_is_removed(tt_db_project($site_id))) { return 'This project was removed by an administrator, so it cannot be changed.'; }
     if ($project_id < 1 || $freelancer_user_id < 1) { return 'This project or freelancer is not available.'; }
 
     $pdo = db();
@@ -1628,6 +1521,7 @@ function tt_db_send_contract($site_id, $agreed_amount, $hourly_rate = null, $max
     $user = tt_current_user();
     if (!$user || $user['role'] !== 'client') { return 'Only clients can send contracts.'; }
     $project = tt_db_project($site_id);
+    if (tt_project_is_removed($project)) { return 'This project was removed by an administrator, so it cannot be changed.'; }
     if (!$project || (int) $project['client_id'] !== (int) ($user['id'] ?? 0)) { return 'This project is not yours.'; }
     if ($project['status'] !== 'open') { return 'This project is no longer accepting contracts.'; }
     if (empty($project['freelancer_id']))                             { return 'Select a freelancer before sending the contract.'; }
@@ -1657,6 +1551,7 @@ function tt_db_respond_contract($site_id, $accept)
     $user = tt_current_user();
     if (!$user || $user['role'] !== 'freelancer') { return 'Only freelancers can respond to contracts.'; }
     $project = tt_db_project($site_id);
+    if (tt_project_is_removed($project)) { return 'This project was removed by an administrator, so it cannot be changed.'; }
     if (!$project || (int) $project['freelancer_id'] !== (int) ($user['id'] ?? 0)) { return 'This offer is not yours.'; }
     if ($project['status'] !== 'open') { return 'This project is closed or suspended and cannot be contracted.'; }
     if ($project['contract_status'] !== 'pending') { return 'There is no open contract to respond to.'; }
@@ -1676,7 +1571,7 @@ function tt_db_respond_contract($site_id, $accept)
     } else {
         $pdo->prepare("UPDATE projects SET contract_status = 'none', freelancer_id = NULL, agreed_amount = 0 WHERE id = ?")
             ->execute([(int) $project['id']]);
-        $pdo->prepare("UPDATE proposals SET status = 'withdrawn' WHERE project_id = ? AND freelancer_id = ? AND status = 'selected'")
+        $pdo->prepare("UPDATE proposals SET status = 'declined' WHERE project_id = ? AND freelancer_id = ? AND status = 'selected'")
             ->execute([(int) $project['id'], (int) $user['id']]);
         tt_notify($project['client_id'], 'responses', 'Contract declined',
                   $user['name'] . ' declined the contract for ' . $project['title'] . '. The project is open again.');
@@ -1799,9 +1694,6 @@ function toptunity_category_catalog()
         && (false || false)) {
         return array_values(array_unique($_SESSION['demo_admin_catalog']['categories']));
     }
-    if (false) {
-        return array_values(array_unique(tt_demo_admin_catalog_state()['categories']));
-    }
     toptunity_skill_catalog();
     return db()->query('SELECT name FROM categories ORDER BY name')->fetchAll(PDO::FETCH_COLUMN);
 }
@@ -1834,6 +1726,7 @@ function tt_db_deposit($site_id, $method = '', $transfer_ref = '')
         $lock->execute([(int) (tt_db_project($site_id)['id'] ?? 0)]);
         $project = $lock->fetch();
         if (!$project || (int) $project['client_id'] !== (int) $u['id']) { $pdo->rollBack(); return 'This project is not yours.'; }
+        if (tt_project_is_removed($project)) { $pdo->rollBack(); return 'This project was removed by an administrator, so it cannot be changed.'; }
         if ($project['contract_status'] !== 'active')                    { $pdo->rollBack(); return 'The contract must be accepted before you deposit.'; }
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM payments WHERE project_id = ? AND type = 'escrow'");
         $stmt->execute([(int) $project['id']]);
@@ -1868,6 +1761,7 @@ function tt_db_release($site_id)
 {
     $u = tt_current_user();
     $project = tt_db_project($site_id);
+    if (tt_project_is_removed($project)) { return 'This project was removed by an administrator, so it cannot be changed.'; }
     if (!$project || (int) $project['client_id'] !== (int) $u['id']) { return 'This project is not yours.'; }
     if ($project['billing_type'] === 'hourly') {
         return 'Hourly projects are settled on the End Date using approved hours; the unused deposit is refunded.';
@@ -1898,14 +1792,6 @@ function tt_db_release($site_id)
     return null;
 }
 
-/** Settle an hourly escrow on or after the project deadline. */
-function tt_db_settle_hourly_project($site_id)
-{
-    $user = tt_current_user();
-    $project = tt_db_project($site_id);
-    if (!$project || (int) $project['client_id'] !== (int) ($user['id'] ?? 0)) { return 'This project is not yours.'; }
-    return tt_settle_hourly_core($project);
-}
 
 /** Settles one hourly project on or after its End Date. Used by the client page and the scheduled job. */
 function tt_settle_hourly_core($project)
@@ -2002,6 +1888,7 @@ function tt_db_cancel_project($site_id)
 {
     $user = tt_current_user();
     $project = tt_db_project($site_id);
+    if (tt_project_is_removed($project)) { return 'This project was removed by an administrator, so it cannot be changed.'; }
     if (!$project || (int) $project['client_id'] !== (int) ($user['id'] ?? 0)) { return 'This project is not yours.'; }
     if (in_array($project['status'], ['completed', 'cancelled'], true)) { return 'This project can no longer be cancelled.'; }
 
@@ -2114,12 +2001,6 @@ function tt_admin_withdrawals_db()
 {
     $sql = "SELECT w.*, u.name AS freelancer FROM withdrawals w JOIN users u ON u.id = w.freelancer_id";
     $demo_ids = tt_demo_ids();
-    if (false) {
-        if (!$demo_ids) { return []; }
-        $sql .= ' WHERE w.freelancer_id IN (' . implode(',', array_map('intval', $demo_ids)) . ')';
-    } elseif ($demo_ids) {
-        $sql .= ' WHERE w.freelancer_id NOT IN (' . implode(',', array_map('intval', $demo_ids)) . ')';
-    }
     return db()->query($sql . ' ORDER BY w.id DESC')->fetchAll();
 }
 
@@ -2169,18 +2050,6 @@ function tt_admin_payments_db()
 {
     $sql = "SELECT pay.*, p.title, p.billing_type, p.client_id, p.freelancer_id
             FROM payments pay JOIN projects p ON p.id = pay.project_id";
-    if (false) {
-        $demo_ids = tt_demo_ids();
-        if (!$demo_ids) { return [[], ['held' => 0, 'released' => 0, 'fees' => 0]]; }
-        $ids = implode(',', array_map('intval', $demo_ids));
-        $sql .= " WHERE p.client_id IN ($ids) OR p.freelancer_id IN ($ids)";
-    } else {
-        $demo_ids = tt_demo_ids();
-        if ($demo_ids) {
-            $ids = implode(',', array_map('intval', $demo_ids));
-            $sql .= " WHERE p.client_id NOT IN ($ids) AND (p.freelancer_id IS NULL OR p.freelancer_id NOT IN ($ids))";
-        }
-    }
     $rows = db()->query($sql . ' ORDER BY pay.id DESC')->fetchAll();
     $totals = ['held' => 0, 'released' => 0, 'fees' => 0];
     foreach ($rows as $r) {
@@ -2293,21 +2162,6 @@ function toptunity_admin_withdrawals()
     return $out;
 }
 
-/** Process a sample withdrawal without changing real balances or database rows. */
-function tt_admin_process_demo_withdrawal($id, $action, $reason = '')
-{
-    if (!false) { return 'This action is only available to the demo administrator.'; }
-    if (!in_array($action, ['process', 'reject'], true)) { return 'Choose a valid withdrawal action.'; }
-    $request = null;
-    foreach (toptunity_admin_withdrawals() as $candidate) {
-        if ((string) $candidate['id'] === (string) $id && !empty($candidate['sample'])) { $request = $candidate; break; }
-    }
-    if (!$request) { return 'That sample withdrawal could not be found.'; }
-    if ($request['status'] !== 'pending') { return 'This request has already been handled.'; }
-    if ($action === 'reject' && mb_strlen(trim($reason)) < 10) { return 'Give a reason for rejecting (at least 10 characters).'; }
-    $_SESSION['demo_admin_withdrawal_status'][$id] = $action === 'process' ? 'processed' : 'rejected';
-    return null;
-}
 
 /** Real proposal statuses for the signed-in freelancer (used by the dashboard counts). */
 function tt_freelancer_db_proposal_statuses()
@@ -2319,15 +2173,6 @@ function tt_freelancer_db_proposal_statuses()
     return array_column($stmt->fetchAll(), 'status');
 }
 
-/** Real ongoing projects for the signed-in freelancer. */
-function tt_freelancer_db_ongoing_count()
-{
-    $u = tt_current_user();
-    if (!$u || $u['role'] !== 'freelancer') { return 0; }
-    $stmt = db()->prepare("SELECT COUNT(*) FROM projects WHERE freelancer_id = ? AND status IN ('ongoing', 'overdue')");
-    $stmt->execute([(int) $u['id']]);
-    return (int) $stmt->fetchColumn();
-}
 
 /* ==========================================================================
    CLIENT ACCOUNT FORMS: profile, account, platform review, report, dispute
@@ -2610,12 +2455,12 @@ function toptunity_freelancer_threads()
 
 function toptunity_client_notifications_all()
 {
-    return array_merge(tt_real_notifications(), tt_apply_demo_notification_read(false ? toptunity_client_notifications_all_demo() : []));
+    return tt_real_notifications();
 }
 
 function toptunity_freelancer_notifications()
 {
-    return array_merge(tt_real_notifications(), tt_apply_demo_notification_read(false ? toptunity_freelancer_notifications_demo() : []));
+    return tt_real_notifications();
 }
 
 /** Read state of the demo conversations for this session (not saved to the database). */
@@ -2656,11 +2501,6 @@ function tt_apply_demo_notification_read($list)
         }
     }
     return $list;
-}
-
-function tt_mark_demo_notifications_read()
-{
-    $_SESSION[tt_demo_session_key()]['notif_all'] = time();
 }
 
 /** Real conversations for the signed-in user (partners they have messaged, or the one in ?with=). */
@@ -2787,8 +2627,7 @@ function tt_notification_key($n)
 
 function toptunity_admin_notifications()
 {
-    $demo_notifications = false ? toptunity_admin_notifications_base() : [];
-    return tt_apply_demo_notification_read(array_merge(tt_real_notifications(), $demo_notifications));
+    return tt_real_notifications();
 }
 
 /** Opens a notification: marks it read (saved for real ones, this session for demo ones) and returns the page to open. */
@@ -2829,60 +2668,7 @@ function tt_freelancer_db_proposal_rows()
     return $out;
 }
 
-/** Real ongoing projects of the signed-in freelancer, in the shape the dashboard list uses. */
-function tt_freelancer_db_ongoing_rows()
-{
-    $u = tt_current_user();
-    if (!$u || $u['role'] !== 'freelancer') { return []; }
-    $stmt = db()->prepare("SELECT p.title, p.deadline, p.status, u.name AS client
-                           FROM projects p JOIN users u ON u.id = p.client_id
-                           WHERE p.freelancer_id = ? AND p.status IN ('ongoing', 'overdue') ORDER BY p.id DESC");
-    $stmt->execute([(int) $u['id']]);
-    $out = [];
-    foreach ($stmt->fetchAll() as $r) {
-        $out[] = ['title' => $r['title'], 'client' => $r['client'], 'deadline' => $r['deadline'], 'status' => $r['status'], 'progress' => 0];
-    }
-    return $out;
-}
 
-/** Accepted database projects of the signed-in freelancer, in the My Projects shape. */
-function tt_freelancer_db_project_rows()
-{
-    $u = tt_current_user();
-    if (!$u || $u['role'] !== 'freelancer') { return []; }
-    $stmt = db()->prepare("SELECT p.id, p.title, p.description, p.billing_type, p.budget, p.hourly_rate, p.max_hours,
-                                  p.deadline, p.status, p.start_date, p.created_at, c.name AS category, client.name AS client,
-                                  cp.company AS client_company
-                           FROM projects p
-                           JOIN users client ON client.id = p.client_id
-                           LEFT JOIN client_profiles cp ON cp.user_id = client.id
-                           LEFT JOIN categories c ON c.id = p.category_id
-                           WHERE p.freelancer_id = ? AND p.contract_status IN ('active', 'completed')
-                           ORDER BY p.id DESC");
-    $stmt->execute([(int) $u['id']]);
-    $out = [];
-    foreach ($stmt->fetchAll() as $r) {
-        $out[] = [
-            'id' => 1000 + (int) $r['id'],
-            'project_id' => 1000 + (int) $r['id'],
-            'title' => $r['title'],
-            'client' => $r['client'],
-            'client_company' => $r['client_company'] ?: '',
-            'category' => $r['category'] ?: 'Web Development',
-            'status' => $r['status'],
-            'type' => $r['billing_type'],
-            'budget' => (int) $r['budget'],
-            'rate' => (int) $r['hourly_rate'],
-            'max_hours' => (int) $r['max_hours'],
-            'start' => $r['start_date'] ?: substr($r['created_at'], 0, 10),
-            'deadline' => $r['deadline'],
-            'progress' => $r['status'] === 'completed' ? 100 : 0,
-            'intro' => $r['description'],
-            'real' => true,
-        ];
-    }
-    return $out;
-}
 
 /* ==========================================================================
    FREELANCER ACCOUNT FORMS: profile, skills, platform review, account
@@ -2987,7 +2773,7 @@ function tt_portfolio_update_real($id, $title, $category)
    Visitors and the demo accounts also see the sample data.
    ========================================================================== */
 
-/** True when the sample data may be shown: visitors and the demo accounts. */
+/** Sample data is intentionally disabled for the live app. */
 function tt_show_sample()
 {
     return false;
@@ -3049,10 +2835,10 @@ function tt_real_freelancers()
     return $out;
 }
 
-/** Freelancers shown across the site: sample (visitors and demo accounts) plus the real ones. */
+/** Freelancers shown across the site: real active freelancers only. */
 function toptunity_freelancers()
 {
-    return (tt_show_sample() ? toptunity_freelancers_sample() : []) + tt_real_freelancers();
+    return tt_real_freelancers();
 }
 
 /** Real open projects in the listing shape. */
@@ -3086,21 +2872,21 @@ function tt_real_listing()
     return $out;
 }
 
-/** Projects shown in the listings: sample (visitors and demo accounts) plus the real open ones. */
+/** Projects shown in the listings: real active projects only. */
 function toptunity_listing()
 {
-    return array_reverse(tt_real_listing(), true) + (tt_show_sample() ? toptunity_listing_sample() : []);
+    return array_reverse(tt_real_listing(), true);
 }
 
-/** Sample threads only for the demo accounts; real accounts get their real conversations only. */
+/** Demo-thread fallbacks are intentionally disabled. */
 function toptunity_client_threads_demo()
 {
-    return false ? toptunity_client_threads_demo_base() : [];
+    return [];
 }
 
 function toptunity_freelancer_threads_demo()
 {
-    return false ? toptunity_freelancer_threads_demo_base() : [];
+    return [];
 }
 
 /** A single freelancer: sample ids, or a real one (5000 + user id). */
@@ -3429,6 +3215,7 @@ function tt_review_done($project_id, $reviewer_id)
 function tt_project_status_view($status, $contract_status, $has_freelancer)
 {
     if ($status === 'cancelled') { return ['Cancelled', 'cancelled']; }
+    if ($status === 'removed')   { return ['Removed', 'cancelled']; }
     if ($status === 'completed') { return ['Completed', 'completed']; }
     if ($status === 'ongoing')   { return ['Ongoing', 'ongoing']; }
     if ($status === 'overdue')   { return ['Overdue', 'overdue']; }

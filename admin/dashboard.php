@@ -18,7 +18,7 @@ $money = toptunity_admin_money_totals();
 $notes = array_slice(toptunity_admin_notifications(), 0, 5);
 {
     $status_labels = ['open' => 'Open', 'past' => 'Past Deadline', 'ongoing' => 'Ongoing', 'overdue' => 'Overdue',
-                      'completed' => 'Completed', 'closed' => 'Closed', 'suspended' => 'Suspended', 'cancelled' => 'Cancelled'];
+                      'completed' => 'Completed', 'closed' => 'Closed', 'suspended' => 'Suspended', 'cancelled' => 'Cancelled', 'removed' => 'Removed'];
     $status_counts = array_fill_keys(array_keys($status_labels), 0);
     foreach (toptunity_admin_projects() as $project) {
         if (isset($status_counts[$project['status']])) { $status_counts[$project['status']]++; }

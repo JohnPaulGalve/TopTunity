@@ -23,14 +23,6 @@ foreach (tt_attachments('portfolio', $uid) as $i => $f) {
 }
 // The demo samples stay as they are; Remove and Edit only change them for this session
 $sample_items = [];
-if (false) {
-    foreach (toptunity_freelancer(1)['portfolio'] as $sm) {
-        $key = 'd' . md5($sm['title']);
-        if (!empty($pf['hidden'][$key])) { continue; }
-        $sample_items[] = ['key' => $key, 'title' => $pf['edit'][$key]['title'] ?? $sm['title'],
-                           'category' => $pf['edit'][$key]['category'] ?? $sm['category'], 'tint' => $sm['tint'], 'real' => false];
-    }
-}
 $items = array_merge($real_items, $sample_items);
 
 $errors  = [];
@@ -45,7 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $key    = (string) ($_POST['key'] ?? '');
     if ($action === 'remove') {
         if ($key !== '' && $key[0] === 'r') { tt_portfolio_remove_real((int) substr($key, 1)); }
-        elseif ($key !== '') { $_SESSION[tt_demo_session_key()]['portfolio']['hidden'][$key] = true; }
         header('Location: ' . $base_url . 'freelancer/portfolio.php');
         exit;
     }

@@ -27,6 +27,60 @@ if ($session_user && in_array($session_user['role'], ['client', 'freelancer'], t
     }
 }
 
+/* Form protection: every POST must carry this session's token. The token is added to every form automatically. */
+function tt_csrf_token()
+{
+    if (empty($_SESSION['csrf'])) { $_SESSION['csrf'] = bin2hex(random_bytes(16)); }
+    return $_SESSION['csrf'];
+}
+
+function tt_csrf_guard()
+{
+    if (PHP_SAPI === 'cli' || ($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') { return; }
+    $sent = isset($_POST['csrf']) ? (string) $_POST['csrf'] : '';
+    if (!hash_equals(tt_csrf_token(), $sent)) {
+        http_response_code(403);
+        echo 'Your form has expired. Go back, refresh the page, and try again.';
+        exit;
+    }
+}
+
+function tt_csrf_inject($html)
+{
+    $token = tt_csrf_token();
+    return preg_replace('/(<form\b[^>]*\bmethod\s*=\s*["\']?post["\']?[^>]*>)/i',
+                        '$1<input type="hidden" name="csrf" value="' . $token . '">', (string) $html);
+}
+
+if (PHP_SAPI !== 'cli') {
+    tt_csrf_guard();
+    ob_start('tt_csrf_inject');
+}
+
+/* Local testing only. Set to false before the site goes live, so reset links are never shown on screen. */
+if (!defined('TT_LOCAL_SHOW_RESET_LINK')) { define('TT_LOCAL_SHOW_RESET_LINK', true); }
+
+/* Sends a plain-text email. If the server cannot send it, the message is kept in storage/outbox so it is not lost. */
+function tt_send_mail($to, $subject, $body)
+{
+    $headers = "From: support@toptunity.ph\r\nContent-Type: text/plain; charset=UTF-8";
+    if (@mail($to, $subject, $body, $headers)) { return true; }
+    $dir = __DIR__ . '/../storage/outbox';
+    if (!is_dir($dir)) { @mkdir($dir, 0775, true); }
+    $file = $dir . '/' . date('Ymd-His') . '-' . preg_replace('/[^a-z0-9]+/i', '_', strtolower($to)) . '.txt';
+    file_put_contents($file, "To: $to\nSubject: $subject\n\n$body\n");
+    error_log('TopTunity email not sent by the server; saved to ' . $file);
+    return false;
+}
+
+/* Sign-in limit: after 5 failed attempts for an email within 15 minutes, further attempts are paused. */
+function tt_sign_in_blocked($email)
+{
+    $stmt = db()->prepare("SELECT COUNT(*) FROM audit_logs WHERE action = 'failed sign-in' AND target = ? AND created_at > (NOW() - INTERVAL 15 MINUTE)");
+    $stmt->execute([substr(strtolower(trim((string) $email)), 0, 120)]);
+    return (int) $stmt->fetchColumn() >= 5;
+}
+
 /* Fallbacks so the site works even when PHP's mbstring extension is not installed. */
 if (!function_exists('mb_strlen')) {
     function mb_strlen($str, $encoding = null)
@@ -53,7 +107,6 @@ function tt_login($user)
 {
     session_regenerate_id(true);
     $_SESSION['user'] = ['id' => $user['id'], 'name' => $user['name'], 'email' => $user['email'], 'role' => $user['role']];
-    if (false) { tt_reset_demo_data(); }   // demo accounts start clean each time
 }
 
 function tt_logout()
@@ -150,11 +203,6 @@ function tt_brand_home()
    ACCOUNTS (stored in the MySQL "users" table; passwords are hashed)
    ========================================================================== */
 
-/** The demo accounts. They are added to the database the first time they are needed. */
-function tt_demo_accounts()
-{
-    return [];
-}
 
 /** Adds any missing demo account (existing accounts are left alone). */
 function tt_ensure_demo_accounts()
@@ -162,12 +210,6 @@ function tt_ensure_demo_accounts()
     return;
 }
 
-/** Every account (id, name, email, role, password hash). */
-function tt_load_users()
-{
-    tt_ensure_demo_accounts();
-    return db()->query('SELECT id, name, email, role, password_hash AS password, status, created_at FROM users ORDER BY id')->fetchAll();
-}
 
 /** One account by email, or null. */
 function tt_find_user_by_email($email)
@@ -209,12 +251,11 @@ function tt_request_password_reset($email, $base_url)
     $host = isset($_SERVER['HTTP_HOST']) ? preg_replace('/[^A-Za-z0-9.:\-\[\]]/', '', $_SERVER['HTTP_HOST']) : 'localhost';
     $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
     $path = rtrim($base_url, '/') . '/pages/forgot-password.php?token=' . urlencode($token);
-    $sent = mail($user['email'], 'Reset your TopTunity password',
-                 "Use this one-time link within 30 minutes to reset your password:\n\n" . $scheme . '://' . $host . $path,
-                 "From: support@toptunity.ph\r\nContent-Type: text/plain; charset=UTF-8");
-    if (!$sent) {
-        error_log('TopTunity password reset email could not be sent; check the configured mail transport.');
-    }
+    $full_link = $scheme . '://' . $host . $path;
+    $sent = tt_send_mail($user['email'], 'Reset your TopTunity password',
+                         "Use this one-time link within 30 minutes to reset your password:\n\n" . $full_link);
+    // Local testing only: show the link on this computer, because a mail call can report success without delivering anything
+    if (defined('TT_LOCAL_SHOW_RESET_LINK') && TT_LOCAL_SHOW_RESET_LINK) { $_SESSION['local_reset_link'] = $full_link; }
 }
 
 /** True when a reset token exists and has not expired or been used. */

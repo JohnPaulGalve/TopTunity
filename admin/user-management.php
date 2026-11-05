@@ -109,7 +109,7 @@ $status_class = ['Active' => 'released', 'Suspended' => 'past', 'Deactivated' =>
       </div>
       <div style="margin-top:1rem;">
         <div class="kv"><span>Email</span><strong style="font-size:0.72rem;"><?= e($sel['email']) ?></strong></div>
-        <div class="kv"><span>Projects</span><strong><?= $sel['role'] === 'client' ? 2 : 0 ?></strong></div>
+        <div class="kv"><span>Projects</span><strong><?php $pc = db()->prepare($sel['role'] === 'client' ? 'SELECT COUNT(*) FROM projects WHERE client_id = ?' : 'SELECT COUNT(*) FROM projects WHERE freelancer_id = ?'); $pc->execute([(int) $sel['id']]); echo (int) $pc->fetchColumn(); ?></strong></div>
         <div class="kv"><span>Reports received</span><strong style="color:var(--color-error-base);"><?= (int) $reports_received ?></strong></div>
         <?php if (!empty($sel['warnings'])): ?><div class="kv"><span>Warnings issued</span><strong><?= (int) $sel['warnings'] ?></strong></div><?php endif; ?>
         <?php if ($sel['status'] === 'Suspended'): ?><div class="kv"><span>Suspended on</span><strong><?= e($sel['suspended_on'] ?: '—') ?></strong></div><?php endif; ?>

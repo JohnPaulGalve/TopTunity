@@ -1,0 +1,2 @@
+-- Adds "declined" to proposal statuses, for freelancers who decline a contract. Run once.
+ALTER TABLE proposals MODIFY status ENUM('pending','selected','not_selected','withdrawn','declined') NOT NULL DEFAULT 'pending';

@@ -27,7 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email    = trim(isset($_POST['email']) ? $_POST['email'] : '');
     $password = isset($_POST['password']) ? $_POST['password'] : '';
     $user = tt_find_user_by_email($email);
-    if (!$user || !password_verify($password, $user['password'])) {
+    if (tt_sign_in_blocked($email)) {
+        $error = 'Too many failed sign-in attempts. Wait 15 minutes, then try again.';
+    } elseif (!$user || !password_verify($password, $user['password'])) {
+        tt_audit('failed sign-in', substr((string) $email, 0, 120), $user['id'] ?? null);
         $error = 'The email or password is incorrect.';
     } elseif ($user['status'] !== 'active') {
         $error = 'This administrator account is not active.';

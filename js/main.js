@@ -347,7 +347,7 @@ document.addEventListener('click', function (e) {
     box.setAttribute('role', 'status');
     document.body.appendChild(box);
   }
-  box.textContent = 'This action will work once the database is connected.';
+  box.textContent = 'This action is not available right now.';
   box.classList.add('is-visible');
   clearTimeout(box._t);
   box._t = setTimeout(function () { box.classList.remove('is-visible'); }, 2800);

@@ -172,7 +172,10 @@ include '../includes/client-nav.php';
 <?php else: ?>
 
   <!-- ===================== HEADER ===================== -->
-  <nav class="crumbs" aria-label="Breadcrumb">
+  <?php if ($p && ($p['status'] ?? '') === 'removed'): ?>
+<div class="notice-bar" role="status" style="margin-bottom:1rem;"><?= icon('info', 15) ?> This project was removed by an administrator. It is kept for your records, and no new actions can be taken on it.</div>
+<?php endif; ?>
+<nav class="crumbs" aria-label="Breadcrumb">
     <a href="my-projects.php">My Projects</a><span>/</span><span aria-current="page">Project Details</span>
   </nav>
 
@@ -412,7 +415,7 @@ include '../includes/client-nav.php';
                 <a href="#" class="btn btn--row-outline">Cancel</a>
                 <form method="post" action="project-tracking.php?id=<?= (int) $id ?>&amp;tab=proposals" style="display:inline;">
                   <input type="hidden" name="action" value="select">
-                  <input type="hidden" name="proposal" value="<?= (int) $pr['key'] ?>">
+                  <input type="hidden" name="proposal" value="<?= (int) $pr['id'] ?>">
                   <button type="submit" class="btn btn--select">Select Freelancer → Contract</button>
                 </form>
               </div>
@@ -740,7 +743,7 @@ include '../includes/client-nav.php';
             <h2>Contract</h2>
             <?php
               $cstate = $p['status'] === 'cancelled' ? 'cancelled' : (($db_row['contract_status'] ?? 'none'));
-              $clabel = ['cancelled' => ['Cancelled', 'cancelled'], 'completed' => ['Completed', 'released'], 'active' => ['Active', 'ongoing'], 'pending' => ['Awaiting acceptance', 'pending']][$cstate] ?? ['No contract yet', 'open'];
+              $clabel = ['cancelled' => ['Cancelled', 'cancelled'], 'removed' => ['Removed', 'cancelled'], 'completed' => ['Completed', 'released'], 'active' => ['Active', 'ongoing'], 'pending' => ['Awaiting acceptance', 'pending']][$cstate] ?? ['No contract yet', 'open'];
             ?>
             <div class="kv"><span>Status</span><span class="status status--<?= e($clabel[1]) ?>"><?= e($clabel[0]) ?></span></div>
             <div class="kv"><span>Agreed</span><strong><?= e(date('M d, Y', strtotime($tracking['start']))) ?></strong></div>

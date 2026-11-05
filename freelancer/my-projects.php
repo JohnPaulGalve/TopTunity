@@ -47,7 +47,7 @@ $rows   = array_values(array_filter($all, function ($p) use ($tab) {
 }));
 if ($tab === 'offer') { $rows = []; }
 
-$pill = ['ongoing' => 'Ongoing', 'overdue' => 'Overdue', 'completed' => 'Completed', 'waiting' => 'Waiting for contract', 'cancelled' => 'Cancelled'];
+$pill = ['ongoing' => 'Ongoing', 'overdue' => 'Overdue', 'completed' => 'Completed', 'waiting' => 'Waiting for contract', 'cancelled' => 'Cancelled', 'removed' => 'Removed'];
 
 $page_title = "My Projects";
 include '../includes/header.php';

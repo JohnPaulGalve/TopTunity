@@ -10,7 +10,7 @@ require_once __DIR__ . '/../includes/data.php';
 
 $all  = toptunity_admin_projects();
 $tabs = ['all' => 'All', 'open' => 'Open', 'past' => 'Past Deadline', 'ongoing' => 'Ongoing', 'overdue' => 'Overdue',
-         'completed' => 'Completed', 'closed' => 'Closed', 'suspended' => 'Suspended', 'cancelled' => 'Cancelled'];
+         'completed' => 'Completed', 'closed' => 'Closed', 'suspended' => 'Suspended', 'cancelled' => 'Cancelled', 'removed' => 'Removed'];
 $status = isset($_GET['status']) && isset($tabs[$_GET['status']]) ? $_GET['status'] : 'all';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = (string) ($_POST['moderation_action'] ?? '');
@@ -104,14 +104,16 @@ include '../includes/client-nav.php';
               'close' => ['Close Project', 'btn btn--block', 'Close this project and notify its client?'],
               'suspend' => ['Suspend Project', 'btn btn--pale-red btn--block', 'Suspend this project and notify its client?'],
               'reopen' => ['Reopen Project', 'btn btn--row-outline btn--block', 'Reopen this project?'],
-              'remove' => ['Remove Project', 'btn btn--row-outline btn--block', 'Permanently remove this project and its proposals? This cannot be undone.'],
+              'remove' => ['Remove Project', 'btn btn--row-outline btn--block', 'Remove this project? It stays in the records and both parties are told. You can restore it later.'],
+              'restore' => ['Restore Project', 'btn btn--row-outline btn--block', 'Restore this project to its previous status?'],
           ];
           foreach ($moderation_controls as $action => $control):
               $no_contract = in_array($sel['contract_status'], ['none', 'declined'], true);
               $eligible = ($action === 'close' && $sel['contract_status'] === 'none' && in_array($sel['status'], ['open', 'past', 'overdue'], true))
                   || ($action === 'suspend' && $sel['contract_status'] === 'none' && in_array($sel['status'], ['open', 'past'], true))
                   || ($action === 'reopen' && $sel['contract_status'] === 'none' && in_array($sel['status'], ['closed', 'suspended'], true))
-                  || ($action === 'remove' && $no_contract && in_array($sel['status'], ['open', 'past', 'closed', 'suspended', 'cancelled'], true));
+                  || ($action === 'remove' && $no_contract && in_array($sel['status'], ['open', 'past', 'closed', 'suspended', 'cancelled'], true))
+                  || ($action === 'restore' && $sel['status'] === 'removed');
               if (!$eligible) { continue; }
           ?>
             <form method="post" action="project-moderation.php?status=<?= e($status) ?>&amp;id=<?= e($sel['id']) ?>"
