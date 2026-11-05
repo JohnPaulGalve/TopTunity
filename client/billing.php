@@ -42,7 +42,7 @@ $held_total   = $sum(['held']);
 $real_paid = 0; $real_refunds = 0; $real_refund_count = 0;
 foreach (tt_client_payment_history() as $h) {
     if ($h['status'] === 'released') { $real_paid += (int) $h['amount']; }
-    if ($h['status'] === 'refunded') { $real_refunds += (int) $h['amount']; $real_refund_count++; }
+    if ($h['type'] === 'refund' && $h['status'] === 'refunded') { $real_refunds += (int) $h['amount']; $real_refund_count++; }
 }
 $paid_total   = $real_paid;
 $refund_total = $real_refunds;

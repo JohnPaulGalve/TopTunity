@@ -18,7 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['review_project'])) {
 }
 
 $all  = toptunity_freelancer_projects();
-$tabs = ['all' => 'All', 'offer' => 'Project Offers', 'ongoing' => 'Ongoing', 'overdue' => 'Overdue', 'completed' => 'Completed'];
+$tabs = ['all' => 'All', 'offer' => 'Project Offers', 'ongoing' => 'Ongoing', 'overdue' => 'Overdue',
+         'past' => 'Past Deadline', 'completed' => 'Completed', 'cancelled' => 'Cancelled'];
 $tab  = isset($_GET['tab']) && isset($tabs[$_GET['tab']]) ? $_GET['tab'] : 'all';
 $counts = ['all' => count($all)];
 foreach ($all as $p) { $counts[$p['status']] = ($counts[$p['status']] ?? 0) + 1; }
@@ -47,7 +48,9 @@ $rows   = array_values(array_filter($all, function ($p) use ($tab) {
 }));
 if ($tab === 'offer') { $rows = []; }
 
-$pill = ['ongoing' => 'Ongoing', 'overdue' => 'Overdue', 'completed' => 'Completed', 'waiting' => 'Waiting for contract', 'cancelled' => 'Cancelled', 'removed' => 'Removed'];
+$pill = ['ongoing' => 'Ongoing', 'overdue' => 'Overdue', 'past' => 'Past Deadline', 'completed' => 'Completed',
+         'waiting' => 'Waiting for contract', 'cancelled' => 'Cancelled', 'removed' => 'Removed',
+         'closed' => 'Closed', 'suspended' => 'Suspended'];
 
 $page_title = "My Projects";
 include '../includes/header.php';

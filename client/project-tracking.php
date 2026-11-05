@@ -210,7 +210,7 @@ include '../includes/client-nav.php';
       <?php if ($p['status'] === 'open'): ?>
         <a href="post-project.php?id=<?= (int) $id ?>" class="btn btn--row-outline"><?= icon('edit', 13) ?> Edit Project</a>
       <?php endif; ?>
-      <?php if (in_array($p['status'], ['open', 'ongoing', 'overdue'], true)): ?>
+      <?php if (in_array($p['status'], ['open', 'past', 'ongoing', 'overdue'], true)): ?>
         <form method="post" action="project-tracking.php?id=<?= (int) $id ?>" style="display:inline;" data-confirm="Cancel this project? Any held deposit is refunded to you. This cannot be undone.">
           <input type="hidden" name="action" value="cancel_project">
           <button type="submit" class="btn btn--danger-outline"><?= icon('x-circle', 13) ?> Cancel Project</button>

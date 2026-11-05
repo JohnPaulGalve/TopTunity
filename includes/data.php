@@ -18,6 +18,13 @@ function toptunity_projects()
     return [];
 }
 
+/** An open project past its deadline is displayed as past deadline without mutating its stored status. */
+function tt_project_visible_status($status, $deadline)
+{
+    if ($status === 'open' && $deadline < date('Y-m-d')) { return 'past'; }
+    return $status;
+}
+
 /** Remove just-uploaded files when the related form cannot be saved. */
 function tt_discard_uploads($files)
 {
@@ -495,9 +502,11 @@ function toptunity_freelancer_projects()
     $stmt->execute([(int) $u['id']]);
     $out = [];
     foreach ($stmt->fetchAll() as $r) {
-        if ($r['contract_status'] === 'pending')                       { $st = 'offer'; }
-        elseif (in_array($r['status'], ['completed'], true))            { $st = 'completed'; }
-        elseif (in_array($r['status'], ['ongoing', 'overdue'], true))  { $st = $r['status']; }
+        $project_status = tt_project_visible_status($r['status'], $r['deadline']);
+        if (in_array($project_status, ['cancelled', 'removed', 'closed', 'suspended', 'past'], true)) { $st = $project_status; }
+        elseif ($project_status === 'completed')                         { $st = 'completed'; }
+        elseif ($r['contract_status'] === 'pending')                     { $st = 'offer'; }
+        elseif (in_array($project_status, ['ongoing', 'overdue'], true)) { $st = $project_status; }
         elseif ($r['contract_status'] === 'active')                     { $st = 'ongoing'; }
         else                                                            { $st = 'waiting'; } // selected, contract not sent yet
         $out[] = ['id' => 1000 + (int) $r['id'], 'project_id' => (int) $r['id'], 'title' => $r['title'], 'client' => $r['client'],
@@ -676,7 +685,7 @@ function toptunity_admin_projects()
     foreach ($rows as $r) {
         $hourly = $r['billing_type'] === 'hourly';
         $out[] = ['id' => 1000 + (int) $r['id'], 'site_id' => 1000 + (int) $r['id'], 'title' => $r['title'], 'client' => $r['client'],
-                  'freelancer' => $r['freelancer'] ?: '—', 'status' => $r['status'], 'contract_status' => $r['contract_status'], 'has_freelancer' => !empty($r['freelancer']), 'deadline' => $r['deadline'],
+                  'freelancer' => $r['freelancer'] ?: '—', 'status' => tt_project_visible_status($r['status'], $r['deadline']), 'contract_status' => $r['contract_status'], 'has_freelancer' => !empty($r['freelancer']), 'deadline' => $r['deadline'],
                   'type' => $r['billing_type'], 'billing' => $hourly ? 'Hourly ₱' . number_format((int) $r['hourly_rate']) . '/hr' : 'Fixed · ₱' . number_format((int) $r['budget']),
                   'proposals' => (int) $r['proposals'], 'contract_status' => $r['contract_status'], 'real' => true,
                   'history' => tt_project_history((int) $r['id'], $r['created_at'], $r['deadline'], $r['status'])];
@@ -1097,7 +1106,7 @@ function tt_project_from_row($r, $skills)
         'rate'      => (int) $r['hourly_rate'],
         'max_hours' => (int) $r['max_hours'],
         'deadline'  => $r['deadline'],
-        'status'    => $r['status'],
+        'status'    => tt_project_visible_status($r['status'], $r['deadline']),
         'posted'    => substr($r['created_at'], 0, 10),
         'proposals' => (int) $r['proposals'],
         'freelancer'=> $r['freelancer_name'] ?? null,
@@ -1430,6 +1439,7 @@ function tt_db_select_freelancer($site_id, $proposal_id)
     if (tt_project_is_removed($project)) { return 'This project was removed by an administrator, so it cannot be changed.'; }
     if (!$project || (int) $project['client_id'] !== (int) ($user['id'] ?? 0)) { return 'This project is not yours.'; }
     if ($project['status'] !== 'open') { return 'This project is no longer accepting contracts.'; }
+    if ($project['deadline'] < date('Y-m-d')) { return 'The deadline for this project has passed.'; }
     if ($project['contract_status'] !== 'none') { return 'A contract is already in progress for this project.'; }
     $stmt = db()->prepare('SELECT * FROM proposals WHERE id = ? AND project_id = ?');
     $stmt->execute([(int) $proposal_id, (int) $project['id']]);
@@ -1438,7 +1448,8 @@ function tt_db_select_freelancer($site_id, $proposal_id)
     $pdo = db();
     $pdo->beginTransaction();
     $guard = $pdo->prepare("UPDATE projects SET freelancer_id = ?, agreed_amount = ?
-                            WHERE id = ? AND status = 'open' AND contract_status = 'none' AND freelancer_id IS NULL");
+                            WHERE id = ? AND status = 'open' AND deadline >= CURDATE()
+                              AND contract_status = 'none' AND freelancer_id IS NULL");
     $guard->execute([(int) $prop['freelancer_id'], (int) $prop['offer'], (int) $project['id']]);
     if (!$guard->rowCount()) {
         $pdo->rollBack();
@@ -1524,6 +1535,7 @@ function tt_db_send_contract($site_id, $agreed_amount, $hourly_rate = null, $max
     if (tt_project_is_removed($project)) { return 'This project was removed by an administrator, so it cannot be changed.'; }
     if (!$project || (int) $project['client_id'] !== (int) ($user['id'] ?? 0)) { return 'This project is not yours.'; }
     if ($project['status'] !== 'open') { return 'This project is no longer accepting contracts.'; }
+    if ($project['deadline'] < date('Y-m-d')) { return 'The deadline for this project has passed.'; }
     if (empty($project['freelancer_id']))                             { return 'Select a freelancer before sending the contract.'; }
     if ($project['contract_status'] !== 'none')                       { return 'The contract has already been sent.'; }
     if ($project['billing_type'] === 'hourly' && $hourly_rate !== null && $max_hours !== null) {
@@ -1535,7 +1547,8 @@ function tt_db_send_contract($site_id, $agreed_amount, $hourly_rate = null, $max
     }
     if ((int) $agreed_amount < 1) { return 'Enter the agreed amount.'; }
     $stmt = db()->prepare("UPDATE projects SET contract_status = 'pending', agreed_amount = ?, contract_sent_at = NOW()
-                           WHERE id = ? AND status = 'open' AND contract_status = 'none' AND freelancer_id IS NOT NULL");
+                       WHERE id = ? AND status = 'open' AND deadline >= CURDATE()
+                         AND contract_status = 'none' AND freelancer_id IS NOT NULL");
     $stmt->execute([(int) $agreed_amount, (int) $project['id']]);
     if (!$stmt->rowCount()) { return 'This project is no longer accepting contracts.'; }
     tt_notify($project['freelancer_id'], 'offers', 'Project offer',
@@ -1554,12 +1567,13 @@ function tt_db_respond_contract($site_id, $accept)
     if (tt_project_is_removed($project)) { return 'This project was removed by an administrator, so it cannot be changed.'; }
     if (!$project || (int) $project['freelancer_id'] !== (int) ($user['id'] ?? 0)) { return 'This offer is not yours.'; }
     if ($project['status'] !== 'open') { return 'This project is closed or suspended and cannot be contracted.'; }
+    if ($project['deadline'] < date('Y-m-d')) { return 'The deadline for this project has passed.'; }
     if ($project['contract_status'] !== 'pending') { return 'There is no open contract to respond to.'; }
     $pdo = db();
     $pdo->beginTransaction();
     if ($accept) {
         $stmt = $pdo->prepare("UPDATE projects SET contract_status = 'active', status = 'ongoing', start_date = CURDATE()
-                               WHERE id = ? AND status = 'open' AND contract_status = 'pending'");
+                               WHERE id = ? AND status = 'open' AND deadline >= CURDATE() AND contract_status = 'pending'");
         $stmt->execute([(int) $project['id']]);
         if (!$stmt->rowCount()) {
             $pdo->rollBack();
@@ -1590,7 +1604,8 @@ function tt_db_freelancer_offers()
                            LEFT JOIN categories c ON c.id = p.category_id
                            JOIN users u ON u.id = p.client_id
                            LEFT JOIN client_profiles cp ON cp.user_id = u.id
-                           WHERE p.freelancer_id = ? AND p.contract_status = 'pending' ORDER BY p.id");
+                           WHERE p.freelancer_id = ? AND p.contract_status = 'pending'
+                             AND p.status = 'open' AND p.deadline >= CURDATE() ORDER BY p.id");
     $stmt->execute([(int) $user['id']]);
     return $stmt->fetchAll();
 }
@@ -2122,7 +2137,7 @@ function toptunity_admin_payments()
     foreach ($rows as $r) {
         $real[] = ['date' => tt_date_label($r['created_at']), 'project' => $r['title'],
                    'billing' => $r['billing_type'] === 'hourly' ? 'Hourly' : 'Fixed Price',
-                   'type' => $r['status'] === 'released' ? 'Release' : 'Escrow',
+                   'type' => $r['status'] === 'released' ? 'Release' : (['refund' => 'Refund'][$r['type']] ?? 'Escrow'),
                    'amount' => (int) $r['amount'], 'fee' => (int) $r['service_fee'], 'status' => $r['status'], 'sample' => false,
                    'reference' => (string) ($r['reference'] ?? ''), 'method' => (string) ($r['method'] ?? ''), 'transfer_ref' => (string) ($r['transfer_ref'] ?? '')];
     }

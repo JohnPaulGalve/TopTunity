@@ -34,12 +34,11 @@ $per_page = 6;
 $counts = ['all' => count($projects), 'closed' => 0];
 foreach ($projects as $p) {
     $counts[$p['status']] = ($counts[$p['status']] ?? 0) + 1;
-    if (!empty($p['note'])) { $counts['closed']++; }
+    if ($p['status'] === 'closed') { $counts['closed']++; }
 }
 
 $rows = array_values(array_filter($projects, function ($p) use ($status, $q) {
-    if ($status === 'closed' && empty($p['note'])) { return false; }
-    if ($status !== 'all' && $status !== 'closed' && $p['status'] !== $status) { return false; }
+    if ($status !== 'all' && $p['status'] !== $status) { return false; }
     if ($q !== '' && stripos($p['title'] . ' ' . $p['category'], $q) === false) { return false; }
     return true;
 }));
@@ -147,7 +146,7 @@ include '../includes/client-nav.php';
         </div>
 
         <div class="project-row__actions">
-          <?php if ($p['status'] === 'open'): ?>
+          <?php if (in_array($p['status'], ['open', 'past'], true)): ?>
             <a href="<?= e($base_url) ?>client/post-project.php?id=<?= (int) $id ?>" class="btn--row-outline"><?= icon('edit', 13) ?> Edit Project</a>
             <form method="post" action="<?= e($base_url) ?>client/project-tracking.php?id=<?= (int) $id ?>" style="display:inline;" data-confirm="Cancel this project? Any held deposit is refunded to you. This cannot be undone.">
               <input type="hidden" name="action" value="cancel_project">

@@ -86,8 +86,13 @@ include '../includes/client-nav.php';
       <div class="kv"><span>Deadline</span><strong><?= e(date('M d, Y', strtotime($sel['deadline']))) ?></strong></div>
 
       <div class="kv" style="align-items:center;">
-        <span>Contract<br><small class="muted">No contract — no freelancer selected</small></span>
-        <span class="status status--cancelled">None</span>
+        <?php
+          $contract_labels = ['none' => 'None', 'pending' => 'Pending', 'active' => 'Active', 'completed' => 'Completed', 'declined' => 'Declined'];
+          $contract_status = $sel['contract_status'] ?? 'none';
+          $contract_class = ['pending' => 'pending', 'active' => 'ongoing', 'completed' => 'completed', 'declined' => 'cancelled'][$contract_status] ?? 'cancelled';
+        ?>
+        <span>Contract<br><small class="muted"><?= $contract_status === 'none' ? 'No contract has been sent' : 'Current contract status' ?></small></span>
+        <span class="status status--<?= e($contract_class) ?>"><?= e($contract_labels[$contract_status] ?? ucfirst($contract_status)) ?></span>
       </div>
 
       <p class="muted" style="margin:0.9rem 0 0.4rem; font-size:0.72rem; font-weight:600;">Project History</p>

@@ -1,335 +1,328 @@
--- demo-seed.sql: ALL demo data in one file (accounts, profiles, projects, proposals, contracts, payments, reviews, portfolio).
--- Run AFTER the schema files. Safe to run twice. Password for every demo account: Demo12345
--- Remove demo data later with: DELETE FROM users WHERE email LIKE '%@demo.toptunity.local';
--- demo-seed.sql: 5 demo clients, 5 demo freelancers, projects, proposals, contracts and payments.
--- Run AFTER all the schema files. Safe to run twice (existing demo rows are skipped).
--- Every demo account uses the password:  Demo12345
--- Delete the demo accounts later with:  DELETE FROM users WHERE email LIKE '%@demo.toptunity.local';
+-- Demo data for visual presentation. Run after schema.sql and all database/*.sql migrations.
+-- Safe to run repeatedly. Demo password for every account: Demo12345
+-- Cleanup: run database/demo-cleanup.sql
 
-SET @pw := '$2y$10$i9czN7gzkC4Aipq1ZfluK.1n8WjL6Bnu6BZIH8HAVJhHg.P4BCNkG';
+SET @demo_password_hash := '$2y$10$i9czN7gzkC4Aipq1ZfluK.1n8WjL6Bnu6BZIH8HAVJhHg.P4BCNkG';
 
--- Categories and skills (same names the site uses)
-INSERT IGNORE INTO categories (name) VALUES ('Web Development'), ('Mobile App Development'), ('Graphic Design'),
-  ('UI/UX Design'), ('Writing and Content'), ('Digital Marketing'), ('Video and Animation'), ('Data Entry and Admin');
+-- Shared catalog data; retained after demo cleanup because other accounts may use it.
+INSERT IGNORE INTO categories (name, work_group) VALUES
+  ('Web Development', 'Programmer'),
+  ('Mobile App Development', 'Programmer'),
+  ('Graphic Design', 'Designer'),
+  ('UI/UX Design', 'Designer'),
+  ('Writing and Content', 'Writer'),
+  ('Digital Marketing', 'Marketer'),
+  ('Video and Animation', 'Editor'),
+  ('Data Entry and Admin', 'Admin Assistant');
 
-INSERT INTO skills (name, category_id)
-SELECT s.name, c.id FROM (
-  SELECT 'PHP' AS name, 'Web Development' AS cat UNION ALL SELECT 'MySQL', 'Web Development'
-  UNION ALL SELECT 'JavaScript', 'Web Development' UNION ALL SELECT 'Laravel', 'Web Development'
-  UNION ALL SELECT 'Bootstrap', 'Web Development' UNION ALL SELECT 'REST API', 'Web Development'
-  UNION ALL SELECT 'HTML/CSS', 'Web Development' UNION ALL SELECT 'React', 'Web Development'
-  UNION ALL SELECT 'Flutter', 'Mobile App Development' UNION ALL SELECT 'Firebase', 'Mobile App Development'
-  UNION ALL SELECT 'Logo Design', 'Graphic Design' UNION ALL SELECT 'Adobe Illustrator', 'Graphic Design'
-  UNION ALL SELECT 'Photoshop', 'Graphic Design' UNION ALL SELECT 'Figma', 'UI/UX Design'
-  UNION ALL SELECT 'UI Design', 'UI/UX Design' UNION ALL SELECT 'Social Media Marketing', 'Digital Marketing'
-  UNION ALL SELECT 'Copywriting', 'Writing and Content'
-) s JOIN categories c ON c.name = s.cat
-WHERE NOT EXISTS (SELECT 1 FROM skills k WHERE k.name = s.name);
-
--- Demo clients
-INSERT IGNORE INTO users (name, email, password_hash, role, status) VALUES
-  ('Andrea Reyes', 'andrea.reyes@demo.toptunity.local', @pw, 'client', 'active'),
-  ('Mark Santos', 'mark.santos@demo.toptunity.local', @pw, 'client', 'active'),
-  ('Liza Ramos', 'liza.ramos@demo.toptunity.local', @pw, 'client', 'active'),
-  ('Carlo Dizon', 'carlo.dizon@demo.toptunity.local', @pw, 'client', 'active'),
-  ('Grace Lim', 'grace.lim@demo.toptunity.local', @pw, 'client', 'active');
-
--- Demo freelancers
-INSERT IGNORE INTO users (name, email, password_hash, role, status) VALUES
-  ('Miguel Cruz', 'miguel.cruz@demo.toptunity.local', @pw, 'freelancer', 'active'),
-  ('Bea Lim', 'bea.lim@demo.toptunity.local', @pw, 'freelancer', 'active'),
-  ('Jerome Castillo', 'jerome.castillo@demo.toptunity.local', @pw, 'freelancer', 'active'),
-  ('Janelle Aquino', 'janelle.aquino@demo.toptunity.local', @pw, 'freelancer', 'active'),
-  ('Ramon Villanueva', 'ramon.villanueva@demo.toptunity.local', @pw, 'freelancer', 'active');
-
--- Client profiles
-INSERT IGNORE INTO client_profiles (user_id, company, location, phone, about)
-SELECT id, 'Kape Lokal', 'Quezon City, Philippines', '+63 917 555 0101', 'We run two coffee shops and want a simple online ordering system for our customers.' FROM users WHERE email = 'andrea.reyes@demo.toptunity.local'
-UNION ALL SELECT id, 'Santos Family Clinic', 'Makati City, Philippines', '+63 917 555 0102', 'A family clinic looking for an online appointment booking system for patients.' FROM users WHERE email = 'mark.santos@demo.toptunity.local'
-UNION ALL SELECT id, 'Ramos Bakehouse', 'Cebu City, Philippines', '+63 917 555 0103', 'A small bakery that needs a logo and brand kit for its new packaging.' FROM users WHERE email = 'liza.ramos@demo.toptunity.local'
-UNION ALL SELECT id, 'Dizon Resort', 'Batangas, Philippines', '+63 917 555 0104', 'A beach resort looking for social media help to grow bookings.' FROM users WHERE email = 'carlo.dizon@demo.toptunity.local'
-UNION ALL SELECT id, 'Lim Logistics', 'Davao City, Philippines', '+63 917 555 0105', 'A delivery company that wants a mobile app for tracking shipments in real time.' FROM users WHERE email = 'grace.lim@demo.toptunity.local';
-
--- Freelancer profiles
-INSERT IGNORE INTO freelancer_profiles (user_id, title, location, hourly_rate, languages, about, available, phone)
-SELECT id, 'Full-Stack PHP Developer', 'Cebu City, Philippines', 250, 'English, Cebuano', 'I build PHP and MySQL web systems for small businesses, including ordering, booking and inventory tools. I write clean code and explain every step.', 1, '+63 917 555 0201' FROM users WHERE email = 'miguel.cruz@demo.toptunity.local'
-UNION ALL SELECT id, 'Graphic Designer', 'Quezon City, Philippines', 200, 'English, Filipino', 'Logo and brand designer for food and retail businesses. I deliver print-ready files and a short brand guide.', 1, '+63 917 555 0202' FROM users WHERE email = 'bea.lim@demo.toptunity.local'
-UNION ALL SELECT id, 'Backend and REST API Developer', 'Davao City, Philippines', 280, 'English, Filipino', 'I design REST APIs and database structures for web and mobile apps, with clear documentation.', 1, '+63 917 555 0203' FROM users WHERE email = 'jerome.castillo@demo.toptunity.local'
-UNION ALL SELECT id, 'Web and Database Developer', 'Bacolod City, Philippines', 300, 'English, Hiligaynon', 'Frontend and database developer for responsive websites, with a focus on clean layouts and fast pages.', 1, '+63 917 555 0204' FROM users WHERE email = 'janelle.aquino@demo.toptunity.local'
-UNION ALL SELECT id, 'Mobile App Developer', 'Iloilo City, Philippines', 320, 'English, Ilonggo', 'Flutter developer for Android and iOS apps, with Firebase backends and clear progress updates.', 1, '+63 917 555 0205' FROM users WHERE email = 'ramon.villanueva@demo.toptunity.local';
-
--- Freelancer skills
-INSERT IGNORE INTO freelancer_skills (freelancer_id, skill_id)
-SELECT u.id, s.id FROM users u JOIN skills s ON s.name IN ('PHP','MySQL','JavaScript','Laravel','Bootstrap') WHERE u.email = 'miguel.cruz@demo.toptunity.local'
-UNION ALL SELECT u.id, s.id FROM users u JOIN skills s ON s.name IN ('Logo Design','Adobe Illustrator','Photoshop','Figma') WHERE u.email = 'bea.lim@demo.toptunity.local'
-UNION ALL SELECT u.id, s.id FROM users u JOIN skills s ON s.name IN ('REST API','PHP','MySQL') WHERE u.email = 'jerome.castillo@demo.toptunity.local'
-UNION ALL SELECT u.id, s.id FROM users u JOIN skills s ON s.name IN ('HTML/CSS','JavaScript','MySQL','React') WHERE u.email = 'janelle.aquino@demo.toptunity.local'
-UNION ALL SELECT u.id, s.id FROM users u JOIN skills s ON s.name IN ('Flutter','Firebase','UI Design') WHERE u.email = 'ramon.villanueva@demo.toptunity.local';
-
--- Projects (open, ongoing and completed). Each is added only once, by title.
-INSERT INTO projects (client_id, category_id, title, description, billing_type, budget, hourly_rate, max_hours, deadline, status, contract_status, created_at)
-SELECT u.id, c.id, 'Online Ordering Website for a Coffee Shop',
-  'We need a website where customers can browse the menu, add items to a cart, choose pick-up time and pay on pick-up. Include a staff dashboard to see and update orders.',
-  'fixed', 45000, 0, 0, '2026-12-20', 'open', 'none', NOW()
-FROM users u JOIN categories c ON c.name = 'Web Development' WHERE u.email = 'andrea.reyes@demo.toptunity.local'
-  AND NOT EXISTS (SELECT 1 FROM projects p WHERE p.title = 'Online Ordering Website for a Coffee Shop');
-
-INSERT INTO projects (client_id, category_id, title, description, billing_type, budget, hourly_rate, max_hours, deadline, status, contract_status, created_at)
-SELECT u.id, c.id, 'Clinic Appointment Booking System',
-  'A booking page where patients pick a doctor, date and time slot, plus an admin page for the clinic staff to confirm or move appointments.',
-  'fixed', 60000, 0, 0, '2026-12-30', 'open', 'none', NOW()
-FROM users u JOIN categories c ON c.name = 'Web Development' WHERE u.email = 'mark.santos@demo.toptunity.local'
-  AND NOT EXISTS (SELECT 1 FROM projects p WHERE p.title = 'Clinic Appointment Booking System');
-
-INSERT INTO projects (client_id, category_id, title, description, billing_type, budget, hourly_rate, max_hours, deadline, status, contract_status, created_at)
-SELECT u.id, c.id, 'Logo and Brand Kit for a Bakery',
-  'A new logo, color palette and typeface choices, with print-ready files for boxes, bags and stickers.',
-  'fixed', 8000, 0, 0, '2026-11-30', 'open', 'none', NOW()
-FROM users u JOIN categories c ON c.name = 'Graphic Design' WHERE u.email = 'liza.ramos@demo.toptunity.local'
-  AND NOT EXISTS (SELECT 1 FROM projects p WHERE p.title = 'Logo and Brand Kit for a Bakery');
-
-INSERT INTO projects (client_id, category_id, title, description, billing_type, budget, hourly_rate, max_hours, deadline, status, contract_status, created_at)
-SELECT u.id, c.id, 'Social Media Management for a Beach Resort',
-  'Plan and post weekly content on Facebook and Instagram, reply to comments and report the results each month.',
-  'hourly', 0, 350, 40, '2026-12-15', 'open', 'none', NOW()
-FROM users u JOIN categories c ON c.name = 'Digital Marketing' WHERE u.email = 'carlo.dizon@demo.toptunity.local'
-  AND NOT EXISTS (SELECT 1 FROM projects p WHERE p.title = 'Social Media Management for a Beach Resort');
-
-INSERT INTO projects (client_id, category_id, title, description, billing_type, budget, hourly_rate, max_hours, deadline, status, contract_status, created_at)
-SELECT u.id, c.id, 'Mobile App for Delivery Tracking',
-  'An Android and iOS app where drivers update delivery status and customers see live progress on a map.',
-  'fixed', 120000, 0, 0, '2027-02-28', 'open', 'none', NOW()
-FROM users u JOIN categories c ON c.name = 'Mobile App Development' WHERE u.email = 'grace.lim@demo.toptunity.local'
-  AND NOT EXISTS (SELECT 1 FROM projects p WHERE p.title = 'Mobile App for Delivery Tracking');
-
-INSERT INTO projects (client_id, category_id, title, description, billing_type, budget, hourly_rate, max_hours, deadline, status, contract_status, freelancer_id, agreed_amount, created_at)
-SELECT u.id, c.id, 'Inventory Dashboard for a Sari-Sari Store',
-  'A simple inventory page to add products, record stock in and out, and see low-stock alerts.',
-  'hourly', 0, 300, 60, '2026-12-05', 'open', 'pending', f.id, 18000, NOW() - INTERVAL 2 DAY
-FROM users u JOIN categories c ON c.name = 'Web Development'
-JOIN users f ON f.email = 'miguel.cruz@demo.toptunity.local'
-WHERE u.email = 'andrea.reyes@demo.toptunity.local'
-  AND NOT EXISTS (SELECT 1 FROM projects p WHERE p.title = 'Inventory Dashboard for a Sari-Sari Store');
-
-INSERT INTO projects (client_id, category_id, title, description, billing_type, budget, hourly_rate, max_hours, deadline, status, contract_status, freelancer_id, agreed_amount, created_at)
-SELECT u.id, c.id, 'Product Photo Editing for an Online Shop',
-  'Clean up 30 product photos: remove backgrounds, match colors and export web and print sizes.',
-  'fixed', 6000, 0, 0, '2026-10-25', 'completed', 'completed', f.id, 6000, NOW() - INTERVAL 20 DAY
-FROM users u JOIN categories c ON c.name = 'Graphic Design'
-JOIN users f ON f.email = 'bea.lim@demo.toptunity.local'
-WHERE u.email = 'mark.santos@demo.toptunity.local'
-  AND NOT EXISTS (SELECT 1 FROM projects p WHERE p.title = 'Product Photo Editing for an Online Shop');
-
--- Project skills
-INSERT IGNORE INTO project_skills (project_id, skill_id)
-SELECT p.id, s.id FROM projects p JOIN skills s ON s.name IN ('PHP','MySQL','JavaScript') WHERE p.title = 'Online Ordering Website for a Coffee Shop'
-UNION ALL SELECT p.id, s.id FROM projects p JOIN skills s ON s.name IN ('Laravel','MySQL') WHERE p.title = 'Clinic Appointment Booking System'
-UNION ALL SELECT p.id, s.id FROM projects p JOIN skills s ON s.name IN ('Logo Design','Adobe Illustrator') WHERE p.title = 'Logo and Brand Kit for a Bakery'
-UNION ALL SELECT p.id, s.id FROM projects p JOIN skills s ON s.name IN ('Social Media Marketing','Copywriting') WHERE p.title = 'Social Media Management for a Beach Resort'
-UNION ALL SELECT p.id, s.id FROM projects p JOIN skills s ON s.name IN ('Flutter','Firebase') WHERE p.title = 'Mobile App for Delivery Tracking'
-UNION ALL SELECT p.id, s.id FROM projects p JOIN skills s ON s.name IN ('PHP','MySQL') WHERE p.title = 'Inventory Dashboard for a Sari-Sari Store'
-UNION ALL SELECT p.id, s.id FROM projects p JOIN skills s ON s.name IN ('Photoshop','Adobe Illustrator') WHERE p.title = 'Product Photo Editing for an Online Shop';
-
--- Proposals on the open projects, and the accepted ones on the ongoing and completed projects
-INSERT IGNORE INTO proposals (project_id, freelancer_id, offer, days, cover_letter, status, created_at)
-SELECT p.id, f.id, 42000, 21, 'I have built several ordering systems for cafes in Cebu. I can deliver the menu, cart, pick-up scheduling and a staff dashboard within three weeks.', 'pending', NOW() FROM projects p JOIN users f ON f.email = 'miguel.cruz@demo.toptunity.local' WHERE p.title = 'Online Ordering Website for a Coffee Shop'
-UNION ALL SELECT p.id, f.id, 45000, 25, 'I can build the full ordering flow and the staff view with clean, mobile-friendly pages and a short training guide.', 'pending', NOW() FROM projects p JOIN users f ON f.email = 'janelle.aquino@demo.toptunity.local' WHERE p.title = 'Online Ordering Website for a Coffee Shop'
-UNION ALL SELECT p.id, f.id, 58000, 30, 'I design booking systems with clear time-slot rules and an admin view for staff. I include testing before handover.', 'pending', NOW() FROM projects p JOIN users f ON f.email = 'jerome.castillo@demo.toptunity.local' WHERE p.title = 'Clinic Appointment Booking System'
-UNION ALL SELECT p.id, f.id, 60000, 35, 'Laravel and MySQL are my main stack. I will deliver the booking page, the admin view and a handover document.', 'pending', NOW() FROM projects p JOIN users f ON f.email = 'miguel.cruz@demo.toptunity.local' WHERE p.title = 'Clinic Appointment Booking System'
-UNION ALL SELECT p.id, f.id, 7500, 7, 'Logo and brand kit is my specialty. I will send three concepts and then finish the one you pick with all print files.', 'pending', NOW() FROM projects p JOIN users f ON f.email = 'bea.lim@demo.toptunity.local' WHERE p.title = 'Logo and Brand Kit for a Bakery'
-UNION ALL SELECT p.id, f.id, 330, 40, 'I manage resort social pages every week and report the results monthly. My hourly rate includes content planning.', 'pending', NOW() FROM projects p JOIN users f ON f.email = 'janelle.aquino@demo.toptunity.local' WHERE p.title = 'Social Media Management for a Beach Resort'
-UNION ALL SELECT p.id, f.id, 115000, 60, 'I have built delivery and tracking apps in Flutter with Firebase. I will include driver and customer screens and live map updates.', 'pending', NOW() FROM projects p JOIN users f ON f.email = 'ramon.villanueva@demo.toptunity.local' WHERE p.title = 'Mobile App for Delivery Tracking'
-UNION ALL SELECT p.id, f.id, 300, 60, 'I will build the inventory dashboard with stock in and out records and low-stock alerts.', 'selected', NOW() FROM projects p JOIN users f ON f.email = 'miguel.cruz@demo.toptunity.local' WHERE p.title = 'Inventory Dashboard for a Sari-Sari Store'
-UNION ALL SELECT p.id, f.id, 6000, 5, 'I will clean up all 30 photos with consistent colors and export both web and print sizes.', 'selected', NOW() FROM projects p JOIN users f ON f.email = 'bea.lim@demo.toptunity.local' WHERE p.title = 'Product Photo Editing for an Online Shop';
-
--- Payments for the completed project only (escrow paid, then released with the 10% fee). The Sari-Sari offer is still waiting for the freelancer to accept, so it has no payment yet.
-INSERT INTO payments (project_id, type, amount, service_fee, status, created_at)
-SELECT p.id, 'escrow', 6000, 0, 'paid', NOW() - INTERVAL 20 DAY FROM projects p WHERE p.title = 'Product Photo Editing for an Online Shop' AND NOT EXISTS (SELECT 1 FROM payments x WHERE x.project_id = p.id)
-UNION ALL SELECT p.id, 'release', 6000, 600, 'released', NOW() - INTERVAL 2 DAY FROM projects p WHERE p.title = 'Product Photo Editing for an Online Shop' AND NOT EXISTS (SELECT 1 FROM payments x WHERE x.project_id = p.id AND x.type = 'release')
-;
-
--- Platform reviews (published, one per user)
-INSERT IGNORE INTO platform_reviews (user_id, rating, body, status)
-SELECT u.id, 5, 'TopTunity made it easy to find a designer and keep track of every step. The payment process was clear.', 'published' FROM users u WHERE u.email = 'liza.ramos@demo.toptunity.local'
-UNION ALL SELECT u.id, 4, 'I found steady clients here. The proposal and contract steps are simple, and I always know where a project stands.', 'published' FROM users u WHERE u.email = 'miguel.cruz@demo.toptunity.local'
-UNION ALL SELECT u.id, 5, 'We posted our project in the morning and had several good proposals by the afternoon. Very helpful for a small business.', 'published' FROM users u WHERE u.email = 'andrea.reyes@demo.toptunity.local';
-
--- ===== Portfolio, completed projects, payments and reviews =====
-
--- Two more completed projects (fixed price)
-INSERT INTO projects (client_id, category_id, title, description, billing_type, budget, hourly_rate, max_hours, deadline, status, contract_status, freelancer_id, agreed_amount, created_at)
-SELECT c.id, cat.id, 'Clinic Website Redesign',
-  'Redesign the clinic website with a new booking page, service list and mobile-friendly layout.',
-  'fixed', 35000, 0, 0, '2026-10-10', 'completed', 'completed', f.id, 35000, NOW() - INTERVAL 40 DAY
-FROM users c JOIN categories cat ON cat.name = 'Web Development' JOIN users f ON f.email = 'jerome.castillo@demo.toptunity.local'
-WHERE c.email = 'mark.santos@demo.toptunity.local'
-  AND NOT EXISTS (SELECT 1 FROM projects p WHERE p.title = 'Clinic Website Redesign');
-
-INSERT INTO projects (client_id, category_id, title, description, billing_type, budget, hourly_rate, max_hours, deadline, status, contract_status, freelancer_id, agreed_amount, created_at)
-SELECT c.id, cat.id, 'Resort Booking Mobile App',
-  'A mobile app where guests check room availability, book a stay and pay a deposit.',
-  'fixed', 90000, 0, 0, '2026-09-30', 'completed', 'completed', f.id, 90000, NOW() - INTERVAL 60 DAY
-FROM users c JOIN categories cat ON cat.name = 'Mobile App Development' JOIN users f ON f.email = 'ramon.villanueva@demo.toptunity.local'
-WHERE c.email = 'carlo.dizon@demo.toptunity.local'
-  AND NOT EXISTS (SELECT 1 FROM projects p WHERE p.title = 'Resort Booking Mobile App');
-
--- Accepted proposals for those two projects
-INSERT IGNORE INTO proposals (project_id, freelancer_id, offer, days, cover_letter, status, created_at)
-SELECT p.id, f.id, 35000, 14, 'I redesign clinic websites with clear booking steps and a mobile-friendly layout. I will walk the team through every page.', 'selected', NOW() - INTERVAL 45 DAY
-FROM projects p JOIN users f ON f.email = 'jerome.castillo@demo.toptunity.local' WHERE p.title = 'Clinic Website Redesign'
-UNION ALL SELECT p.id, f.id, 90000, 45, 'I have built booking apps in Flutter with Firebase. I will deliver Android and iOS builds with a test release.', 'selected', NOW() - INTERVAL 65 DAY
-FROM projects p JOIN users f ON f.email = 'ramon.villanueva@demo.toptunity.local' WHERE p.title = 'Resort Booking Mobile App';
-
--- Payments: escrow paid, then released with the 10% fee
-INSERT INTO payments (project_id, type, amount, service_fee, status, created_at)
-SELECT p.id, 'escrow', 35000, 0, 'paid', NOW() - INTERVAL 40 DAY FROM projects p WHERE p.title = 'Clinic Website Redesign' AND NOT EXISTS (SELECT 1 FROM payments x WHERE x.project_id = p.id)
-UNION ALL SELECT p.id, 'release', 35000, 3500, 'released', NOW() - INTERVAL 30 DAY FROM projects p WHERE p.title = 'Clinic Website Redesign' AND NOT EXISTS (SELECT 1 FROM payments x WHERE x.project_id = p.id AND x.type = 'release')
-UNION ALL SELECT p.id, 'escrow', 90000, 0, 'paid', NOW() - INTERVAL 60 DAY FROM projects p WHERE p.title = 'Resort Booking Mobile App' AND NOT EXISTS (SELECT 1 FROM payments x WHERE x.project_id = p.id)
-UNION ALL SELECT p.id, 'release', 90000, 9000, 'released', NOW() - INTERVAL 50 DAY FROM projects p WHERE p.title = 'Resort Booking Mobile App' AND NOT EXISTS (SELECT 1 FROM payments x WHERE x.project_id = p.id AND x.type = 'release');
-
--- Reviews on the completed projects, both directions
-INSERT INTO reviews (reviewer_id, reviewee_id, project_id, rating, body, created_at)
-SELECT c.id, f.id, p.id, 5, 'Fast turnaround and clean edits. Our product photos look consistent now.', NOW() - INTERVAL 3 DAY
-FROM projects p JOIN users c ON c.id = p.client_id JOIN users f ON f.id = p.freelancer_id
-WHERE p.title = 'Product Photo Editing for an Online Shop' AND NOT EXISTS (SELECT 1 FROM reviews r WHERE r.reviewer_id = c.id AND r.project_id = p.id)
-UNION ALL SELECT f.id, c.id, p.id, 5, 'Clear brief and quick feedback. Easy client to work with.', NOW() - INTERVAL 3 DAY
-FROM projects p JOIN users c ON c.id = p.client_id JOIN users f ON f.id = p.freelancer_id
-WHERE p.title = 'Product Photo Editing for an Online Shop' AND NOT EXISTS (SELECT 1 FROM reviews r WHERE r.reviewer_id = f.id AND r.project_id = p.id)
-UNION ALL SELECT c.id, f.id, p.id, 5, 'Our booking page is simple and fast now. Jerome explained every change.', NOW() - INTERVAL 28 DAY
-FROM projects p JOIN users c ON c.id = p.client_id JOIN users f ON f.id = p.freelancer_id
-WHERE p.title = 'Clinic Website Redesign' AND NOT EXISTS (SELECT 1 FROM reviews r WHERE r.reviewer_id = c.id AND r.project_id = p.id)
-UNION ALL SELECT f.id, c.id, p.id, 4, 'Good scope and payment on time. Feedback could have come a little sooner.', NOW() - INTERVAL 28 DAY
-FROM projects p JOIN users c ON c.id = p.client_id JOIN users f ON f.id = p.freelancer_id
-WHERE p.title = 'Clinic Website Redesign' AND NOT EXISTS (SELECT 1 FROM reviews r WHERE r.reviewer_id = f.id AND r.project_id = p.id)
-UNION ALL SELECT c.id, f.id, p.id, 5, 'Smooth app and very responsive. Guests can book in a few taps.', NOW() - INTERVAL 48 DAY
-FROM projects p JOIN users c ON c.id = p.client_id JOIN users f ON f.id = p.freelancer_id
-WHERE p.title = 'Resort Booking Mobile App' AND NOT EXISTS (SELECT 1 FROM reviews r WHERE r.reviewer_id = c.id AND r.project_id = p.id)
-UNION ALL SELECT f.id, c.id, p.id, 5, 'Clear requirements and fair communication.', NOW() - INTERVAL 48 DAY
-FROM projects p JOIN users c ON c.id = p.client_id JOIN users f ON f.id = p.freelancer_id
-WHERE p.title = 'Resort Booking Mobile App' AND NOT EXISTS (SELECT 1 FROM reviews r WHERE r.reviewer_id = f.id AND r.project_id = p.id);
-
--- Portfolio items (two per freelancer)
-INSERT INTO attachments (owner_type, owner_id, user_id, label, category, original_name, stored_name, size_label, file_type, created_at)
-SELECT 'portfolio', u.id, u.id, x.label, x.cat, x.orig, x.stored, '8 KB', 'png', NOW() - INTERVAL 30 DAY
-FROM (
-  SELECT 'miguel.cruz@demo.toptunity.local' AS em, 'Coffee shop ordering app' AS label, 'Web Development' AS cat, 'coffee-shop-app.png' AS orig, 'demo-pf-01.png' AS stored
-  UNION ALL SELECT 'miguel.cruz@demo.toptunity.local', 'Inventory admin panel', 'Web Development', 'inventory-panel.png', 'demo-pf-03.png'
-  UNION ALL SELECT 'bea.lim@demo.toptunity.local', 'Logo set for a bakery', 'Graphic Design', 'bakery-logo.png', 'demo-pf-04.png'
-  UNION ALL SELECT 'bea.lim@demo.toptunity.local', 'Product packaging mockup', 'Graphic Design', 'packaging-mockup.png', 'demo-pf-05.png'
-  UNION ALL SELECT 'jerome.castillo@demo.toptunity.local', 'Clinic booking dashboard', 'Web Development', 'clinic-dashboard.png', 'demo-pf-02.png'
-  UNION ALL SELECT 'jerome.castillo@demo.toptunity.local', 'REST API documentation', 'Web Development', 'api-docs.png', 'demo-pf-08.png'
-  UNION ALL SELECT 'janelle.aquino@demo.toptunity.local', 'Responsive landing page', 'Web Development', 'landing-page.png', 'demo-pf-09.png'
-  UNION ALL SELECT 'janelle.aquino@demo.toptunity.local', 'Resort social media plan', 'Digital Marketing', 'resort-social-plan.png', 'demo-pf-06.png'
-  UNION ALL SELECT 'ramon.villanueva@demo.toptunity.local', 'Delivery tracking app', 'Mobile App Development', 'delivery-app.png', 'demo-pf-07.png'
-  UNION ALL SELECT 'ramon.villanueva@demo.toptunity.local', 'Flutter booking app screens', 'Mobile App Development', 'booking-screens.png', 'demo-pf-10.png'
-) x JOIN users u ON u.email = x.em
-WHERE NOT EXISTS (SELECT 1 FROM attachments a WHERE a.owner_type = 'portfolio' AND a.user_id = u.id AND a.label = x.label);
-
--- ===== Reviews for Miguel Cruz and Janelle Aquino =====
--- Completed project for Miguel Cruz (client Andrea Reyes)
-INSERT INTO projects (client_id, category_id, title, description, billing_type, budget, hourly_rate, max_hours, deadline, status, contract_status, freelancer_id, agreed_amount, created_at)
-SELECT c.id, cat.id, 'Bakery Stock Dashboard',
-  'A simple stock dashboard for the bakery: record ingredients in and out, and see low-stock alerts.',
-  'fixed', 12000, 0, 0, '2026-09-20', 'completed', 'completed', f.id, 12000, NOW() - INTERVAL 50 DAY
-FROM users c JOIN categories cat ON cat.name = 'Web Development' JOIN users f ON f.email = 'miguel.cruz@demo.toptunity.local'
-WHERE c.email = 'andrea.reyes@demo.toptunity.local'
-  AND NOT EXISTS (SELECT 1 FROM projects p WHERE p.title = 'Bakery Stock Dashboard');
-
--- Completed project for Janelle Aquino (client Liza Ramos)
-INSERT INTO projects (client_id, category_id, title, description, billing_type, budget, hourly_rate, max_hours, deadline, status, contract_status, freelancer_id, agreed_amount, created_at)
-SELECT c.id, cat.id, 'Bakery Landing Page',
-  'A one-page website for the bakery with the menu, store hours and a contact form.',
-  'fixed', 9000, 0, 0, '2026-09-15', 'completed', 'completed', f.id, 9000, NOW() - INTERVAL 55 DAY
-FROM users c JOIN categories cat ON cat.name = 'Web Development' JOIN users f ON f.email = 'janelle.aquino@demo.toptunity.local'
-WHERE c.email = 'liza.ramos@demo.toptunity.local'
-  AND NOT EXISTS (SELECT 1 FROM projects p WHERE p.title = 'Bakery Landing Page');
-
--- Accepted proposals for those projects
-INSERT IGNORE INTO proposals (project_id, freelancer_id, offer, days, cover_letter, status, created_at)
-SELECT p.id, f.id, 12000, 12, 'I will build the stock dashboard with ingredient records and low-stock alerts.', 'selected', NOW() - INTERVAL 60 DAY
-FROM projects p JOIN users f ON f.email = 'miguel.cruz@demo.toptunity.local' WHERE p.title = 'Bakery Stock Dashboard'
-UNION ALL SELECT p.id, f.id, 9000, 10, 'I will build a clean one-page site with the menu and a working contact form.', 'selected', NOW() - INTERVAL 60 DAY
-FROM projects p JOIN users f ON f.email = 'janelle.aquino@demo.toptunity.local' WHERE p.title = 'Bakery Landing Page';
-
--- Payments: escrow paid, then released with the 10% fee
-INSERT INTO payments (project_id, type, amount, service_fee, status, created_at)
-SELECT p.id, 'escrow', 12000, 0, 'paid', NOW() - INTERVAL 50 DAY FROM projects p WHERE p.title = 'Bakery Stock Dashboard' AND NOT EXISTS (SELECT 1 FROM payments x WHERE x.project_id = p.id)
-UNION ALL SELECT p.id, 'release', 12000, 1200, 'released', NOW() - INTERVAL 40 DAY FROM projects p WHERE p.title = 'Bakery Stock Dashboard' AND NOT EXISTS (SELECT 1 FROM payments x WHERE x.project_id = p.id AND x.type = 'release')
-UNION ALL SELECT p.id, 'escrow', 9000, 0, 'paid', NOW() - INTERVAL 55 DAY FROM projects p WHERE p.title = 'Bakery Landing Page' AND NOT EXISTS (SELECT 1 FROM payments x WHERE x.project_id = p.id)
-UNION ALL SELECT p.id, 'release', 9000, 900, 'released', NOW() - INTERVAL 45 DAY FROM projects p WHERE p.title = 'Bakery Landing Page' AND NOT EXISTS (SELECT 1 FROM payments x WHERE x.project_id = p.id AND x.type = 'release');
-
--- Delivered work before the deadline (used for the on-time figure)
-INSERT INTO project_submissions (project_id, freelancer_id, message, status, review_note, created_at)
-SELECT p.id, p.freelancer_id, 'Final dashboard delivered with the handover notes.', 'approved', NULL, '2026-09-18 10:00:00'
-FROM projects p WHERE p.title = 'Bakery Stock Dashboard' AND NOT EXISTS (SELECT 1 FROM project_submissions s WHERE s.project_id = p.id)
-UNION ALL SELECT p.id, p.freelancer_id, 'Landing page delivered, with the contact form tested.', 'approved', NULL, '2026-09-12 09:00:00'
-FROM projects p WHERE p.title = 'Bakery Landing Page' AND NOT EXISTS (SELECT 1 FROM project_submissions s WHERE s.project_id = p.id);
-
--- Client reviews for Miguel Cruz and Janelle Aquino (different wording and ratings)
-INSERT INTO reviews (reviewer_id, reviewee_id, project_id, rating, body, created_at)
-SELECT c.id, f.id, p.id, 5, 'Our stock counts are finally accurate. Miguel explained every step and delivered before the date.', NOW() - INTERVAL 40 DAY
-FROM projects p JOIN users c ON c.id = p.client_id JOIN users f ON f.id = p.freelancer_id
-WHERE p.title = 'Bakery Stock Dashboard' AND NOT EXISTS (SELECT 1 FROM reviews r WHERE r.reviewer_id = c.id AND r.project_id = p.id)
-UNION ALL SELECT c.id, f.id, p.id, 4, 'Nice landing page that loads fast. A few small layout changes took an extra week.', NOW() - INTERVAL 45 DAY
-FROM projects p JOIN users c ON c.id = p.client_id JOIN users f ON f.id = p.freelancer_id
-WHERE p.title = 'Bakery Landing Page' AND NOT EXISTS (SELECT 1 FROM reviews r WHERE r.reviewer_id = c.id AND r.project_id = p.id);
-
--- ===== Accounts and projects for every Type of Work (Editor, Writer, Marketer, Admin Assistant) =====
-INSERT IGNORE INTO categories (name) VALUES ('Video and Animation'), ('Writing and Content'), ('Digital Marketing'), ('Data Entry and Admin');
-UPDATE categories SET work_group = 'Editor' WHERE name = 'Video and Animation';
+UPDATE categories SET work_group = 'Programmer' WHERE name IN ('Web Development', 'Mobile App Development');
+UPDATE categories SET work_group = 'Designer' WHERE name IN ('Graphic Design', 'UI/UX Design');
 UPDATE categories SET work_group = 'Writer' WHERE name = 'Writing and Content';
 UPDATE categories SET work_group = 'Marketer' WHERE name = 'Digital Marketing';
+UPDATE categories SET work_group = 'Editor' WHERE name = 'Video and Animation';
 UPDATE categories SET work_group = 'Admin Assistant' WHERE name = 'Data Entry and Admin';
 
 INSERT INTO skills (name, category_id)
-SELECT s.name, c.id FROM (
-  SELECT 'Premiere Pro' AS name, 'Video and Animation' AS cat UNION ALL SELECT 'After Effects', 'Video and Animation'
-  UNION ALL SELECT 'Copywriting', 'Writing and Content' UNION ALL SELECT 'Blog Writing', 'Writing and Content'
-  UNION ALL SELECT 'SEO', 'Digital Marketing' UNION ALL SELECT 'Social Media Marketing', 'Digital Marketing'
-  UNION ALL SELECT 'Data Entry', 'Data Entry and Admin' UNION ALL SELECT 'Microsoft Excel', 'Data Entry and Admin'
-) s JOIN categories c ON c.name = s.cat
-WHERE NOT EXISTS (SELECT 1 FROM skills k WHERE k.name = s.name);
+SELECT x.name, c.id
+FROM (
+  SELECT 'PHP' AS name, 'Web Development' AS category UNION ALL
+  SELECT 'MySQL', 'Web Development' UNION ALL
+  SELECT 'JavaScript', 'Web Development' UNION ALL
+  SELECT 'Laravel', 'Web Development' UNION ALL
+  SELECT 'React', 'Web Development' UNION ALL
+  SELECT 'HTML/CSS', 'Web Development' UNION ALL
+  SELECT 'REST API', 'Web Development' UNION ALL
+  SELECT 'Flutter', 'Mobile App Development' UNION ALL
+  SELECT 'Firebase', 'Mobile App Development' UNION ALL
+  SELECT 'Android Development', 'Mobile App Development' UNION ALL
+  SELECT 'Logo Design', 'Graphic Design' UNION ALL
+  SELECT 'Adobe Illustrator', 'Graphic Design' UNION ALL
+  SELECT 'Photoshop', 'Graphic Design' UNION ALL
+  SELECT 'Figma', 'UI/UX Design' UNION ALL
+  SELECT 'UI Design', 'UI/UX Design' UNION ALL
+  SELECT 'Prototyping', 'UI/UX Design' UNION ALL
+  SELECT 'Copywriting', 'Writing and Content' UNION ALL
+  SELECT 'Blog Writing', 'Writing and Content' UNION ALL
+  SELECT 'Social Media Marketing', 'Digital Marketing' UNION ALL
+  SELECT 'Google Ads', 'Digital Marketing' UNION ALL
+  SELECT 'SEO', 'Digital Marketing' UNION ALL
+  SELECT 'Premiere Pro', 'Video and Animation' UNION ALL
+  SELECT 'After Effects', 'Video and Animation' UNION ALL
+  SELECT 'Data Entry', 'Data Entry and Admin' UNION ALL
+  SELECT 'Microsoft Excel', 'Data Entry and Admin' UNION ALL
+  SELECT 'Virtual Assistance', 'Data Entry and Admin'
+) x
+JOIN categories c ON c.name = x.category
+WHERE NOT EXISTS (SELECT 1 FROM skills s WHERE s.name = x.name);
 
+-- Ten clients and ten freelancers. Existing demo accounts are reused by email.
 INSERT IGNORE INTO users (name, email, password_hash, role, status) VALUES
-  ('Noel Bautista', 'noel.bautista@demo.toptunity.local', @pw, 'freelancer', 'active'),
-  ('Ana Mendoza', 'ana.mendoza@demo.toptunity.local', @pw, 'freelancer', 'active'),
-  ('Paolo Garcia', 'paolo.garcia@demo.toptunity.local', @pw, 'freelancer', 'active'),
-  ('Rhea Santos', 'rhea.santos@demo.toptunity.local', @pw, 'freelancer', 'active');
+  ('Andrea Reyes', 'andrea.reyes@demo.toptunity.local', @demo_password_hash, 'client', 'active'),
+  ('Mark Santos', 'mark.santos@demo.toptunity.local', @demo_password_hash, 'client', 'active'),
+  ('Liza Ramos', 'liza.ramos@demo.toptunity.local', @demo_password_hash, 'client', 'active'),
+  ('Carlo Dizon', 'carlo.dizon@demo.toptunity.local', @demo_password_hash, 'client', 'active'),
+  ('Grace Lim', 'grace.lim@demo.toptunity.local', @demo_password_hash, 'client', 'active'),
+  ('Noel Garcia', 'noel.garcia@demo.toptunity.local', @demo_password_hash, 'client', 'active'),
+  ('Mia Flores', 'mia.flores@demo.toptunity.local', @demo_password_hash, 'client', 'active'),
+  ('Paolo Herrera', 'paolo.herrera@demo.toptunity.local', @demo_password_hash, 'client', 'active'),
+  ('Rhea Villanueva', 'rhea.villanueva@demo.toptunity.local', @demo_password_hash, 'client', 'active'),
+  ('Dante Cruz', 'dante.cruz@demo.toptunity.local', @demo_password_hash, 'client', 'active'),
+  ('Miguel Cruz', 'miguel.cruz@demo.toptunity.local', @demo_password_hash, 'freelancer', 'active'),
+  ('Bea Lim', 'bea.lim@demo.toptunity.local', @demo_password_hash, 'freelancer', 'active'),
+  ('Jerome Castillo', 'jerome.castillo@demo.toptunity.local', @demo_password_hash, 'freelancer', 'active'),
+  ('Janelle Aquino', 'janelle.aquino@demo.toptunity.local', @demo_password_hash, 'freelancer', 'active'),
+  ('Ramon Villanueva', 'ramon.villanueva@demo.toptunity.local', @demo_password_hash, 'freelancer', 'active'),
+  ('Noel Bautista', 'noel.bautista@demo.toptunity.local', @demo_password_hash, 'freelancer', 'active'),
+  ('Ana Mendoza', 'ana.mendoza@demo.toptunity.local', @demo_password_hash, 'freelancer', 'active'),
+  ('Paolo Garcia', 'paolo.garcia@demo.toptunity.local', @demo_password_hash, 'freelancer', 'active'),
+  ('Rhea Santos', 'rhea.santos@demo.toptunity.local', @demo_password_hash, 'freelancer', 'active'),
+  ('Kyla Torres', 'kyla.torres@demo.toptunity.local', @demo_password_hash, 'freelancer', 'active');
 
-INSERT IGNORE INTO freelancer_profiles (user_id, title, location, hourly_rate, languages, about, available, phone)
-SELECT id, 'Video Editor', 'Makati City, Philippines', 260, 'English, Filipino', 'I edit promo videos, reels and event highlights for resorts and shops, with captions and music.', 1, '+63 917 555 0206' FROM users WHERE email = 'noel.bautista@demo.toptunity.local'
-UNION ALL SELECT id, 'Copywriter and Blog Writer', 'Pasig City, Philippines', 180, 'English, Filipino', 'I write website copy, blog articles and product descriptions that are clear and easy to read.', 1, '+63 917 555 0207' FROM users WHERE email = 'ana.mendoza@demo.toptunity.local'
-UNION ALL SELECT id, 'Digital Marketing Specialist', 'Taguig City, Philippines', 240, 'English, Filipino', 'I plan social media content and search engine optimization to bring more customers to small businesses.', 1, '+63 917 555 0208' FROM users WHERE email = 'paolo.garcia@demo.toptunity.local'
-UNION ALL SELECT id, 'Data Entry and Office Assistant', 'Cebu City, Philippines', 150, 'English, Cebuano', 'I encode sales records, inventory lists and monthly reports accurately and on time, using Excel.', 1, '+63 917 555 0209' FROM users WHERE email = 'rhea.santos@demo.toptunity.local';
+INSERT INTO client_profiles (user_id, company, location, phone, about)
+SELECT u.id, x.company, x.location, x.phone, x.about
+FROM (
+  SELECT 'andrea.reyes@demo.toptunity.local' AS email, 'Kape Lokal' AS company, 'Quezon City, Philippines' AS location, '+63 917 555 0101' AS phone, 'A neighborhood coffee shop growing its online ordering and loyalty experience.' AS about UNION ALL
+  SELECT 'mark.santos@demo.toptunity.local', 'Santos Family Clinic', 'Makati City, Philippines', '+63 917 555 0102', 'A family clinic improving patient booking and follow-up.' UNION ALL
+  SELECT 'liza.ramos@demo.toptunity.local', 'Ramos Bakehouse', 'Cebu City, Philippines', '+63 917 555 0103', 'A small bakery building a recognizable brand and better online presence.' UNION ALL
+  SELECT 'carlo.dizon@demo.toptunity.local', 'Dizon Beach Resort', 'Batangas, Philippines', '+63 917 555 0104', 'A local resort attracting more guests through digital content.' UNION ALL
+  SELECT 'grace.lim@demo.toptunity.local', 'Lim Logistics', 'Davao City, Philippines', '+63 917 555 0105', 'A growing delivery team digitizing customer and driver workflows.' UNION ALL
+  SELECT 'noel.garcia@demo.toptunity.local', 'Northstar Learning Hub', 'Pasig City, Philippines', '+63 917 555 0106', 'A learning center creating useful resources for students and parents.' UNION ALL
+  SELECT 'mia.flores@demo.toptunity.local', 'Flores Home Goods', 'Iloilo City, Philippines', '+63 917 555 0107', 'An independent home-goods shop preparing to expand online.' UNION ALL
+  SELECT 'paolo.herrera@demo.toptunity.local', 'Herrera Property Group', 'Taguig City, Philippines', '+63 917 555 0108', 'A property team looking for practical tools and clear marketing.' UNION ALL
+  SELECT 'rhea.villanueva@demo.toptunity.local', 'Green Basket Market', 'Bacolod City, Philippines', '+63 917 555 0109', 'A local grocery service improving operations and customer communications.' UNION ALL
+  SELECT 'dante.cruz@demo.toptunity.local', 'Cruz Fitness Studio', 'Mandaluyong City, Philippines', '+63 917 555 0110', 'A fitness studio building a stronger community and online class experience.'
+) x
+JOIN users u ON u.email = x.email
+ON DUPLICATE KEY UPDATE company = VALUES(company), location = VALUES(location), phone = VALUES(phone), about = VALUES(about);
+
+INSERT INTO freelancer_profiles (user_id, title, location, hourly_rate, languages, about, available, phone)
+SELECT u.id, x.title, x.location, x.rate, x.languages, x.about, x.available, x.phone
+FROM (
+  SELECT 'miguel.cruz@demo.toptunity.local' AS email, 'Full-Stack PHP Developer' AS title, 'Cebu City, Philippines' AS location, 450 AS rate, 'English, Cebuano' AS languages, 'I build dependable PHP and MySQL systems for small businesses, from ordering flows to inventory dashboards.' AS about, 1 AS available, '+63 917 555 0201' AS phone UNION ALL
+  SELECT 'bea.lim@demo.toptunity.local', 'Brand and Graphic Designer', 'Quezon City, Philippines', 380, 'English, Filipino', 'I create thoughtful visual identities, packaging, and campaign artwork with production-ready files.', 1, '+63 917 555 0202' UNION ALL
+  SELECT 'jerome.castillo@demo.toptunity.local', 'Backend and API Developer', 'Davao City, Philippines', 520, 'English, Filipino', 'I design documented REST APIs and database structures that are secure, maintainable, and easy to extend.', 1, '+63 917 555 0203' UNION ALL
+  SELECT 'janelle.aquino@demo.toptunity.local', 'UI/UX and Web Designer', 'Bacolod City, Philippines', 420, 'English, Hiligaynon', 'I turn complex requirements into clear user flows, responsive interfaces, and testable prototypes.', 1, '+63 917 555 0204' UNION ALL
+  SELECT 'ramon.villanueva@demo.toptunity.local', 'Flutter Mobile App Developer', 'Iloilo City, Philippines', 600, 'English, Ilonggo', 'I build Flutter apps with Firebase services, clear milestones, and practical release documentation.', 1, '+63 917 555 0205' UNION ALL
+  SELECT 'noel.bautista@demo.toptunity.local', 'Video Editor and Motion Designer', 'Makati City, Philippines', 390, 'English, Filipino', 'I edit short-form social videos, event highlights, and product promos with captions and motion graphics.', 1, '+63 917 555 0206' UNION ALL
+  SELECT 'ana.mendoza@demo.toptunity.local', 'Copywriter and Content Writer', 'Pasig City, Philippines', 320, 'English, Filipino', 'I write useful website copy, blog articles, and product descriptions in a friendly, consistent voice.', 1, '+63 917 555 0207' UNION ALL
+  SELECT 'paolo.garcia@demo.toptunity.local', 'Digital Marketing Specialist', 'Taguig City, Philippines', 480, 'English, Filipino', 'I plan social campaigns and paid ads, then report results in plain language with practical next steps.', 1, '+63 917 555 0208' UNION ALL
+  SELECT 'rhea.santos@demo.toptunity.local', 'Data and Virtual Admin Assistant', 'Cebu City, Philippines', 260, 'English, Cebuano', 'I organize records, spreadsheets, and recurring admin tasks with a careful eye for accuracy.', 1, '+63 917 555 0209' UNION ALL
+  SELECT 'kyla.torres@demo.toptunity.local', 'Product Designer and Frontend Developer', 'Quezon City, Philippines', 560, 'English, Filipino', 'I combine Figma prototyping with React and accessible HTML/CSS to deliver polished product experiences.', 0, '+63 917 555 0210'
+) x
+JOIN users u ON u.email = x.email
+ON DUPLICATE KEY UPDATE title = VALUES(title), location = VALUES(location), hourly_rate = VALUES(hourly_rate),
+  languages = VALUES(languages), about = VALUES(about), available = VALUES(available), phone = VALUES(phone);
 
 INSERT IGNORE INTO freelancer_skills (freelancer_id, skill_id)
-SELECT u.id, s.id FROM users u JOIN skills s ON s.name IN ('Premiere Pro','After Effects') WHERE u.email = 'noel.bautista@demo.toptunity.local'
-UNION ALL SELECT u.id, s.id FROM users u JOIN skills s ON s.name IN ('Copywriting','Blog Writing') WHERE u.email = 'ana.mendoza@demo.toptunity.local'
-UNION ALL SELECT u.id, s.id FROM users u JOIN skills s ON s.name IN ('SEO','Social Media Marketing') WHERE u.email = 'paolo.garcia@demo.toptunity.local'
-UNION ALL SELECT u.id, s.id FROM users u JOIN skills s ON s.name IN ('Data Entry','Microsoft Excel') WHERE u.email = 'rhea.santos@demo.toptunity.local';
+SELECT u.id, s.id
+FROM (
+  SELECT 'miguel.cruz@demo.toptunity.local' AS email, 'PHP' AS skill UNION ALL SELECT 'miguel.cruz@demo.toptunity.local', 'MySQL' UNION ALL SELECT 'miguel.cruz@demo.toptunity.local', 'Laravel' UNION ALL SELECT 'miguel.cruz@demo.toptunity.local', 'JavaScript' UNION ALL
+  SELECT 'bea.lim@demo.toptunity.local', 'Logo Design' UNION ALL SELECT 'bea.lim@demo.toptunity.local', 'Adobe Illustrator' UNION ALL SELECT 'bea.lim@demo.toptunity.local', 'Photoshop' UNION ALL
+  SELECT 'jerome.castillo@demo.toptunity.local', 'REST API' UNION ALL SELECT 'jerome.castillo@demo.toptunity.local', 'PHP' UNION ALL SELECT 'jerome.castillo@demo.toptunity.local', 'MySQL' UNION ALL
+  SELECT 'janelle.aquino@demo.toptunity.local', 'Figma' UNION ALL SELECT 'janelle.aquino@demo.toptunity.local', 'UI Design' UNION ALL SELECT 'janelle.aquino@demo.toptunity.local', 'Prototyping' UNION ALL SELECT 'janelle.aquino@demo.toptunity.local', 'HTML/CSS' UNION ALL
+  SELECT 'ramon.villanueva@demo.toptunity.local', 'Flutter' UNION ALL SELECT 'ramon.villanueva@demo.toptunity.local', 'Firebase' UNION ALL SELECT 'ramon.villanueva@demo.toptunity.local', 'Android Development' UNION ALL
+  SELECT 'noel.bautista@demo.toptunity.local', 'Premiere Pro' UNION ALL SELECT 'noel.bautista@demo.toptunity.local', 'After Effects' UNION ALL
+  SELECT 'ana.mendoza@demo.toptunity.local', 'Copywriting' UNION ALL SELECT 'ana.mendoza@demo.toptunity.local', 'Blog Writing' UNION ALL SELECT 'ana.mendoza@demo.toptunity.local', 'SEO' UNION ALL
+  SELECT 'paolo.garcia@demo.toptunity.local', 'Social Media Marketing' UNION ALL SELECT 'paolo.garcia@demo.toptunity.local', 'Google Ads' UNION ALL SELECT 'paolo.garcia@demo.toptunity.local', 'SEO' UNION ALL
+  SELECT 'rhea.santos@demo.toptunity.local', 'Data Entry' UNION ALL SELECT 'rhea.santos@demo.toptunity.local', 'Microsoft Excel' UNION ALL SELECT 'rhea.santos@demo.toptunity.local', 'Virtual Assistance' UNION ALL
+  SELECT 'kyla.torres@demo.toptunity.local', 'Figma' UNION ALL SELECT 'kyla.torres@demo.toptunity.local', 'React' UNION ALL SELECT 'kyla.torres@demo.toptunity.local', 'HTML/CSS' UNION ALL SELECT 'kyla.torres@demo.toptunity.local', 'Prototyping'
+) x
+JOIN users u ON u.email = x.email
+JOIN skills s ON s.name = x.skill;
 
-INSERT INTO projects (client_id, category_id, title, description, billing_type, budget, hourly_rate, max_hours, deadline, status, contract_status, created_at)
-SELECT u.id, c.id, 'Promo Video for a Beach Resort', 'A 60-second promo video with music, captions and a short version for social media.', 'fixed', 15000, 0, 0, '2027-01-15', 'open', 'none', NOW() - INTERVAL 1 DAY
-FROM users u JOIN categories c ON c.name = 'Video and Animation' WHERE u.email = 'carlo.dizon@demo.toptunity.local'
-  AND NOT EXISTS (SELECT 1 FROM projects p WHERE p.title = 'Promo Video for a Beach Resort');
-INSERT INTO projects (client_id, category_id, title, description, billing_type, budget, hourly_rate, max_hours, deadline, status, contract_status, created_at)
-SELECT u.id, c.id, 'Blog Articles for a Dental Clinic', 'Four blog articles about dental care, written in plain language with a clear call to book an appointment.', 'fixed', 6000, 0, 0, '2026-12-20', 'open', 'none', NOW() - INTERVAL 2 DAY
-FROM users u JOIN categories c ON c.name = 'Writing and Content' WHERE u.email = 'mark.santos@demo.toptunity.local'
-  AND NOT EXISTS (SELECT 1 FROM projects p WHERE p.title = 'Blog Articles for a Dental Clinic');
-INSERT INTO projects (client_id, category_id, title, description, billing_type, budget, hourly_rate, max_hours, deadline, status, contract_status, created_at)
-SELECT u.id, c.id, 'Monthly Sales Data Entry for a Bakery', 'Encode the monthly sales and inventory records into the shop spreadsheet, and check the totals.', 'hourly', 0, 150, 40, '2026-12-10', 'open', 'none', NOW() - INTERVAL 3 DAY
-FROM users u JOIN categories c ON c.name = 'Data Entry and Admin' WHERE u.email = 'liza.ramos@demo.toptunity.local'
-  AND NOT EXISTS (SELECT 1 FROM projects p WHERE p.title = 'Monthly Sales Data Entry for a Bakery');
+-- Sixteen projects cover all categories, both billing types, multiple statuses, and varied clients.
+INSERT INTO projects
+  (client_id, category_id, title, description, billing_type, budget, hourly_rate, max_hours, deadline,
+   status, contract_status, freelancer_id, agreed_amount, start_date, contract_sent_at, created_at)
+SELECT c.id, cat.id, x.title, x.description, x.billing_type, x.budget, x.hourly_rate, x.max_hours,
+  DATE_ADD(CURDATE(), INTERVAL x.deadline_days DAY), x.project_status, x.contract_status, f.id,
+  x.agreed_amount,
+  CASE WHEN x.project_status IN ('ongoing', 'completed') THEN DATE_SUB(CURDATE(), INTERVAL x.age_days DAY) ELSE NULL END,
+  CASE WHEN x.contract_status <> 'none' THEN DATE_SUB(NOW(), INTERVAL x.age_days DAY) ELSE NULL END,
+  DATE_SUB(NOW(), INTERVAL x.age_days DAY)
+FROM (
+  SELECT 'Kape Lokal Ordering Website' AS title, 'Build a responsive menu and ordering site with pickup slots, order status, and a simple staff dashboard.' AS description, 'Web Development' AS category, 'andrea.reyes@demo.toptunity.local' AS client_email, 'fixed' AS billing_type, 48000 AS budget, 0 AS hourly_rate, 0 AS max_hours, 35 AS deadline_days, 'open' AS project_status, 'none' AS contract_status, NULL AS freelancer_email, 0 AS agreed_amount, 3 AS age_days UNION ALL
+  SELECT 'Clinic Booking Website', 'Create a mobile-friendly clinic site with doctor profiles, appointment requests, and a staff scheduling view.', 'Web Development', 'mark.santos@demo.toptunity.local', 'fixed', 62000, 0, 0, 25, 'completed', 'completed', 'miguel.cruz@demo.toptunity.local', 59000, 55 UNION ALL
+  SELECT 'Lim Logistics Tracking App', 'Create a customer and driver app for shipment updates, delivery proof, and status notifications.', 'Mobile App Development', 'grace.lim@demo.toptunity.local', 'fixed', 125000, 0, 0, 60, 'open', 'none', NULL, 0, 2 UNION ALL
+  SELECT 'Resort Guest Companion App', 'Build a lightweight Flutter app for room requests, resort maps, and activity bookings.', 'Mobile App Development', 'carlo.dizon@demo.toptunity.local', 'fixed', 98000, 0, 0, 30, 'completed', 'completed', 'ramon.villanueva@demo.toptunity.local', 92000, 65 UNION ALL
+  SELECT 'Ramos Bakehouse Brand Kit', 'Design a warm, memorable bakery identity with logo variations, packaging artwork, and a short usage guide.', 'Graphic Design', 'liza.ramos@demo.toptunity.local', 'fixed', 16000, 0, 0, 28, 'open', 'none', NULL, 0, 4 UNION ALL
+  SELECT 'Flores Home Goods Product Set', 'Create a consistent set of product images and promotional graphics for a small online shop.', 'Graphic Design', 'mia.flores@demo.toptunity.local', 'fixed', 12000, 0, 0, 20, 'completed', 'completed', 'bea.lim@demo.toptunity.local', 11500, 48 UNION ALL
+  SELECT 'Fitness Studio Member Experience', 'Map and prototype a simple member journey for class discovery, booking, and account management.', 'UI/UX Design', 'dante.cruz@demo.toptunity.local', 'hourly', 0, 480, 40, 35, 'open', 'none', NULL, 0, 1 UNION ALL
+  SELECT 'Northstar Learning Portal Redesign', 'Improve the student dashboard, course navigation, and parent-facing progress screens.', 'UI/UX Design', 'noel.garcia@demo.toptunity.local', 'fixed', 36000, 0, 0, 18, 'completed', 'completed', 'janelle.aquino@demo.toptunity.local', 34000, 58 UNION ALL
+  SELECT 'Green Basket Product Guides', 'Write clear product descriptions and two helpful articles for a local grocery delivery service.', 'Writing and Content', 'rhea.villanueva@demo.toptunity.local', 'fixed', 14000, 0, 0, 22, 'open', 'none', NULL, 0, 5 UNION ALL
+  SELECT 'Herrera Property Area Guides', 'Write neighborhood guides and listing copy that sound accurate, welcoming, and easy to scan.', 'Writing and Content', 'paolo.herrera@demo.toptunity.local', 'fixed', 18000, 0, 0, 16, 'completed', 'completed', 'ana.mendoza@demo.toptunity.local', 17000, 72 UNION ALL
+  SELECT 'Dizon Resort Social Campaign', 'Plan a month of social posts, short campaign copy, and a compact performance report.', 'Digital Marketing', 'carlo.dizon@demo.toptunity.local', 'hourly', 0, 420, 32, 30, 'open', 'none', NULL, 0, 2 UNION ALL
+  SELECT 'Kape Lokal Launch Campaign', 'Prepare a local launch campaign with social content, audience testing, and clear weekly reporting.', 'Digital Marketing', 'andrea.reyes@demo.toptunity.local', 'fixed', 28000, 0, 0, 14, 'ongoing', 'active', 'paolo.garcia@demo.toptunity.local', 26000, 22 UNION ALL
+  SELECT 'Cruz Studio Reels Package', 'Edit short workout reels with clean captions, consistent color, and a reusable title animation.', 'Video and Animation', 'dante.cruz@demo.toptunity.local', 'fixed', 22000, 0, 0, 25, 'open', 'none', NULL, 0, 3 UNION ALL
+  SELECT 'Ramos Bakehouse Promo Video', 'Edit a short bakery profile video from supplied footage with captions and music.', 'Video and Animation', 'liza.ramos@demo.toptunity.local', 'fixed', 15000, 0, 0, 12, 'completed', 'completed', 'noel.bautista@demo.toptunity.local', 14500, 42 UNION ALL
+  SELECT 'Green Basket Inventory Cleanup', 'Organize product and stock spreadsheets, remove duplicates, and prepare a clear weekly summary.', 'Data Entry and Admin', 'rhea.villanueva@demo.toptunity.local', 'hourly', 0, 240, 24, 21, 'open', 'none', NULL, 0, 1 UNION ALL
+  SELECT 'Northstar Enrollment Records', 'Clean and reconcile enrollment records, document the process, and prepare a reusable Excel tracker.', 'Data Entry and Admin', 'noel.garcia@demo.toptunity.local', 'fixed', 11000, 0, 0, 10, 'completed', 'completed', 'rhea.santos@demo.toptunity.local', 10500, 80
+) x
+JOIN users c ON c.email = x.client_email
+JOIN categories cat ON cat.name = x.category
+LEFT JOIN users f ON f.email = x.freelancer_email
+WHERE NOT EXISTS (SELECT 1 FROM projects p WHERE p.client_id = c.id AND p.title = x.title);
 
+-- Skills required by each seeded project.
 INSERT IGNORE INTO project_skills (project_id, skill_id)
-SELECT p.id, s.id FROM projects p JOIN skills s ON s.name IN ('Premiere Pro','After Effects') WHERE p.title = 'Promo Video for a Beach Resort'
-UNION ALL SELECT p.id, s.id FROM projects p JOIN skills s ON s.name IN ('Copywriting','Blog Writing') WHERE p.title = 'Blog Articles for a Dental Clinic'
-UNION ALL SELECT p.id, s.id FROM projects p JOIN skills s ON s.name IN ('Data Entry','Microsoft Excel') WHERE p.title = 'Monthly Sales Data Entry for a Bakery';
+SELECT p.id, s.id
+FROM (
+  SELECT 'Kape Lokal Ordering Website' AS title, 'PHP' AS skill UNION ALL SELECT 'Kape Lokal Ordering Website', 'MySQL' UNION ALL SELECT 'Kape Lokal Ordering Website', 'JavaScript' UNION ALL
+  SELECT 'Clinic Booking Website', 'Laravel' UNION ALL SELECT 'Clinic Booking Website', 'MySQL' UNION ALL
+  SELECT 'Lim Logistics Tracking App', 'Flutter' UNION ALL SELECT 'Lim Logistics Tracking App', 'Firebase' UNION ALL
+  SELECT 'Resort Guest Companion App', 'Flutter' UNION ALL SELECT 'Resort Guest Companion App', 'Android Development' UNION ALL SELECT 'Resort Guest Companion App', 'Firebase' UNION ALL
+  SELECT 'Ramos Bakehouse Brand Kit', 'Logo Design' UNION ALL SELECT 'Ramos Bakehouse Brand Kit', 'Adobe Illustrator' UNION ALL
+  SELECT 'Flores Home Goods Product Set', 'Photoshop' UNION ALL SELECT 'Flores Home Goods Product Set', 'Adobe Illustrator' UNION ALL
+  SELECT 'Fitness Studio Member Experience', 'Figma' UNION ALL SELECT 'Fitness Studio Member Experience', 'Prototyping' UNION ALL
+  SELECT 'Northstar Learning Portal Redesign', 'Figma' UNION ALL SELECT 'Northstar Learning Portal Redesign', 'UI Design' UNION ALL
+  SELECT 'Green Basket Product Guides', 'Copywriting' UNION ALL SELECT 'Green Basket Product Guides', 'Blog Writing' UNION ALL
+  SELECT 'Herrera Property Area Guides', 'Copywriting' UNION ALL SELECT 'Herrera Property Area Guides', 'SEO' UNION ALL
+  SELECT 'Dizon Resort Social Campaign', 'Social Media Marketing' UNION ALL SELECT 'Dizon Resort Social Campaign', 'Google Ads' UNION ALL
+  SELECT 'Kape Lokal Launch Campaign', 'Social Media Marketing' UNION ALL SELECT 'Kape Lokal Launch Campaign', 'Google Ads' UNION ALL
+  SELECT 'Cruz Studio Reels Package', 'Premiere Pro' UNION ALL SELECT 'Cruz Studio Reels Package', 'After Effects' UNION ALL
+  SELECT 'Ramos Bakehouse Promo Video', 'Premiere Pro' UNION ALL SELECT 'Ramos Bakehouse Promo Video', 'After Effects' UNION ALL
+  SELECT 'Green Basket Inventory Cleanup', 'Data Entry' UNION ALL SELECT 'Green Basket Inventory Cleanup', 'Microsoft Excel' UNION ALL
+  SELECT 'Northstar Enrollment Records', 'Microsoft Excel' UNION ALL SELECT 'Northstar Enrollment Records', 'Virtual Assistance'
+) x
+JOIN projects p ON p.title = x.title
+JOIN skills s ON s.name = x.skill
+JOIN users c ON c.id = p.client_id AND c.email LIKE '%@demo.toptunity.local';
 
--- Type of Work for every category (sets the plain-language groups used by the filters)
-UPDATE categories SET work_group = 'Programmer'      WHERE name IN ('Web Development', 'Mobile App Development');
-UPDATE categories SET work_group = 'Designer'        WHERE name IN ('Graphic Design', 'UI/UX Design');
-UPDATE categories SET work_group = 'Editor'          WHERE name IN ('Video and Animation');
-UPDATE categories SET work_group = 'Writer'          WHERE name IN ('Writing and Content');
-UPDATE categories SET work_group = 'Marketer'        WHERE name IN ('Digital Marketing');
-UPDATE categories SET work_group = 'Admin Assistant' WHERE name IN ('Data Entry and Admin');
+-- Varied proposals for open and contracted projects. Unique project/freelancer pairs make reruns safe.
+INSERT INTO proposals (project_id, freelancer_id, offer, days, cover_letter, status, created_at)
+SELECT p.id, f.id, x.offer, x.days, x.cover_letter, x.proposal_status, DATE_SUB(NOW(), INTERVAL x.age_days DAY)
+FROM (
+  SELECT 'Kape Lokal Ordering Website' AS title, 'miguel.cruz@demo.toptunity.local' AS email, 45500 AS offer, 24 AS days, 'I have built ordering and inventory tools for small businesses. I would start with the pickup flow, then test the staff dashboard on mobile.' AS cover_letter, 'pending' AS proposal_status, 1 AS age_days UNION ALL
+  SELECT 'Kape Lokal Ordering Website', 'kyla.torres@demo.toptunity.local', 47000, 28, 'I can map the customer journey first and then build the responsive ordering experience in React with a clear handover.', 'pending', 2 UNION ALL
+  SELECT 'Clinic Booking Website', 'miguel.cruz@demo.toptunity.local', 59000, 28, 'I will deliver the booking flow and staff schedule with clear validation and a concise setup guide.', 'selected', 58 UNION ALL
+  SELECT 'Clinic Booking Website', 'jerome.castillo@demo.toptunity.local', 62000, 32, 'My PHP and MySQL experience fits the requested patient and staff workflows. I can include testing and deployment notes.', 'not_selected', 60 UNION ALL
+  SELECT 'Lim Logistics Tracking App', 'ramon.villanueva@demo.toptunity.local', 118000, 55, 'I have delivered Flutter and Firebase apps with status updates. I would stage the driver and customer flows for review.', 'pending', 1 UNION ALL
+  SELECT 'Lim Logistics Tracking App', 'jerome.castillo@demo.toptunity.local', 121000, 62, 'I can design the tracking API and data model first, then coordinate the mobile integration with documented endpoints.', 'pending', 2 UNION ALL
+  SELECT 'Resort Guest Companion App', 'ramon.villanueva@demo.toptunity.local', 92000, 50, 'I will build the guest request and booking screens in Flutter and provide a test build with release notes.', 'selected', 68 UNION ALL
+  SELECT 'Ramos Bakehouse Brand Kit', 'bea.lim@demo.toptunity.local', 14800, 12, 'I will share three visual directions, refine the selected identity, and provide packaging-ready and digital exports.', 'pending', 2 UNION ALL
+  SELECT 'Ramos Bakehouse Brand Kit', 'janelle.aquino@demo.toptunity.local', 15500, 15, 'I can connect the brand system to a small set of digital templates and present the concepts in a review-ready file.', 'pending', 3 UNION ALL
+  SELECT 'Flores Home Goods Product Set', 'bea.lim@demo.toptunity.local', 11500, 8, 'I will standardize the product imagery and prepare reusable promotional layouts in the same visual system.', 'selected', 51 UNION ALL
+  SELECT 'Fitness Studio Member Experience', 'janelle.aquino@demo.toptunity.local', 450, 36, 'I will map the class discovery and booking journey, then prototype the key screens for a quick stakeholder review.', 'pending', 1 UNION ALL
+  SELECT 'Fitness Studio Member Experience', 'kyla.torres@demo.toptunity.local', 470, 40, 'I can deliver a clickable Figma prototype with accessible components and a concise interaction specification.', 'pending', 2 UNION ALL
+  SELECT 'Northstar Learning Portal Redesign', 'janelle.aquino@demo.toptunity.local', 34000, 20, 'I will simplify course navigation and make the student and parent views easier to scan on smaller screens.', 'selected', 62 UNION ALL
+  SELECT 'Green Basket Product Guides', 'ana.mendoza@demo.toptunity.local', 13200, 12, 'I will create a consistent product voice, write the articles, and provide a lightweight SEO checklist.', 'pending', 3 UNION ALL
+  SELECT 'Herrera Property Area Guides', 'ana.mendoza@demo.toptunity.local', 17000, 16, 'I will research each area, draft listing copy in the same voice, and share the editable content for review.', 'selected', 75 UNION ALL
+  SELECT 'Dizon Resort Social Campaign', 'paolo.garcia@demo.toptunity.local', 410, 30, 'I will prepare the content calendar and campaign variants, then report reach and engagement each week.', 'pending', 2 UNION ALL
+  SELECT 'Kape Lokal Launch Campaign', 'paolo.garcia@demo.toptunity.local', 26000, 25, 'I will test local audiences and creative variations, keep weekly notes, and adjust spend based on results.', 'selected', 25 UNION ALL
+  SELECT 'Cruz Studio Reels Package', 'noel.bautista@demo.toptunity.local', 21000, 14, 'I will edit a first reel for feedback, then apply the approved caption and title style to the remaining clips.', 'pending', 1 UNION ALL
+  SELECT 'Ramos Bakehouse Promo Video', 'noel.bautista@demo.toptunity.local', 14500, 10, 'I will assemble the supplied footage into a warm short profile with readable captions and a clean audio mix.', 'selected', 47 UNION ALL
+  SELECT 'Green Basket Inventory Cleanup', 'rhea.santos@demo.toptunity.local', 240, 24, 'I will reconcile the sheet, document any uncertain records, and provide a reusable weekly stock template.', 'pending', 1 UNION ALL
+  SELECT 'Northstar Enrollment Records', 'rhea.santos@demo.toptunity.local', 10500, 10, 'I will clean the enrollment list, preserve an audit copy, and build a tracker that staff can update safely.', 'selected', 83
+) x
+JOIN projects p ON p.title = x.title
+JOIN users c ON c.id = p.client_id AND c.email LIKE '%@demo.toptunity.local'
+JOIN users f ON f.email = x.email
+WHERE NOT EXISTS (
+  SELECT 1 FROM proposals old WHERE old.project_id = p.id AND old.freelancer_id = f.id
+);
+
+-- Escrow and release history for completed projects; a held payment for the ongoing contract.
+INSERT INTO payments (project_id, type, amount, service_fee, status, created_at)
+SELECT p.id, x.payment_type, x.amount, x.service_fee, x.payment_status, DATE_SUB(NOW(), INTERVAL x.age_days DAY)
+FROM (
+  SELECT 'Clinic Booking Website' AS title, 'escrow' AS payment_type, 59000 AS amount, 0 AS service_fee, 'paid' AS payment_status, 55 AS age_days UNION ALL
+  SELECT 'Clinic Booking Website', 'release', 59000, 5900, 'released', 45 UNION ALL
+  SELECT 'Resort Guest Companion App', 'escrow', 92000, 0, 'paid', 65 UNION ALL
+  SELECT 'Resort Guest Companion App', 'release', 92000, 9200, 'released', 53 UNION ALL
+  SELECT 'Flores Home Goods Product Set', 'escrow', 11500, 0, 'paid', 48 UNION ALL
+  SELECT 'Flores Home Goods Product Set', 'release', 11500, 1150, 'released', 39 UNION ALL
+  SELECT 'Northstar Learning Portal Redesign', 'escrow', 34000, 0, 'paid', 58 UNION ALL
+  SELECT 'Northstar Learning Portal Redesign', 'release', 34000, 3400, 'released', 46 UNION ALL
+  SELECT 'Herrera Property Area Guides', 'escrow', 17000, 0, 'paid', 72 UNION ALL
+  SELECT 'Herrera Property Area Guides', 'release', 17000, 1700, 'released', 60 UNION ALL
+  SELECT 'Ramos Bakehouse Promo Video', 'escrow', 14500, 0, 'paid', 42 UNION ALL
+  SELECT 'Ramos Bakehouse Promo Video', 'release', 14500, 1450, 'released', 34 UNION ALL
+  SELECT 'Northstar Enrollment Records', 'escrow', 10500, 0, 'paid', 80 UNION ALL
+  SELECT 'Northstar Enrollment Records', 'release', 10500, 1050, 'released', 69 UNION ALL
+  SELECT 'Kape Lokal Launch Campaign', 'escrow', 26000, 0, 'held', 18
+) x
+JOIN projects p ON p.title = x.title
+JOIN users c ON c.id = p.client_id AND c.email LIKE '%@demo.toptunity.local'
+WHERE NOT EXISTS (SELECT 1 FROM payments old WHERE old.project_id = p.id AND old.type = x.payment_type);
+
+-- Completion records for the freelancer dashboards and delivery history.
+INSERT INTO project_submissions (project_id, freelancer_id, message, status, review_note, created_at)
+SELECT p.id, f.id, x.message, 'approved', x.review_note, DATE_SUB(NOW(), INTERVAL x.age_days DAY)
+FROM (
+  SELECT 'Clinic Booking Website' AS title, 'Completed patient booking and staff scheduling pages with setup notes.' AS message, 'Clear handover and the staff flow works as discussed.' AS review_note, 44 AS age_days UNION ALL
+  SELECT 'Resort Guest Companion App', 'Delivered the guest request flow and Android test build with release notes.', 'The test build was easy to review and the updates were clear.', 52 UNION ALL
+  SELECT 'Flores Home Goods Product Set', 'Delivered the revised product image set and editable promotional layouts.', 'Consistent visual treatment across the product collection.', 38 UNION ALL
+  SELECT 'Northstar Learning Portal Redesign', 'Delivered the final prototype and annotated component states.', 'The new navigation is much easier for families to follow.', 45 UNION ALL
+  SELECT 'Herrera Property Area Guides', 'Delivered the area guides, listing copy, and editable source document.', 'Well-researched writing and quick, thoughtful revisions.', 59 UNION ALL
+  SELECT 'Ramos Bakehouse Promo Video', 'Delivered the final short video with captions and social exports.', 'The video feels on brand and is ready to post.', 33 UNION ALL
+  SELECT 'Northstar Enrollment Records', 'Delivered the cleaned records, reconciliation notes, and reusable tracker.', 'The tracker is clear and reduced our weekly cleanup time.', 68
+) x
+JOIN projects p ON p.title = x.title AND p.status = 'completed'
+JOIN users c ON c.id = p.client_id AND c.email LIKE '%@demo.toptunity.local'
+JOIN users f ON f.id = p.freelancer_id
+WHERE NOT EXISTS (SELECT 1 FROM project_submissions old WHERE old.project_id = p.id AND old.status = 'approved');
+
+-- Different client and freelancer reviews on completed work.
+INSERT INTO reviews (reviewer_id, reviewee_id, project_id, rating, body, created_at)
+SELECT reviewer.id, reviewee.id, p.id, x.rating, x.body, DATE_SUB(NOW(), INTERVAL x.age_days DAY)
+FROM (
+  SELECT 'Clinic Booking Website' AS title, 'andrea.reyes@demo.toptunity.local' AS reviewer_email, 'miguel.cruz@demo.toptunity.local' AS reviewee_email, 5 AS rating, 'Miguel understood the clinic workflow quickly and delivered a reliable booking flow with a clear handover.' AS body, 43 AS age_days UNION ALL
+  SELECT 'Clinic Booking Website', 'miguel.cruz@demo.toptunity.local', 'andrea.reyes@demo.toptunity.local', 5, 'Andrea gave a detailed brief and timely feedback. The project stayed organized from start to finish.', 42 UNION ALL
+  SELECT 'Resort Guest Companion App', 'carlo.dizon@demo.toptunity.local', 'ramon.villanueva@demo.toptunity.local', 5, 'The guest request flow is smooth, and Ramon kept us informed throughout testing.', 51 UNION ALL
+  SELECT 'Resort Guest Companion App', 'ramon.villanueva@demo.toptunity.local', 'carlo.dizon@demo.toptunity.local', 4, 'Carlo had a clear vision and responded quickly. A few new ideas came in late but we worked them through.', 50 UNION ALL
+  SELECT 'Flores Home Goods Product Set', 'mia.flores@demo.toptunity.local', 'bea.lim@demo.toptunity.local', 4, 'The images now feel consistent across the shop. One extra revision was needed, but the final set looks great.', 37 UNION ALL
+  SELECT 'Flores Home Goods Product Set', 'bea.lim@demo.toptunity.local', 'mia.flores@demo.toptunity.local', 5, 'Mia supplied excellent references and made decisions quickly, which helped us finish ahead of schedule.', 36 UNION ALL
+  SELECT 'Northstar Learning Portal Redesign', 'noel.garcia@demo.toptunity.local', 'janelle.aquino@demo.toptunity.local', 5, 'Janelle made a complicated student portal much easier to understand. The prototype was polished and practical.', 44 UNION ALL
+  SELECT 'Northstar Learning Portal Redesign', 'janelle.aquino@demo.toptunity.local', 'noel.garcia@demo.toptunity.local', 5, 'Noel brought useful feedback from both students and parents and kept reviews focused.', 43 UNION ALL
+  SELECT 'Herrera Property Area Guides', 'paolo.herrera@demo.toptunity.local', 'ana.mendoza@demo.toptunity.local', 5, 'The neighborhood guides sound natural, are well researched, and match the tone we wanted.', 58 UNION ALL
+  SELECT 'Herrera Property Area Guides', 'ana.mendoza@demo.toptunity.local', 'paolo.herrera@demo.toptunity.local', 4, 'Paolo provided clear source material and helpful edits. I would gladly work with him again.', 57 UNION ALL
+  SELECT 'Ramos Bakehouse Promo Video', 'liza.ramos@demo.toptunity.local', 'noel.bautista@demo.toptunity.local', 5, 'The final edit captures the bakery perfectly and is ready to share on our social pages.', 32 UNION ALL
+  SELECT 'Ramos Bakehouse Promo Video', 'noel.bautista@demo.toptunity.local', 'liza.ramos@demo.toptunity.local', 5, 'Liza shared great footage and gave thoughtful feedback. The collaboration was easy and positive.', 31 UNION ALL
+  SELECT 'Northstar Enrollment Records', 'noel.garcia@demo.toptunity.local', 'rhea.santos@demo.toptunity.local', 4, 'Rhea cleaned a large set of records carefully and left useful notes for our staff.', 67 UNION ALL
+  SELECT 'Northstar Enrollment Records', 'rhea.santos@demo.toptunity.local', 'noel.garcia@demo.toptunity.local', 5, 'Noel explained the requirements clearly and verified the tracker with the team before sign-off.', 66
+) x
+JOIN projects p ON p.title = x.title AND p.status = 'completed'
+JOIN users c ON c.id = p.client_id AND c.email LIKE '%@demo.toptunity.local'
+JOIN users f ON f.id = p.freelancer_id
+JOIN users reviewer ON reviewer.email = x.reviewer_email
+JOIN users reviewee ON reviewee.email = x.reviewee_email
+WHERE NOT EXISTS (
+  SELECT 1 FROM reviews old
+  WHERE old.project_id = p.id AND old.reviewer_id = reviewer.id AND old.reviewee_id = reviewee.id
+);
+
+-- A small set of realistic conversation and notification activity for dashboard presentation.
+INSERT INTO messages (sender_id, receiver_id, project_id, body, is_read, created_at)
+SELECT sender.id, receiver.id, p.id, x.body, x.is_read, DATE_SUB(NOW(), INTERVAL x.age_hours HOUR)
+FROM (
+  SELECT 'andrea.reyes@demo.toptunity.local' AS sender_email, 'miguel.cruz@demo.toptunity.local' AS receiver_email, 'Clinic Booking Website' AS title, 'The staff team reviewed the booking flow. We are happy with the final handover, thank you.' AS body, 1 AS is_read, 106 AS age_hours UNION ALL
+  SELECT 'miguel.cruz@demo.toptunity.local', 'andrea.reyes@demo.toptunity.local', 'Clinic Booking Website', 'Thanks, Andrea. I have added the setup notes and included the final tested version.', 1, 104 UNION ALL
+  SELECT 'carlo.dizon@demo.toptunity.local', 'ramon.villanueva@demo.toptunity.local', 'Resort Guest Companion App', 'Could we review the guest request screen together before the next test build?', 0, 3 UNION ALL
+  SELECT 'ramon.villanueva@demo.toptunity.local', 'carlo.dizon@demo.toptunity.local', 'Resort Guest Companion App', 'Absolutely. I will share the updated build and a short list of changes this afternoon.', 0, 1 UNION ALL
+  SELECT 'liza.ramos@demo.toptunity.local', 'bea.lim@demo.toptunity.local', 'Ramos Bakehouse Brand Kit', 'The second color direction feels closest to the shop. Can we see it on a paper bag mockup?', 0, 5 UNION ALL
+  SELECT 'bea.lim@demo.toptunity.local', 'liza.ramos@demo.toptunity.local', 'Ramos Bakehouse Brand Kit', 'Yes, I will prepare that mockup and send it with the revised logo lockup.', 0, 2
+) x
+JOIN users sender ON sender.email = x.sender_email
+JOIN users receiver ON receiver.email = x.receiver_email
+JOIN projects p ON p.title = x.title
+JOIN users c ON c.id = p.client_id AND c.email LIKE '%@demo.toptunity.local'
+WHERE NOT EXISTS (
+  SELECT 1 FROM messages old
+  WHERE old.sender_id = sender.id AND old.receiver_id = receiver.id AND old.project_id = p.id AND old.body = x.body
+);
+
+INSERT INTO notifications (user_id, category, title, body, is_read, created_at)
+SELECT u.id, x.category, x.title, x.body, x.is_read, DATE_SUB(NOW(), INTERVAL x.age_hours HOUR)
+FROM (
+  SELECT 'andrea.reyes@demo.toptunity.local' AS email, 'responses' AS category, 'Project completed' AS title, 'The Clinic Booking Website has been completed and reviewed.' AS body, 0 AS is_read, 44 AS age_hours UNION ALL
+  SELECT 'andrea.reyes@demo.toptunity.local', 'projects', 'New proposal received', 'A freelancer submitted a proposal for the Kape Lokal Ordering Website.', 0, 2 UNION ALL
+  SELECT 'miguel.cruz@demo.toptunity.local', 'payments', 'Payment released', 'Your payment for the Clinic Booking Website has been released.', 1, 43 UNION ALL
+  SELECT 'bea.lim@demo.toptunity.local', 'responses', 'New review received', 'Mia Flores left a review for your completed product design project.', 0, 36 UNION ALL
+  SELECT 'ramon.villanueva@demo.toptunity.local', 'messages', 'New message', 'Carlo Dizon sent a message about the guest companion app.', 0, 3 UNION ALL
+  SELECT 'paolo.garcia@demo.toptunity.local', 'projects', 'Contract in progress', 'The Kape Lokal Launch Campaign contract is active.', 1, 18
+) x
+JOIN users u ON u.email = x.email
+WHERE NOT EXISTS (
+  SELECT 1 FROM notifications old
+  WHERE old.user_id = u.id AND old.title = x.title AND old.body = x.body
+);
